@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\VideoMediaPembelajaranController;
 use App\Http\Controllers\MateriBelajarController;
+use App\Http\Controllers\MaterialCategoryController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MarketingController;
@@ -68,6 +69,8 @@ Route::middleware('auth')->group(function () {
         Route::get('marketing/assets', [MarketingController::class, 'assets'])->name('marketing.assets');
         Route::get('marketing/assets/{asset}/download', [MarketingController::class, 'downloadPhotos'])->name('marketing.download-photos');
         Route::get('marketing/learning', [MarketingController::class, 'learning'])->name('marketing.learning');
+        Route::get('marketing/materi', [MarketingController::class, 'materi'])->name('marketing.materi');
+        Route::get('marketing/informasi', [MarketingController::class, 'informasi'])->name('marketing.informasi');
         Route::get('marketing/notifications', [MarketingController::class, 'notifications'])->name('marketing.notifications');
         Route::post('marketing/notifications/{notification}/read', [MarketingController::class, 'markNotificationAsRead'])->name('marketing.notification-read');
         Route::delete('marketing/notifications/{notification}', [MarketingController::class, 'deleteNotification'])->name('marketing.notification-delete');
@@ -90,6 +93,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('materi', MateriBelajarController::class)->parameters(['materi' => 'material']);
         Route::patch('materi/{material}/publish', [MateriBelajarController::class, 'togglePublish'])->name('materi.togglePublish');
         Route::delete('materi/{material}/thumbnail', [MateriBelajarController::class, 'deleteThumbnail'])->name('materi.deleteThumbnail');
+
+        // Material Category Store Route (for modal)
+        Route::post('categories', [MaterialCategoryController::class, 'store'])->name('categories.store');
 
         // Notification Management Routes
         Route::resource('notifications', NotificationController::class);

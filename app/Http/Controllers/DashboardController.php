@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Asset;
 use App\Models\Content;
+use App\Models\Information;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,27 @@ class DashboardController extends Controller
     public function marketingDashboard()
     {
         $this->checkRole('marketing');
-        return view('marketing.marketing');
+
+        // Informasi Terbaru
+        $informations = Information::where('status', 'active')
+            ->latest('published_date')
+            ->take(3)
+            ->get();
+
+        // Statistik Listing/Asset
+        $totalListings = Asset::count();
+        $availableListings = Asset::where('status', 'Available')->count();
+        $soldListings = Asset::where('status', 'Sold Out')->count();
+
+        // Listing berdasarkan kategori
+        $listingsByCategory = Asset::selectRaw('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->get();
+
+        // Listing terbaru
+        $recentListings = Asset::latest()->take(5)->get();
+
+        return view('marketing.marketing', compact('informations', 'totalListings', 'availableListings', 'soldListings', 'listingsByCategory', 'recentListings'));
     }
 
     public function adminDashboard()

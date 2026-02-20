@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Content;
+use App\Models\Material;
+use App\Models\MaterialCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,13 +14,17 @@ class MateriBelajarController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Content::where('type', 'Materi');
+        $query = Material::query();
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
+        }
+
+        if ($category = $request->input('category')) {
+            $query->where('category_id', $category);
         }
 
         if ($status = $request->input('status')) {
@@ -47,7 +52,8 @@ class MateriBelajarController extends Controller
         }
 
         $materials = $query->paginate(12)->withQueryString();
-        return view('admin.materi.index', compact('materials'));
+        $categories = MaterialCategory::orderBy('order')->get();
+        return view('admin.materi.index', compact('materials', 'categories'));
     }
 
     /**
@@ -55,7 +61,8 @@ class MateriBelajarController extends Controller
      */
     public function create()
     {
-        return view('admin.materi.create');
+        $categories = MaterialCategory::orderBy('order')->get();
+        return view('admin.materi.create', compact('categories'));
     }
 
     /**
@@ -66,6 +73,7 @@ class MateriBelajarController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'category_id' => 'required|exists:material_categories,id',
             'file_path' => 'required|file|mimes:pdf|max:51200', // 50MB
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_published' => 'boolean',
@@ -83,10 +91,10 @@ class MateriBelajarController extends Controller
             $thumbnail = $request->file('thumbnail')->store('materials/thumbnails', 'public');
         }
 
-        Content::create([
+        Material::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
-            'type' => 'Materi',
+            'category_id' => $validated['category_id'],
             'file_path' => $filePath,
             'thumbnail' => $thumbnail,
             'is_published' => $request->has('is_published'),
@@ -98,41 +106,30 @@ class MateriBelajarController extends Controller
     /**
      * Display the specified materi.
      */
-    public function show(Content $material)
+    public function show(Material $material)
     {
-        // Ensure it's actually a material
-        if ($material->type !== 'Materi') {
-            abort(404);
-        }
-
-        $material->increment('views');
         return view('admin.materi.show', compact('material'));
     }
 
     /**
      * Show the form for editing the specified materi.
      */
-    public function edit(Content $material)
+    public function edit(Material $material)
     {
-        if ($material->type !== 'Materi') {
-            abort(404);
-        }
-
-        return view('admin.materi.edit', compact('material'));
+        $categories = MaterialCategory::orderBy('order')->get();
+        return view('admin.materi.edit', compact('material', 'categories'));
     }
 
     /**
      * Update the specified materi in storage.
      */
-    public function update(Request $request, Content $material)
+    public function update(Request $request, Material $material)
     {
-        if ($material->type !== 'Materi') {
-            abort(404);
-        }
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'category_id' => 'required|exists:material_categories,id',
             'file_path' => 'nullable|file|mimes:pdf|max:51200', // 50MB
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_published' => 'boolean',
@@ -170,12 +167,8 @@ class MateriBelajarController extends Controller
     /**
      * Remove the specified materi from storage.
      */
-    public function destroy(Content $material)
+    public function destroy(Material $material)
     {
-        if ($material->type !== 'Materi') {
-            abort(404);
-        }
-
         // Delete files
         if ($material->file_path) {
             Storage::disk('public')->delete($material->file_path);
@@ -191,12 +184,8 @@ class MateriBelajarController extends Controller
     /**
      * Toggle publish status.
      */
-    public function togglePublish(Content $material)
+    public function togglePublish(Material $material)
     {
-        if ($material->type !== 'Materi') {
-            abort(404);
-        }
-
         $material->update(['is_published' => !$material->is_published]);
         return redirect()->back()->with('success', 'Status publikasi berhasil diperbarui!');
     }
@@ -204,12 +193,8 @@ class MateriBelajarController extends Controller
     /**
      * Delete thumbnail from materi.
      */
-    public function deleteThumbnail(Content $material)
+    public function deleteThumbnail(Material $material)
     {
-        if ($material->type !== 'Materi') {
-            abort(404);
-        }
-
         if ($material->thumbnail) {
             Storage::disk('public')->delete($material->thumbnail);
             $material->update(['thumbnail' => null]);
@@ -223,14 +208,17 @@ class MateriBelajarController extends Controller
      */
     public function userMaterials(Request $request)
     {
-        $query = Content::where('type', 'Materi')
-                       ->where('is_published', true);
+        $query = Material::where('is_published', true);
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
+        }
+
+        if ($category = $request->input('category')) {
+            $query->where('category_id', $category);
         }
 
         $sort = $request->input('sort', 'terbaru');
@@ -244,15 +232,13 @@ class MateriBelajarController extends Controller
             case 'judul_za':
                 $query->orderBy('title', 'desc');
                 break;
-            case 'populer':
-                $query->orderByDesc('views');
-                break;
             default:
                 $query->latest();
                 break;
         }
 
         $materials = $query->paginate(12)->withQueryString();
-        return view('user.materials', compact('materials'));
+        $categories = MaterialCategory::orderBy('order')->get();
+        return view('user.materials', compact('materials', 'categories'));
     }
 }

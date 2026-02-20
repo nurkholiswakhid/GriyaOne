@@ -39,6 +39,16 @@
                     <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
                 </select>
 
+                <!-- Category -->
+                <select name="category" class="py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50/80 focus:outline-none focus:border-red-500 transition" onchange="this.form.submit()">
+                    <option value="">Semua Kategori</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+
                 <!-- Sort -->
                 <select name="sort" class="py-2 px-3 border border-gray-200 rounded-lg text-sm bg-gray-50/80 focus:outline-none focus:border-red-500 transition" onchange="this.form.submit()">
                     <option value="terbaru" {{ request('sort', 'terbaru') == 'terbaru' ? 'selected' : '' }}>Terbaru</option>
@@ -113,6 +123,15 @@
 
                         <!-- Description -->
                         <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ $material->description ?? 'Tidak ada deskripsi' }}</p>
+
+                        <!-- Category -->
+                        @if($material->category)
+                            <div class="mb-3">
+                                <span class="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-1 rounded">
+                                    {{ $material->category->name }}
+                                </span>
+                            </div>
+                        @endif
 
                         <!-- Date -->
                         <div class="mb-4 text-xs text-gray-500">

@@ -42,6 +42,16 @@
                     </div>
                 @endif
 
+                <!-- Category -->
+                @if($material->category)
+                    <div class="mb-8 pb-8 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Kategori</h3>
+                        <div class="inline-block bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-semibold">
+                            {{ $material->category->name }}
+                        </div>
+                    </div>
+                @endif
+
                 <!-- PDF Preview -->
                 @if($material->file_path)
                     <div class="mb-8 pb-8 border-b border-gray-200">

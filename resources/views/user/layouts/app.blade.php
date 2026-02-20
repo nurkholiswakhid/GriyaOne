@@ -27,11 +27,11 @@
                         <p class="text-xs text-blue-600 font-semibold">@yield('role', 'User Dashboard')</p>
                     </div>
                 </div>
-                <button class="relative p-2 text-gray-600 hover:text-blue-600 transition flex-shrink-0">
+                <button id="notificationBtn" class="relative p-2 text-gray-600 hover:text-blue-600 transition flex-shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                     </svg>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    <span id="notificationBadge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                 </button>
             </div>
         </div>
@@ -43,13 +43,21 @@
         <aside class="w-64 bg-gradient-to-b from-white to-blue-50 border-r border-gray-200 min-h-screen pt-4 fixed left-0 top-16 bottom-0 overflow-y-auto lg:relative lg:top-0 hidden lg:block scrollbar-hide">
             <!-- User Profile Card -->
             <div class="mx-4 mb-6 bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+                @php
+                    /** @var \App\Models\User|null $authUser */
+                    $authUser = Auth::user();
+                @endphp
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                        U
-                    </div>
+                    @if($authUser && $authUser->profilePhotoUrl())
+                        <img src="{{ $authUser->profilePhotoUrl() }}" alt="Foto Profil" class="w-12 h-12 rounded-full object-cover flex-shrink-0 border border-gray-200">
+                    @else
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                            {{ $authUser ? strtoupper(substr($authUser->name, 0, 1)) : 'U' }}
+                        </div>
+                    @endif
                     <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-gray-900 text-sm truncate">User Properti</h3>
-                        <p class="text-xs text-gray-500 truncate">user@test.com</p>
+                        <h3 class="font-semibold text-gray-900 text-sm truncate">{{ $authUser?->name ?? 'User' }}</h3>
+                        <p class="text-xs text-gray-500 truncate">{{ $authUser?->email ?? '-' }}</p>
                     </div>
                 </div>
             </div>
@@ -153,5 +161,17 @@
             </div>
         </main>
     </div>
+
+    <script>
+        // ============ Notification System ============
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationBadge = document.getElementById('notificationBadge');
+
+        // Toggle notification badge visibility (for user dashboard)
+        // In future, this can be extended with a dropdown like admin/marketing
+
+        // Simple notification check - hide badge by default
+        notificationBadge.classList.add('hidden');
+    </script>
 </body>
 </html>

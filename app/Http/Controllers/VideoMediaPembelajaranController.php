@@ -66,10 +66,7 @@ class VideoMediaPembelajaranController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:Video,Materi,Info',
-            'category' => 'nullable|in:Training,Challenge,Bonus',
             'file_path' => 'nullable|string|max:500',
-            'duration' => 'nullable|integer|min:0',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_published' => 'boolean',
         ]);
@@ -92,7 +89,6 @@ class VideoMediaPembelajaranController extends Controller
      */
     public function show(Content $content)
     {
-        $content->increment('views');
         return view('admin.VideoMediaPembelajaran.show', compact('content'));
     }
 
@@ -112,10 +108,7 @@ class VideoMediaPembelajaranController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:Video,Materi,Info',
-            'category' => 'nullable|in:Training,Challenge,Bonus',
             'file_path' => 'nullable|string|max:500',
-            'duration' => 'nullable|integer|min:0',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_published' => 'boolean',
         ]);

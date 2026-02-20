@@ -9,63 +9,14 @@ class Content extends Model
     protected $fillable = [
         'title',
         'description',
-        'type',
-        'category',
         'thumbnail',
         'file_path',
-        'duration',
         'is_published',
-        'views',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
-        'duration' => 'integer',
-        'views' => 'integer',
     ];
-
-    public function getTypeColor()
-    {
-        return match($this->type) {
-            'Video' => 'blue',
-            'Materi' => 'purple',
-            'Info' => 'amber',
-            default => 'gray',
-        };
-    }
-
-    public function getCategoryColor()
-    {
-        return match($this->category) {
-            'Training' => 'green',
-            'Challenge' => 'red',
-            'Bonus' => 'yellow',
-            default => 'gray',
-        };
-    }
-
-    public function getTypeIcon()
-    {
-        return match($this->type) {
-            'Video' => '🎬',
-            'Materi' => '📄',
-            'Info' => '📢',
-            default => '📦',
-        };
-    }
-
-    public function formatDuration()
-    {
-        if (!$this->duration) return '-';
-        $hours = intdiv($this->duration, 3600);
-        $minutes = intdiv($this->duration % 3600, 60);
-        $seconds = $this->duration % 60;
-
-        if ($hours > 0) {
-            return sprintf('%d:%02d:%02d', $hours, $minutes, $seconds);
-        }
-        return sprintf('%d:%02d', $minutes, $seconds);
-    }
 
     /**
      * Extract YouTube video ID from file_path URL.

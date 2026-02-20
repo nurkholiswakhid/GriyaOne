@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\Notification;
+use App\Models\Content;
+use App\Models\Material;
+use App\Models\MaterialCategory;
+use App\Models\Information;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MarketingController extends Controller
 {
@@ -13,7 +18,12 @@ class MarketingController extends Controller
      */
     public function dashboard()
     {
-        return view('marketing.dashboard');
+        $informations = Information::where('status', 'active')
+            ->latest('published_date')
+            ->take(3)
+            ->get();
+
+        return view('marketing.marketing', compact('informations'));
     }
 
     /**
@@ -43,6 +53,25 @@ class MarketingController extends Controller
     }
 
     /**
+     * Display materi (PDF materials).
+     */
+    public function materi()
+    {
+        $materials = Material::where('is_published', true)->latest()->paginate(12);
+        $categories = MaterialCategory::orderBy('order')->get();
+        return view('marketing.materi', compact('materials', 'categories'));
+    }
+
+    /**
+     * Display informasi terbaru (latest information).
+     */
+    public function informasi()
+    {
+        $informations = Information::latest()->paginate(12);
+        return view('marketing.informasi', compact('informations'));
+    }
+
+    /**
      * Display marketing notifications.
      */
     public function notifications()
@@ -55,7 +84,7 @@ class MarketingController extends Controller
      */
     public function markNotificationAsRead(Notification $notification)
     {
-        if ($notification->user_id !== auth()->id()) {
+        if ($notification->user_id !== Auth::id()) {
             abort(403);
         }
 
@@ -68,7 +97,7 @@ class MarketingController extends Controller
      */
     public function deleteNotification(Notification $notification)
     {
-        if ($notification->user_id !== auth()->id()) {
+        if ($notification->user_id !== Auth::id()) {
             abort(403);
         }
 

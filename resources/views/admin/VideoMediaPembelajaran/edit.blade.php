@@ -24,7 +24,6 @@
     <form action="{{ route('contents.update', $content) }}" method="POST" enctype="multipart/form-data" class="fade-in">
         @csrf
         @method('PUT')
-        <input type="hidden" name="type" value="Video">
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Form -->
