@@ -56,9 +56,9 @@
             </div>
 
             <!-- Info Box -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p class="text-blue-900 text-sm">
-                    <strong>💡 Catatan:</strong> Untuk mengembalikan password ke default, gunakan tombol "Reset Password" di bawah.
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <p class="text-orange-900 text-sm">
+                    <strong>Catatan:</strong> Untuk mengembalikan password ke default, gunakan tombol "Reset Password" di bawah.
                 </p>
             </div>
 
@@ -76,7 +76,7 @@
 
     <!-- Reset Password Section -->
     <div class="bg-white rounded-lg shadow p-8 mt-8">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">🔄 Reset Password</h3>
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Reset Password</h3>
         <p class="text-gray-600 mb-4">Kembalikan password user ke format default: <strong>{{ strtolower(str_replace(' ', '', $user->name)) }}123456</strong></p>
 
         <form method="POST" action="{{ route('users.reset-password', $user) }}" data-confirm="Yakin ingin me-reset password user ke format default?">
@@ -85,7 +85,7 @@
 
             <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                 <p class="text-yellow-900 text-sm">
-                    <strong>⚠️ Perhatian:</strong> Password user akan diubah menjadi <strong>{{ strtolower(str_replace(' ', '', $user->name)) }}123456</strong>. User harus menggunakan password ini untuk login.
+                    <strong>Perhatian:</strong> Password user akan diubah menjadi <strong>{{ strtolower(str_replace(' ', '', $user->name)) }}123456</strong>. User harus menggunakan password ini untuk login.
                 </p>
             </div>
 
@@ -96,3 +96,5 @@
     </div>
 </div>
 @endsection
+
+

@@ -170,7 +170,7 @@
                 <!-- Category Badge -->
                 <div class="absolute top-3 left-3">
                     @if($asset->category === 'Bank Cessie')
-                        <span class="inline-block px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">Bank Cessie</span>
+                        <span class="inline-block px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded-full">Bank Cessie</span>
                     @elseif($asset->category === 'AYDA')
                         <span class="inline-block px-3 py-1 bg-green-600 text-white text-xs font-bold rounded-full">AYDA</span>
                     @else
@@ -228,7 +228,7 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
 
                     <!-- Download Photos -->
                     @if($asset->photos && count($asset->photos) > 0)
-                    <a href="{{ route('marketing.download-photos', $asset) }}" class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                    <a href="{{ route('marketing.download-photos', $asset) }}" class="flex-1 px-3 py-2 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
@@ -332,7 +332,7 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
 
                 <!-- Badge Section -->
                 <div class="mt-4 flex gap-2 flex-wrap" id="modalBadgesContainer">
-                    <span id="modalCategoryBadge" class="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-full">-</span>
+                    <span id="modalCategoryBadge" class="inline-block px-4 py-2 bg-orange-600 text-white text-sm font-bold rounded-full">-</span>
                     <span id="modalStatusBadge" class="inline-block px-4 py-2 bg-green-500 text-white text-sm font-bold rounded-full">-</span>
                 </div>
             </div>
@@ -374,7 +374,7 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
                 <!-- Description -->
                 <div>
                     <h3 class="text-lg font-bold text-gray-900 mb-3">Deskripsi Lengkap</h3>
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 prose prose-sm max-w-none" id="modalDetailDescription">-</div>
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 prose prose-sm max-w-none" id="modalDetailDescription">-</div>
                 </div>
 
                 <!-- Action Buttons -->
@@ -436,7 +436,7 @@ function showDetail(assetId) {
     }
 
     // Populate modal - Category badge
-    let categoryClass = 'bg-blue-600';
+    let categoryClass = 'bg-orange-600';
     if (data.category === 'AYDA') categoryClass = 'bg-green-600';
     else if (data.category === 'Lelang') categoryClass = 'bg-purple-600';
 
@@ -693,3 +693,5 @@ function carouselGo(assetId, index) {
 </style>
 
 @endsection
+
+

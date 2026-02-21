@@ -55,7 +55,7 @@
                             </div>
                             <button type="button"
                                 onclick="openAddCategoryModal()"
-                                class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition whitespace-nowrap">
+                                class="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition whitespace-nowrap">
                                 + Kategori Baru
                             </button>
                         </div>
@@ -175,7 +175,7 @@
             const fileName = document.getElementById('fileName');
             if (input.files && input.files[0]) {
                 const size = (input.files[0].size / 1024 / 1024).toFixed(2);
-                fileName.textContent = `✓ ${input.files[0].name} (${size} MB)`;
+                fileName.textContent = `${input.files[0].name} (${size} MB)`;
                 fileName.className = 'mt-2 text-sm text-green-600 font-medium';
             }
         }
@@ -273,3 +273,5 @@
         }
     </script>
 @endsection
+
+

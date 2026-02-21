@@ -17,115 +17,141 @@
     @endif
 
     <style>
-        body {
-            font-family: 'Figtree', sans-serif;
-        }
+        body { font-family: 'Figtree', sans-serif; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md">
-        <!-- Logo -->
+<body class="min-h-screen flex items-center justify-center p-4" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);">
+
+    <!-- Decorative background shapes -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-10" style="background: radial-gradient(circle, #ea580c, transparent);"></div>
+        <div class="absolute -bottom-20 -left-20 w-80 h-80 rounded-full opacity-10" style="background: radial-gradient(circle, #ea580c, transparent);"></div>
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
+        <!-- Brand Logo -->
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-white">{{ config('app.name', 'GriyaOne') }}</h1>
-            <p class="text-slate-300 mt-2">Sistem Manajemen Properti</p>
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 shadow-2xl" style="background: linear-gradient(135deg, #ea580c, #f97316);">
+                <svg class="w-11 h-11 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">{{ config('app.name', 'GriyaOne') }}</h1>
+            <p class="text-gray-400 mt-1 text-sm">Sistem Manajemen Properti</p>
         </div>
 
         <!-- Login Card -->
-        <div class="bg-white rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">Login</h2>
-            <p class="text-gray-600 mb-6">Masukkan kredensial Anda untuk melanjutkan</p>
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Card top accent -->
+            <div class="h-1.5 w-full" style="background: linear-gradient(90deg, #ea580c, #f97316, #ea580c);"></div>
 
-            <form method="POST" action="/login" class="space-y-4">
-                @csrf
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-1">Selamat Datang</h2>
+                <p class="text-gray-500 text-sm mb-7">Masukkan kredensial Anda untuk melanjutkan</p>
 
-                <!-- Email Input -->
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input
-                        id="email"
-                        type="email"
-                        name="email"
-                        value="{{ old('email') }}"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                        placeholder="nama@contoh.com"
-                        required
-                        autofocus
+                <form method="POST" action="/login" class="space-y-5">
+                    @csrf
+
+                    <!-- Email Input -->
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
+                        <input
+                            id="email"
+                            type="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent outline-none transition text-sm"
+                            style="--tw-ring-color: #ea580c;"
+                            onfocus="this.style.boxShadow='0 0 0 3px rgba(234,88,12,0.15)'; this.style.borderColor='#ea580c';"
+                            onblur="this.style.boxShadow=''; this.style.borderColor='#d1d5db';"
+                            placeholder="nama@contoh.com"
+                            required
+                            autofocus
+                        >
+                        @error('email')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Password Input -->
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg outline-none transition text-sm"
+                            onfocus="this.style.boxShadow='0 0 0 3px rgba(234,88,12,0.15)'; this.style.borderColor='#ea580c';"
+                            onblur="this.style.boxShadow=''; this.style.borderColor='#d1d5db';"
+                            placeholder="••••••••"
+                            required
+                        >
+                        @error('password')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input
+                                id="remember"
+                                type="checkbox"
+                                name="remember"
+                                class="h-4 w-4 rounded border-gray-300 text-orange-600"
+                                style="accent-color: #ea580c;"
+                                {{ old('remember') ? 'checked' : '' }}
+                            >
+                            <span class="text-sm text-gray-600">Ingat saya</span>
+                        </label>
+                        <a href="/password-reset" class="text-sm font-medium" style="color: #ea580c;">
+                            Lupa password?
+                        </a>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button
+                        type="submit"
+                        class="w-full text-white font-semibold py-3 px-4 rounded-lg transition duration-200 ease-in-out active:scale-95 shadow-lg"
+                        style="background: linear-gradient(135deg, #ea580c, #f97316);"
+                        onmouseover="this.style.background='linear-gradient(135deg, #c2410c, #ea580c)';"
+                        onmouseout="this.style.background='linear-gradient(135deg, #ea580c, #f97316)';"
                     >
-                    @error('email')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                        Masuk
+                    </button>
+                </form>
+
+                <!-- Register Link -->
+                <div class="mt-6 pt-6 border-t border-gray-100 text-center">
+                    <p class="text-sm text-gray-500">
+                        Belum memiliki akun?
+                        <a href="/register" class="font-semibold hover:underline" style="color: #ea580c;">
+                            Daftar di sini
+                        </a>
+                    </p>
                 </div>
 
-                <!-- Password Input -->
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input
-                        id="password"
-                        type="password"
-                        name="password"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                        placeholder="••••••••"
-                        required
-                    >
-                    @error('password')
-                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                    @enderror
+                <!-- Test Credentials Info -->
+                <div class="mt-4 p-4 rounded-xl border" style="background-color: #fff7ed; border-color: #fed7aa;">
+                    <p class="text-xs font-bold mb-2" style="color: #9a3412;">Akun Test Tersedia:</p>
+                    <div class="space-y-1 text-xs" style="color: #7c2d12;">
+                        <p><strong>User:</strong> user@test.com / password</p>
+                        <p><strong>Marketing:</strong> marketing@test.com / password</p>
+                        <p><strong>Admin:</strong> admin@test.com / password</p>
+                    </div>
                 </div>
-
-                <!-- Remember Me -->
-                <div class="flex items-center">
-                    <input
-                        id="remember"
-                        type="checkbox"
-                        name="remember"
-                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        {{ old('remember') ? 'checked' : '' }}
-                    >
-                    <label for="remember" class="ml-2 block text-sm text-gray-700">Ingat saya</label>
-                </div>
-
-                <!-- Submit Button -->
-                <button
-                    type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 active:scale-95"
-                >
-                    Login
-                </button>
-            </form>
-
-            <!-- Forgot Password Link -->
-            <div class="mt-4 text-center">
-                <a href="/password-reset" class="text-sm text-blue-600 hover:text-blue-700">
-                    Lupa password?
-                </a>
             </div>
-
-            <!-- Register Link -->
-            <div class="mt-6 pt-6 border-t border-gray-300">
-                <p class="text-sm text-gray-600 text-center">
-                    Belum memiliki akun?
-                    <a href="/register" class="text-blue-600 hover:text-blue-700 font-medium">
-                        Daftar di sini
-                    </a>
-                </p>
-            </div>
-            <!-- Test Credentials Info -->
-            <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p class="text-sm font-semibold text-blue-900 mb-3">📝 Akun Test Tersedia:</p>
-                <div class="space-y-2 text-xs text-blue-800">
-                    <p><strong>User:</strong> user@test.com / password</p>
-                    <p><strong>Marketing:</strong> marketing@test.com / password</p>
-                    <p><strong>Admin:</strong> admin@test.com / password</p>
-                </div>
-            </div>        </div>
+        </div>
 
         <!-- Footer -->
-        <div class="mt-8 text-center">
-            <p class="text-slate-400 text-sm">&copy; 2026 {{ config('app.name', 'GriyaOne') }}. Semua hak dilindungi.</p>
+        <div class="mt-6 text-center">
+            <p class="text-gray-500 text-xs">&copy; 2026 {{ config('app.name', 'GriyaOne') }}. Semua hak dilindungi.</p>
         </div>
     </div>
 </body>
 </html>
+
+
 
 
 

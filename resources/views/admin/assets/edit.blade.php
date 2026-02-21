@@ -118,7 +118,7 @@
                 <!-- Submit Buttons -->
                 <div class="flex gap-4">
                     <button type="submit" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
-                        ✓ Perbarui Aset
+                        Perbarui Aset
                     </button>
                     <a href="{{ route('assets.show', $asset) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 py-3 rounded-lg font-semibold transition text-center">
                         Batalkan
@@ -218,16 +218,16 @@
         function initializeQuill() {
             const editorContainer = document.getElementById('editor-container');
             if (!editorContainer) {
-                console.error('❌ [FATAL] Editor container not found!');
+                console.error('[FATAL] Editor container not found!');
                 return;
             }
 
             if (!window.Quill) {
-                console.error('❌ [FATAL] Quill library not loaded!');
+                console.error('[FATAL] Quill library not loaded!');
                 return;
             }
 
-            log('🚀 Starting Quill initialization...');
+            log('Starting Quill initialization...');
             const initialContent = editorContainer.innerHTML.trim();
             log('Initial content length:', initialContent.length);
             log('Initial content preview:', initialContent.substring(0, 80));
@@ -251,12 +251,12 @@
                     }
                 });
 
-                log('✅ Quill instance created successfully');
+                log('Quill instance created successfully');
 
                 if (initialContent && initialContent.length > 0) {
                     try {
                         quillInstance.root.innerHTML = initialContent;
-                        log('✅ Initial content restored to editor');
+                        log('Initial content restored to editor');
                     } catch (err) {
                         console.error('Error restoring content:', err);
                     }
@@ -264,25 +264,25 @@
 
                 quillInstance.on('text-change', () => {
                     const currentText = quillInstance.getText().trim();
-                    log('📝 Editor changed - Text length:', currentText.length);
+                    log('Editor changed - Text length:', currentText.length);
                 });
 
             } catch (err) {
-                console.error('❌ Error initializing Quill:', err);
+                console.error('Error initializing Quill:', err);
             }
         }
 
         function syncQuillToField() {
-            log('🔄 Syncing Quill to hidden field...');
+            log('Syncing Quill to hidden field...');
 
             if (!quillInstance) {
-                console.error('❌ Quill instance not available!');
+                console.error('Quill instance not available!');
                 return false;
             }
 
             const field = document.getElementById('description_content');
             if (!field) {
-                console.error('❌ Hidden field #description_content not found!');
+                console.error('Hidden field #description_content not found!');
                 return false;
             }
 
@@ -295,18 +295,18 @@
             log('  - Text preview:', textContent.substring(0, 50));
 
             if (textContent.length === 0 || textContent === '') {
-                console.error('❌ Quill editor is EMPTY!');
+                console.error('Quill editor is EMPTY!');
                 return false;
             }
 
             field.value = htmlContent;
 
-            log('✅ Field updated:');
+            log('Field updated:');
             log('  - Field.value length:', field.value.length);
             log('  - Field.value:', field.value.substring(0, 100));
 
             setTimeout(() => {
-                log('🔍 Verification:');
+                log('Verification:');
                 log('  - Field.value:', field.value.substring(0, 100));
             }, 10);
 
@@ -321,12 +321,12 @@
             // Sync first, then decide
             if (!syncQuillToField()) {
                 event.preventDefault();
-                log('❌ SYNC FAILED - Preventing form submission');
-                alert('⚠️ Deskripsi kosong! Silakan isi deskripsi terlebih dahulu.');
+                log('SYNC FAILED - Preventing form submission');
+                alert('Deskripsi kosong! Silakan isi deskripsi terlebih dahulu.');
                 return false;
             }
 
-            log('✅ SYNC SUCCESSFUL - Allowing form submission');
+            log('SYNC SUCCESSFUL - Allowing form submission');
             log('========================================');
 
             // Return true to allow default form submission
@@ -346,10 +346,10 @@
 
         window.addEventListener('load', () => {
             if (!quillInstance) {
-                log('⚠️ Quill not initialized on DOMContentLoaded, trying again on page load');
+                log('Quill not initialized on DOMContentLoaded, trying again on page load');
                 initializeQuill();
             } else {
-                log('✅ Quill already initialized');
+                log('Quill already initialized');
             }
         });
 
@@ -422,7 +422,7 @@
 
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(text).then(() => {
-                        buttonText.textContent = '✓ Tersalin!';
+                        buttonText.textContent = 'Tersalin!';
                         setTimeout(() => {
                             buttonText.textContent = originalText;
                         }, 2000);
@@ -444,7 +444,7 @@
                 try {
                     textarea.select();
                     document.execCommand('copy');
-                    buttonText.textContent = '✓ Tersalin!';
+                    buttonText.textContent = 'Tersalin!';
                     setTimeout(() => {
                         buttonText.textContent = originalText;
                     }, 2000);
@@ -457,3 +457,5 @@
         }
     </script>
 @endsection
+
+

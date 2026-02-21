@@ -139,11 +139,43 @@ class MarketingController extends Controller
     /**
      * Display informasi terbaru (latest information).
      */
-    public function informasi()
+    public function informasi(Request $request)
     {
-        $informations = Information::where('status', 'active')
-                                    ->latest('published_date')
-                                    ->paginate(12);
+        $query = Information::where('status', 'active');
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->input('category'));
+        }
+
+        // Sort
+        $sort = $request->input('sort', 'terbaru');
+        switch ($sort) {
+            case 'terlama':
+                $query->oldest('published_date');
+                break;
+            case 'a-z':
+                $query->orderBy('title', 'asc');
+                break;
+            case 'z-a':
+                $query->orderBy('title', 'desc');
+                break;
+            case 'terbaru':
+            default:
+                $query->latest('published_date');
+        }
+
+        $informations = $query->paginate(12);
+
         return view('marketing.informasi', compact('informations'));
     }
 

@@ -63,7 +63,7 @@
                 @error('password')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
-                <p class="text-gray-500 text-xs mt-1">💡 Jika kosong, password otomatis: <strong>nama_user123456</strong> (contoh: johndoe123456)</p>
+                <p class="text-gray-500 text-xs mt-1">Jika kosong, password otomatis: <strong>nama_user123456</strong> (contoh: johndoe123456)</p>
             </div>
 
             <!-- Confirm Password -->
@@ -86,8 +86,8 @@
                 @error('role')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
-                <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <p class="text-sm text-blue-900" id="roleDescription">
+                <div class="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                    <p class="text-sm text-orange-900" id="roleDescription">
                         <strong>User Reguler:</strong> Akses dashboard user dengan fitur dasar
                     </p>
                 </div>
@@ -132,3 +132,5 @@
     });
 </script>
 @endsection
+
+

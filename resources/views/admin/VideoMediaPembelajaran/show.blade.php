@@ -19,7 +19,7 @@
     <!-- Success Message -->
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 fade-in">
-            <p class="text-green-800 font-medium">✓ {{ session('success') }}</p>
+            <p class="text-green-800 font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
@@ -83,7 +83,7 @@
                     @csrf
                     @method('PATCH')
                     <button type="submit" class="w-full {{ $content->is_published ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }} px-4 py-3 rounded-lg font-semibold text-sm transition">
-                        {{ $content->is_published ? '✓ Dipublikasikan — Klik untuk Draft' : 'Draft — Klik untuk Publikasi' }}
+                        {{ $content->is_published ? 'Dipublikasikan — Klik untuk Draft' : 'Draft — Klik untuk Publikasi' }}
                     </button>
                 </form>
             </div>
@@ -114,3 +114,5 @@
         </div>
     </div>
 @endsection
+
+

@@ -18,7 +18,7 @@
     <!-- Success Message -->
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 fade-in">
-            <p class="text-green-800 font-medium">✓ {{ session('success') }}</p>
+            <p class="text-green-800 font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
@@ -80,7 +80,7 @@
                                     <p class="text-xs text-gray-500 mt-1">{{ Str::limit(strip_tags($info->content), 80) }}</p>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                    <span class="inline-block bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-semibold">
                                         {{ $info->category->name ?? 'Umum' }}
                                     </span>
                                 </td>
@@ -95,7 +95,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex gap-2">
-                                        <a href="{{ route('informasi.show', $info->id) }}" class="text-blue-600 hover:text-blue-900 font-semibold text-sm">
+                                        <a href="{{ route('informasi.show', $info->id) }}" class="text-orange-600 hover:text-orange-900 font-semibold text-sm">
                                             Lihat
                                         </a>
                                         <a href="{{ route('informasi.edit', $info->id) }}" class="text-amber-600 hover:text-amber-900 font-semibold text-sm">
@@ -134,3 +134,5 @@
         @endif
     </div>
 @endsection
+
+

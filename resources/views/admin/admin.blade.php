@@ -6,7 +6,7 @@
 @section('content')
             <!-- Header -->
             <div class="mb-8 fade-in">
-                <h2 class="text-3xl font-bold text-gray-900 mb-1">Selamat datang, {{ Auth::user()->name }}!</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-1">Selamat datang, {{ Auth::user()?->name ?? 'Admin' }}!</h2>
                 <p class="text-gray-600">Kelola sistem dan monitor aktivitas platform</p>
             </div>
 
@@ -20,10 +20,10 @@
                     </div>
                 </div>
                 <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white">
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 text-white">
                         <h3 class="text-lg font-semibold mb-2">Total Properti</h3>
                         <p class="text-3xl font-bold">{{ $totalAssets }}</p>
-                        <p class="text-sm mt-2 text-blue-100">Tersedia: {{ $availableAssets }} | Terjual: {{ $soldAssets }}</p>
+                        <p class="text-sm mt-2 text-orange-100">Tersedia: {{ $availableAssets }} | Terjual: {{ $soldAssets }}</p>
                     </div>
                 </div>
                 <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
@@ -72,11 +72,11 @@
                                         @elseif($user->role === 'marketing')
                                             <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-semibold">Marketing</span>
                                         @else
-                                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-semibold">User</span>
+                                            <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-semibold">User</span>
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->created_at->format('d M Y') }}</td>
-                                    <td class="px-6 py-4 text-sm"><span class="text-green-600 font-semibold">✓ Aktif</span></td>
+                                    <td class="px-6 py-4 text-sm"><span class="text-green-600 font-semibold">Aktif</span></td>
                                 </tr>
                                 @empty
                                 <tr>
@@ -100,11 +100,11 @@
                     <div class="space-y-3">
                         <div>
                             <p class="text-gray-600 text-sm">Nama</p>
-                            <p class="text-gray-900 font-medium">{{ Auth::user()->name }}</p>
+                            <p class="text-gray-900 font-medium">{{ Auth::user()?->name ?? 'N/A' }}</p>
                         </div>
                         <div>
                             <p class="text-gray-600 text-sm">Email</p>
-                            <p class="text-gray-900 font-medium">{{ Auth::user()->email }}</p>
+                            <p class="text-gray-900 font-medium">{{ Auth::user()?->email ?? 'N/A' }}</p>
                         </div>
                         <div>
                             <p class="text-gray-600 text-sm">Role</p>
@@ -112,10 +112,12 @@
                         </div>
                         <div>
                             <p class="text-gray-600 text-sm">Bergabung</p>
-                            <p class="text-gray-900 font-medium">{{ Auth::user()->created_at->format('d M Y') }}</p>
+                            <p class="text-gray-900 font-medium">{{ optional(Auth::user())->created_at?->format('d M Y') ?? 'N/A' }}</p>
                         </div>
                     </div>
                 </div>
 
 
 @endsection
+
+

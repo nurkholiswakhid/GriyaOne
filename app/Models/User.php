@@ -13,6 +13,14 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * @property string $role
+     * @property string $name
+     * @property string $email
+     * @property string|null $phone
+     * @property string|null $profile_photo_path
+     */
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>

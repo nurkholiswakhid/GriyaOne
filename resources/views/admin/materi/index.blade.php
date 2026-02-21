@@ -18,7 +18,7 @@
     <!-- Success Message -->
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 fade-in">
-            <p class="text-green-800 font-medium">✓ {{ session('success') }}</p>
+            <p class="text-green-800 font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
@@ -140,7 +140,7 @@
 
                         <!-- Actions -->
                         <div class="flex gap-2">
-                            <a href="{{ route('materi.edit', $material) }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2 rounded transition text-center">
+                            <a href="{{ route('materi.edit', $material) }}" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold py-2 rounded transition text-center">
                                 Edit
                             </a>
                             <a href="{{ route('materi.show', $material) }}" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold py-2 rounded transition text-center">
@@ -175,3 +175,5 @@
         </div>
     @endif
 @endsection
+
+

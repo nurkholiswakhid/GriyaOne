@@ -18,7 +18,7 @@
 
     <!-- Profile Card -->
     <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
-        <div class="bg-gradient-to-r {{ $user->role === 'admin' ? 'from-red-600 to-red-700' : ($user->role === 'marketing' ? 'from-orange-600 to-orange-700' : 'from-blue-600 to-blue-700') }} p-6 text-white">
+        <div class="bg-gradient-to-r {{ $user->role === 'admin' ? 'from-red-600 to-red-700' : ($user->role === 'marketing' ? 'from-orange-600 to-orange-700' : 'from-orange-600 to-orange-700') }} p-6 text-white">
             <div class="flex items-center gap-4">
                 <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-4xl font-bold">
                     {{ strtoupper(substr($user->name, 0, 1)) }}
@@ -84,8 +84,8 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-3">Ubah Role Pengguna</label>
                 <div class="space-y-3">
-                    <label class="flex items-center p-4 border-2 {{ $user->role === 'user' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300' }} rounded-lg cursor-pointer transition">
-                        <input type="radio" name="role" value="user" {{ $user->role === 'user' ? 'checked' : '' }} class="w-4 h-4 text-blue-600">
+                    <label class="flex items-center p-4 border-2 {{ $user->role === 'user' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-gray-300' }} rounded-lg cursor-pointer transition">
+                        <input type="radio" name="role" value="user" {{ $user->role === 'user' ? 'checked' : '' }} class="w-4 h-4 text-orange-600">
                         <div class="ml-3">
                             <p class="font-medium text-gray-900">User Reguler</p>
                             <p class="text-sm text-gray-600">Akses dashboard user dengan fitur dasar</p>
@@ -131,7 +131,7 @@
 
     <!-- Reset Password -->
     <div class="bg-white rounded-lg shadow p-6 mb-6 border-l-4 border-yellow-500">
-        <h3 class="text-lg font-bold text-yellow-600 mb-4">🔄 Reset Password</h3>
+        <h3 class="text-lg font-bold text-yellow-600 mb-4">Reset Password</h3>
         <p class="text-gray-600 mb-4">Kembalikan password user ke format default:</p>
         <div class="bg-yellow-50 rounded p-3 mb-4">
             <p class="text-sm font-mono text-gray-900"><strong>{{ strtolower(str_replace(' ', '', $user->name)) }}123456</strong></p>
@@ -164,11 +164,13 @@
         </form>
     </div>
     @else
-    <div class="bg-blue-50 rounded-lg border border-blue-200 p-6">
-        <p class="text-blue-900 text-sm">
-            <strong>💡 Catatan:</strong> Anda tidak dapat menghapus akun sendiri. Silakan hubungi administrator lain untuk menghapus akun Anda.
+    <div class="bg-orange-50 rounded-lg border border-orange-200 p-6">
+        <p class="text-orange-900 text-sm">
+            <strong>Catatan:</strong> Anda tidak dapat menghapus akun sendiri. Silakan hubungi administrator lain untuk menghapus akun Anda.
         </p>
     </div>
     @endif
 </div>
 @endsection
+
+

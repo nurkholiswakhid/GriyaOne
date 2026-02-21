@@ -12,14 +12,54 @@
 
     <!-- Filter & Search -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Cari Informasi</label>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik judul atau kata kunci..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+        <form method="GET" class="space-y-4">
+            <!-- Search & Category Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Cari Informasi</label>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik judul atau kata kunci..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                    <select name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="">-- Semua Kategori --</option>
+                        @php
+                            $categories = \App\Models\InformationCategory::orderBy('name')->get();
+                        @endphp
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Urutkan</label>
+                    <select name="sort" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="terbaru" {{ request('sort') == 'terbaru' ? 'selected' : '' }}>Terbaru</option>
+                        <option value="terlama" {{ request('sort') == 'terlama' ? 'selected' : '' }}>Terlama</option>
+                        <option value="a-z" {{ request('sort') == 'a-z' ? 'selected' : '' }}>A - Z</option>
+                        <option value="z-a" {{ request('sort') == 'z-a' ? 'selected' : '' }}>Z - A</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">&nbsp;</label>
-                <button type="submit" class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Cari</button>
+
+            <!-- Buttons Row -->
+            <div class="flex items-center gap-3">
+                <button type="submit" class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition font-medium">
+                    <svg class="w-4 h-4 inline -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    Cari
+                </button>
+                @if(request('search') || request('category') || request('sort') != 'terbaru')
+                <a href="{{ route('marketing.informasi') }}" class="px-6 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition font-medium">
+                    <svg class="w-4 h-4 inline -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Reset
+                </a>
+                @endif
             </div>
         </form>
     </div>
@@ -98,45 +138,56 @@
 
 <!-- Detail Modal -->
 <div id="infoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
-    <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-        <!-- Header: Orange gradient with close button -->
-        <div class="sticky top-0 bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-4 flex items-center justify-between">
-            <h3 class="text-xl font-bold text-white" id="modalTitle">Informasi Terbaru</h3>
-            <button onclick="closeInfoModal()" class="text-white hover:text-gray-200 transition duration-200">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <!-- Header: Sticky dengan close button -->
+        <div class="sticky top-0 bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-5 flex items-center justify-between border-b border-orange-500">
+            <h3 class="text-2xl font-bold text-white" id="modalTitle">Informasi Terbaru</h3>
+            <button onclick="closeInfoModal()" class="flex-shrink-0 text-white hover:text-orange-100 transition duration-200 p-1">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
 
-        <!-- Body: Photo, metadata, content -->
-        <div class="p-6 space-y-4">
-            <!-- Photo with proper overflow handling -->
-            <div id="modalPhotoContainer" class="rounded-lg overflow-hidden border border-gray-300">
-                <img id="modalPhoto" src="" alt="Foto" class="w-full h-48 object-cover">
+        <!-- Body: Square image & content -->
+        <div class="p-6 space-y-5">
+            <!-- Foto: Square aspect ratio -->
+            <div id="modalPhotoContainer" class="rounded-lg overflow-hidden border border-gray-300 shadow-sm">
+                <img id="modalPhoto" src="" alt="Foto" class="w-full aspect-square object-cover">
             </div>
 
-            <!-- Metadata: Category and Date -->
-            <div class="flex items-center gap-3 pb-4 border-b border-gray-200">
-                <span class="inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold" id="modalCategory">-</span>
-                <span class="text-xs text-gray-500" id="modalPublishDate">-</span>
+            <!-- Judul di dalam modal -->
+            <h4 class="text-xl font-bold text-gray-900" id="modalTitle2">-</h4>
+
+            <!-- Metadata: Kategori & Tanggal -->
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold" id="modalCategory">-</span>
+                <span class="text-sm text-gray-500" id="modalPublishDate">-</span>
             </div>
 
-            <!-- Content: Simplified text display -->
-            <div class="text-gray-700 text-sm leading-relaxed" id="modalContent">-</div>
+            <!-- Divider -->
+            <div class="border-t border-gray-200"></div>
+
+            <!-- Konten: Teks dengan formatting -->
+            <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap" id="modalContent">-</div>
         </div>
     </div>
 </div>
 
 <script>
     /**
-     * Open information detail modal with provided data
+     * Buka modal informasi dengan data lengkap
      */
     function openInfoModal(info) {
         const modal = document.getElementById('infoModal');
+
+        // Set title di header
         document.getElementById('modalTitle').textContent = info.title || 'Informasi Terbaru';
 
-        // Set photo with fallback
+        // Set title di dalam modal body
+        document.getElementById('modalTitle2').textContent = info.title || 'Informasi Terbaru';
+
+        // Set foto dengan fallback
         const photoImg = document.getElementById('modalPhoto');
         if (info.photo) {
             photoImg.src = '/storage/' + info.photo;
@@ -145,46 +196,56 @@
             photoImg.style.display = 'none';
         }
 
-        // Format and display publish date
-        document.getElementById('modalPublishDate').textContent = info.published_date
-            ? new Date(info.published_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
-            : '-';
-
-        // Handle category - can be string or object
-        let categoryName = '-';
-        if (info.category) {
-            categoryName = typeof info.category === 'object' ? (info.category.name || '-') : info.category;
-        }
+        // Set kategori - handle string atau object
+        const categoryName = typeof info.category === 'object'
+            ? (info.category.name || '-')
+            : info.category;
         document.getElementById('modalCategory').textContent = categoryName;
 
-        // Display content
+        // Set tanggal publikasi
+        const publishDate = info.published_date
+            ? new Date(info.published_date).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })
+            : '-';
+        document.getElementById('modalPublishDate').textContent = publishDate;
+
+        // Set konten
         document.getElementById('modalContent').textContent = info.content || 'Tidak ada konten';
 
-        // Show modal
+        // Tampilkan modal
         modal.classList.remove('hidden');
     }
 
     /**
-     * Close information detail modal
+     * Tutup modal informasi
      */
     function closeInfoModal() {
         document.getElementById('infoModal').classList.add('hidden');
     }
 
     /**
-     * Event listeners for modal interaction
+     * Event listeners untuk interaksi modal
      */
     document.addEventListener('DOMContentLoaded', function() {
-        // Close modal when clicking outside (on backdrop)
+        // Tutup modal saat click di luar (backdrop)
         document.getElementById('infoModal').addEventListener('click', function(e) {
-            if (e.target === this) closeInfoModal();
+            if (e.target === this) {
+                closeInfoModal();
+            }
         });
     });
 
-    // Close modal with Escape key
+    // Tutup modal dengan tombol Escape
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeInfoModal();
+        if (e.key === 'Escape') {
+            closeInfoModal();
+        }
     });
 </script>
 
 @endsection
+
+

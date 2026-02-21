@@ -35,7 +35,7 @@
         <div class="flex flex-wrap gap-4 mb-6 pb-6 border-b border-gray-200">
             <div>
                 <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Kategori</p>
-                <span class="inline-block mt-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                <span class="inline-block mt-1 bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold">
                     {{ $informasi->category->name ?? 'Umum' }}
                 </span>
             </div>
@@ -77,3 +77,5 @@
         </div>
     </div>
 @endsection
+
+

@@ -67,7 +67,7 @@
                 @if($material->file_path)
                     <div class="mb-8 pb-8 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">File PDF</h3>
-                        <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-6 border border-purple-200">
+                        <div class="bg-gradient-to-br from-purple-50 to-orange-50 rounded-lg p-6 border border-purple-200">
                             <div class="flex items-start justify-between gap-4">
                                 <div class="flex items-start gap-4">
                                     <div class="bg-purple-100 p-3 rounded-lg">
@@ -104,7 +104,7 @@
 
                 <!-- Actions -->
                 <div class="flex gap-3 flex-wrap">
-                    <a href="{{ route('materi.edit', $material) }}" class="flex-1 min-w-40 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-blue-500 text-center inline-flex items-center justify-center gap-2">
+                    <a href="{{ route('materi.edit', $material) }}" class="flex-1 min-w-40 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl border-2 border-orange-500 text-center inline-flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         Edit Materi
                     </a>
@@ -140,3 +140,5 @@
         </div>
     </div>
 @endsection
+
+

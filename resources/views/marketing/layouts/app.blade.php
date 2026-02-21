@@ -21,7 +21,9 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="bg-orange-600 hover:bg-orange-700 w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0 transition-colors duration-200">G</div>
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-colors duration-200 shadow-md" style="background: linear-gradient(135deg, #ea580c, #f97316);">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    </div>
                     <div class="hidden sm:block min-w-0">
                         <h1 class="text-lg sm:text-xl font-bold text-gray-900 truncate">GriyaOne</h1>
                         <p class="text-xs text-orange-600 font-semibold">@yield('role', 'Marketing Dashboard')</p>
@@ -132,6 +134,9 @@
 
 
                 <div class="my-3 border-t border-gray-200"></div>
+
+                <div class="text-xs font-semibold text-gray-500 px-4 py-3 uppercase tracking-wider">Sistem</div>
+
 
                 <a href="{{ route('marketing.pengaturan') }}" class="group flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm transition-colors duration-200 rounded-lg">
                     <svg class="w-5 h-5 flex-shrink-0 text-gray-400 group-hover:text-orange-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,7 +269,7 @@
         // Get icon based on notification type
         function getNotificationIcon(type) {
             const icons = {
-                'info': '<svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                'info': '<svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
                 'new_asset': '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>',
                 'sold_out': '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m6-4a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
             };
@@ -297,3 +302,5 @@
     </script>
 </body>
 </html>
+
+

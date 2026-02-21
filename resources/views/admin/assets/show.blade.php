@@ -19,7 +19,7 @@
     <!-- Success Message -->
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 fade-in">
-            <p class="text-green-800 font-medium">✓ {{ session('success') }}</p>
+            <p class="text-green-800 font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
@@ -114,7 +114,7 @@
                         <p class="text-sm font-semibold text-gray-700 mb-2">Kategori</p>
                         @php
                             $colors = [
-                                'Bank Cessie' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700'],
+                                'Bank Cessie' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-700'],
                                 'AYDA' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-700'],
                                 'Lelang' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-700'],
                             ];
@@ -154,7 +154,7 @@
                 @if($asset->photos && count($asset->photos) > 0)
                     <div class="flex items-center justify-between">
                         <p class="text-gray-900 font-semibold">{{ count($asset->photos) }} Foto</p>
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">Terlengkap</span>
+                        <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">Terlengkap</span>
                     </div>
                 @else
                     <p class="text-gray-600">Tidak ada foto</p>
@@ -229,7 +229,7 @@
                 }
             }
 
-            btnText.textContent = `✓ Selesai!`;
+            btnText.textContent = `Selesai!`;
             setTimeout(() => {
                 btnText.textContent = `Download Semua (${total})`;
             }, 2000);
@@ -267,7 +267,7 @@
             }
 
             function showCopySuccess() {
-                buttonText.textContent = '✓ Tersalin!';
+                buttonText.textContent = 'Tersalin!';
                 setTimeout(() => {
                     buttonText.textContent = originalText;
                 }, 2000);
@@ -294,3 +294,5 @@
         }
     </script>
 @endsection
+
+

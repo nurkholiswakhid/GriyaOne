@@ -16,7 +16,7 @@
     <!-- Success Message -->
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 fade-in">
-            <p class="text-green-800 font-medium">✓ {{ session('success') }}</p>
+            <p class="text-green-800 font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
@@ -133,7 +133,7 @@
                 <!-- Submit Buttons -->
                 <div class="flex gap-4">
                     <button type="submit" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
-                        ✓ Perbarui Video
+                        Perbarui Video
                     </button>
                     <a href="{{ route('contents.show', $content) }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 py-3 rounded-lg font-semibold transition text-center">
                         Batalkan
@@ -234,3 +234,5 @@
         }
     </script>
 @endsection
+
+

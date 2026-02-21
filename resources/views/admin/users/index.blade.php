@@ -27,8 +27,8 @@
                     <p class="text-gray-500 text-sm">Total User</p>
                     <p class="text-3xl font-bold text-gray-900">{{ $stats['total'] }}</p>
                 </div>
-                <div class="bg-blue-100 rounded-full p-3">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-orange-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM12 14a8 8 0 00-8 8v2h16v-2a8 8 0 00-8-8z"></path>
                     </svg>
                 </div>
@@ -39,10 +39,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">User Reguler</p>
-                    <p class="text-3xl font-bold text-blue-600">{{ $stats['users'] }}</p>
+                    <p class="text-3xl font-bold text-orange-600">{{ $stats['users'] }}</p>
                 </div>
-                <div class="bg-blue-100 rounded-full p-3">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-orange-100 rounded-full p-3">
+                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
@@ -111,9 +111,9 @@
 
             <!-- Search Results Info -->
             @if($search || $roleFilter)
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-blue-900">
+                    <p class="text-sm text-orange-900">
                         <strong>{{ $users->total() }}</strong> hasil ditemukan
                         @if($search)
                             untuk pencarian "<strong>{{ $search }}</strong>"
@@ -146,7 +146,7 @@
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 whitespace-nowrap ">
                         <div class="flex items-center">
-                            <div class="w-10 h-10 bg-gradient-to-br {{ $user->role === 'admin' ? 'from-red-400 to-red-600' : ($user->role === 'marketing' ? 'from-orange-400 to-orange-600' : 'from-blue-400 to-blue-600') }} rounded-full flex items-center justify-center text-white font-bold">
+                            <div class="w-10 h-10 bg-gradient-to-br {{ $user->role === 'admin' ? 'from-red-400 to-red-600' : ($user->role === 'marketing' ? 'from-orange-400 to-orange-600' : 'from-orange-400 to-orange-600') }} rounded-full flex items-center justify-center text-white font-bold">
                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                             </div>
                             <div class="ml-4">
@@ -170,7 +170,7 @@
                             Marketing
                         </span>
                         @else
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                             User
                         </span>
                         @endif
@@ -180,7 +180,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
                         <div class="flex justify-center items-center gap-2">
-                            <a href="{{ route('users.show', $user) }}" class="text-blue-600 hover:text-blue-900 transition" title="Lihat detail">
+                            <a href="{{ route('users.show', $user) }}" class="text-orange-600 hover:text-orange-900 transition" title="Lihat detail">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -238,3 +238,5 @@
     </div>
 </div>
 @endsection
+
+

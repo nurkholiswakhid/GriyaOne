@@ -40,7 +40,7 @@
                                 @if($user->role === 'admin')
                                     bg-purple-100 text-purple-700
                                 @elseif($user->role === 'marketing')
-                                    bg-blue-100 text-blue-700
+                                    bg-orange-100 text-orange-700
                                 @else
                                     bg-gray-100 text-gray-700
                                 @endif
@@ -209,12 +209,12 @@
                             </div>
 
                             <!-- Info Box -->
-                            <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                            <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg">
                                 <div class="flex gap-3">
-                                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                    <div class="text-sm text-blue-700">
+                                    <div class="text-sm text-orange-700">
                                         <p class="font-semibold">Tips Keamanan Password</p>
                                         <ul class="list-disc list-inside mt-2 text-xs space-y-1">
                                             <li>Gunakan kombinasi huruf besar, kecil, angka, dan simbol</li>
@@ -263,3 +263,5 @@
     }
 </script>
 @endsection
+
+

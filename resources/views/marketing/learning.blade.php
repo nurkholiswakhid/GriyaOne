@@ -17,13 +17,13 @@
                 <!-- Search Input -->
                 <div>
                     <label for="search" class="block text-sm font-semibold text-gray-700 mb-2">Cari Video</label>
-                    <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Cari judul atau deskripsi..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition bg-gray-50 focus:bg-white">
+                    <input type="text" id="search" name="search" value="{{ request('search') }}" placeholder="Cari judul atau deskripsi..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 transition bg-gray-50 focus:bg-white">
                 </div>
 
                 <!-- Sort -->
                 <div>
                     <label for="sort" class="block text-sm font-semibold text-gray-700 mb-2">Urutkan</label>
-                    <select id="sort" name="sort" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition bg-gray-50 focus:bg-white">
+                    <select id="sort" name="sort" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/20 transition bg-gray-50 focus:bg-white">
                         <option value="latest" {{ request('sort', 'latest') == 'latest' ? 'selected' : '' }}>Terbaru</option>
                         <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Terlama</option>
                         <option value="title_asc" {{ request('sort') == 'title_asc' ? 'selected' : '' }}>Judul (A-Z)</option>
@@ -33,7 +33,7 @@
             </div>
 
             <div class="flex gap-3">
-                <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
+                <button type="submit" class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition">
                     Cari
                 </button>
                 <a href="{{ route('marketing.learning') }}" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition">
@@ -204,3 +204,5 @@
     });
 </script>
 @endsection
+
+

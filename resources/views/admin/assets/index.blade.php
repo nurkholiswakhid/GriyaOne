@@ -18,7 +18,7 @@
     <!-- Success Message -->
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 fade-in">
-            <p class="text-green-800 font-medium">✓ {{ session('success') }}</p>
+            <p class="text-green-800 font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
@@ -66,7 +66,7 @@
                                 <td class="px-6 py-4 text-sm">
                                     @php
                                         $colors = [
-                                            'Bank Cessie' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700'],
+                                            'Bank Cessie' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-700'],
                                             'AYDA' => ['bg' => 'bg-purple-100', 'text' => 'text-purple-700'],
                                             'Lelang' => ['bg' => 'bg-orange-100', 'text' => 'text-orange-700'],
                                         ];
@@ -98,7 +98,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex justify-center gap-2">
-                                        <a href="{{ route('assets.show', $asset) }}" class="text-blue-600 hover:text-blue-700 font-medium text-xs transition">Lihat</a>
+                                        <a href="{{ route('assets.show', $asset) }}" class="text-orange-600 hover:text-orange-700 font-medium text-xs transition">Lihat</a>
                                         <a href="{{ route('assets.edit', $asset) }}" class="text-yellow-600 hover:text-yellow-700 font-medium text-xs transition">Ubah</a>
                                         <form action="{{ route('assets.destroy', $asset) }}" method="POST" style="display:inline;" data-confirm="Yakin ingin menghapus aset ini? Tindakan ini tidak dapat dibatalkan.">
                                             @csrf
@@ -132,7 +132,7 @@
     <!-- Stats Cards -->
     <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6 fade-in">
         <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white">
+            <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 text-white">
                 <h3 class="text-sm font-semibold mb-2 opacity-90">Bank Cessie</h3>
                 <p class="text-3xl font-bold">{{ \App\Models\Asset::where('category', 'Bank Cessie')->count() }}</p>
             </div>
@@ -157,3 +157,5 @@
         </div>
     </div>
 @endsection
+
+

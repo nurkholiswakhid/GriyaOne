@@ -18,7 +18,7 @@
     <!-- Success Message -->
     @if(session('success'))
         <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 fade-in">
-            <p class="text-green-800 font-medium">✓ {{ session('success') }}</p>
+            <p class="text-green-800 font-medium">{{ session('success') }}</p>
         </div>
     @endif
 
@@ -139,7 +139,7 @@
 
                         <!-- Actions -->
                         <div class="flex gap-2">
-                            <a href="{{ route('contents.show', $content) }}" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-xs font-medium transition text-center">Lihat</a>
+                            <a href="{{ route('contents.show', $content) }}" class="flex-1 bg-orange-50 hover:bg-orange-100 text-orange-700 px-3 py-2 rounded-lg text-xs font-medium transition text-center">Lihat</a>
                             <a href="{{ route('contents.edit', $content) }}" class="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 px-3 py-2 rounded-lg text-xs font-medium transition text-center">Ubah</a>
                             <form action="{{ route('contents.destroy', $content) }}" method="POST" style="flex:1" data-confirm="Yakin ingin menghapus video ini? Tindakan ini tidak dapat dibatalkan.">
                                 @csrf
@@ -169,3 +169,5 @@
         </div>
     @endif
 @endsection
+
+

@@ -6,14 +6,14 @@
 @section('content')
             <!-- Header -->
             <div class="mb-8 fade-in">
-                <h2 class="text-3xl font-bold text-gray-900 mb-1">Selamat datang, {{ Auth::user()->name }}!</h2>
+                <h2 class="text-3xl font-bold text-gray-900 mb-1">Selamat datang, {{ Auth::user()?->name ?? 'User' }}!</h2>
                 <p class="text-gray-600">Dashboard marketing untuk monitoring penjualan dan strategi pemasaran aset</p>
             </div>
 
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 fade-in">
                 <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
-                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white">
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 text-white">
                         <h3 class="text-lg font-semibold mb-2">Total Listing</h3>
                         <p class="text-3xl font-bold">{{ $totalListings }}</p>
                         <p class="text-sm mt-2 opacity-90">Aset yang terdaftar</p>
@@ -90,13 +90,13 @@
                         @foreach($listingsByCategory as $category)
                         <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                             <div class="flex items-center gap-3 flex-1">
-                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-semibold">
                                     {{ substr($category->category, 0, 1) }}
                                 </div>
                                 <span class="font-semibold text-gray-900">{{ $category->category }}</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <span class="text-2xl font-bold text-blue-600">{{ $category->count }}</span>
+                                <span class="text-2xl font-bold text-orange-600">{{ $category->count }}</span>
                                 <span class="text-sm text-gray-500">listing</span>
                             </div>
                         </div>
@@ -115,10 +115,10 @@
                     @else
                     <div class="space-y-3">
                         @foreach($recentListings as $listing)
-                        <div class="p-4 border border-gray-200 rounded-lg hover:border-blue-400 transition group">
+                        <div class="p-4 border border-gray-200 rounded-lg hover:border-orange-400 transition group">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex-1">
-                                    <h5 class="font-semibold text-gray-900 group-hover:text-blue-600 transition">{{ $listing->title }}</h5>
+                                    <h5 class="font-semibold text-gray-900 group-hover:text-orange-600 transition">{{ $listing->title }}</h5>
                                     <p class="text-sm text-gray-600 mt-1">{!! Str::limit(strip_tags($listing->description), 60) !!}</p>
                                     <div class="flex items-center gap-3 mt-2">
                                         <span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">{{ $listing->category }}</span>
@@ -243,3 +243,5 @@
     });
 </script>
 @endsection
+
+

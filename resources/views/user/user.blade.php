@@ -66,7 +66,7 @@
 
             <!-- Info Section -->
             <div class="fade-in">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">📋 Info Akun Anda</h3>
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Info Akun Anda</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl p-6 shadow-md">
@@ -96,14 +96,16 @@
                             </div>
                             <div>
                                 <p class="text-gray-600 text-sm">Status</p>
-                                <p class="text-green-600 font-medium">✓ Aktif</p>
+                                <p class="text-green-600 font-medium">Aktif</p>
                             </div>
                             <div>
                                 <p class="text-gray-600 text-sm">Verifikasi Email</p>
-                                <p class="text-blue-600 font-medium">✓ Terverifikasi</p>
+                                <p class="text-orange-600 font-medium">Terverifikasi</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 @endsection
+
+

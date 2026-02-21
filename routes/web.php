@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AssetController;
+use App\Http\Controllers\UserAssetController;
 use App\Http\Controllers\VideoMediaPembelajaranController;
 use App\Http\Controllers\MateriBelajarController;
 use App\Http\Controllers\MaterialCategoryController;
@@ -57,11 +58,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/api/notifications', [NotificationController::class, 'getDashboardNotifications'])->name('api.notifications');
 
     // Profile Routes
+    Route::get('/profile-detail', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    // User Routes (All Authenticated Users)
-    Route::get('materials', [MateriBelajarController::class, 'userMaterials'])->name('user.materials');
+    // User Asset Routes (All Authenticated Users)
+    Route::get('listing-aset', [UserAssetController::class, 'listing'])->name('user.assets.listing');
+    Route::get('listing-aset/{asset}/download', [UserAssetController::class, 'downloadPhotos'])->name('user.assets.download-photos');
+    Route::get('listing-aset/{asset}/download/{photoIndex}', [UserAssetController::class, 'downloadSinglePhoto'])->name('user.assets.download-single');
+    Route::get('api/aset/{asset}/broadcast', [UserAssetController::class, 'getBroadcastText'])->name('user.assets.broadcast-api');
 
     // Marketing Routes (Marketing Only)
     Route::middleware('role:marketing')->group(function () {

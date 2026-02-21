@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\Storage;
 class ProfileController extends Controller
 {
     /**
+     * Show the user profile detail
+     */
+    public function show()
+    {
+        $user = Auth::user();
+        return view('user.profile.show', compact('user'));
+    }
+
+    /**
      * Show the profile edit form
      */
     public function edit()
@@ -19,6 +28,8 @@ class ProfileController extends Controller
         // Return appropriate view based on user role
         if ($user->role === 'marketing') {
             return view('marketing.pengaturan.edit', compact('user'));
+        } elseif ($user->role === 'user') {
+            return view('user.profile.edit', compact('user'));
         }
 
         return view('admin.pengaturan.edit', compact('user'));
