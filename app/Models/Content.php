@@ -68,4 +68,29 @@ class Content extends Model
 
         return "https://www.youtube.com/watch?v={$id}";
     }
+
+    /**
+     * Get the YouTube thumbnail URL.
+     * Fallback thumbnail quality: maxresdefault -> sddefault -> hqdefault -> mqdefault -> default
+     */
+    public function getYoutubeThumbnailUrl()
+    {
+        $id = $this->getYoutubeId();
+        if (!$id) return null;
+
+        return "https://img.youtube.com/vi/{$id}/maxresdefault.jpg";
+    }
+
+    /**
+     * Get the best available thumbnail.
+     * Returns uploaded thumbnail if available, otherwise YouTube thumbnail.
+     */
+    public function getThumbnailUrl()
+    {
+        if ($this->thumbnail) {
+            return asset('storage/' . $this->thumbnail);
+        }
+
+        return $this->getYoutubeThumbnailUrl();
+    }
 }

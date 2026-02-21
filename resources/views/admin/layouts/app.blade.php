@@ -124,7 +124,7 @@
                         </svg>
                         <span>Materi PDF</span>
                     </div>
-                    <span class="bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full group-hover:bg-red-200 transition-colors duration-200">{{ \App\Models\Content::count() }}</span>
+                    <span class="bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full group-hover:bg-red-200 transition-colors duration-200">{{ \App\Models\Material::count() }}</span>
                 </a>
 
                 <a href="{{ route('informasi.index') }}" class="group relative flex items-center justify-between px-4 py-3 text-gray-700 hover:text-red-600 hover:bg-red-50 font-medium text-sm transition-colors duration-200 rounded-lg">

@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function () {
 
         // Informasi Management Routes
         Route::resource('informasi', InformasiController::class);
+        Route::post('informasi-categories', [InformasiController::class, 'storeCategory'])->name('informasi.storeCategory');
+        Route::delete('informasi-categories/{id}', [InformasiController::class, 'destroyCategory'])->name('informasi.destroyCategory');
 
         // Content Management Routes
         Route::resource('manage-video', VideoMediaPembelajaranController::class)->parameters(['manage-video' => 'content'])->names('contents');

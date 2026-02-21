@@ -45,21 +45,95 @@ class MarketingController extends Controller
     }
 
     /**
-     * Display learning materials.
+     * Display learning materials (Video YouTube).
      */
-    public function learning()
+    public function learning(Request $request)
     {
-        return view('marketing.learning');
+        $query = Content::where('is_published', true);
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Sort
+        $sort = $request->input('sort', 'latest');
+        switch ($sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'title_asc':
+                $query->orderBy('title', 'asc');
+                break;
+            case 'title_desc':
+                $query->orderBy('title', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+        }
+
+        $materials = $query->paginate(9);
+
+        $stats = [
+            'total' => Content::where('is_published', true)->count(),
+            'total_all' => Content::count(),
+        ];
+
+        return view('marketing.learning', compact('materials', 'stats'));
     }
 
     /**
      * Display materi (PDF materials).
      */
-    public function materi()
+    public function materi(Request $request)
     {
-        $materials = Material::where('is_published', true)->latest()->paginate(12);
+        $query = Material::where('is_published', true);
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->input('category'));
+        }
+
+        // Sort
+        $sort = $request->input('sort', 'latest');
+        switch ($sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'title_asc':
+                $query->orderBy('title', 'asc');
+                break;
+            case 'title_desc':
+                $query->orderBy('title', 'desc');
+                break;
+            case 'latest':
+            default:
+                $query->latest();
+        }
+
+        $materials = $query->paginate(9);
         $categories = MaterialCategory::orderBy('order')->get();
-        return view('marketing.materi', compact('materials', 'categories'));
+
+        $stats = [
+            'total' => Material::where('is_published', true)->count(),
+            'total_categories' => MaterialCategory::count(),
+        ];
+
+        return view('marketing.materi', compact('materials', 'categories', 'stats'));
     }
 
     /**

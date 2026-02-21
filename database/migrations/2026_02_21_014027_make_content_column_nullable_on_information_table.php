@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropIfExists('materials');
+        Schema::table('information', function (Blueprint $table) {
+            $table->text('content')->nullable()->change();
+        });
     }
 
     /**
@@ -19,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // No need to recreate since we don't know the original schema
+        Schema::table('information', function (Blueprint $table) {
+            $table->text('content')->nullable(false)->change();
+        });
     }
 };

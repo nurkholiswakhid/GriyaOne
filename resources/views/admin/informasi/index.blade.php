@@ -29,17 +29,16 @@
         </div>
         <select name="category" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">
             <option value="">Semua Kategori</option>
-            <option value="General" {{ request('category') == 'General' ? 'selected' : '' }}>General</option>
-            <option value="Update" {{ request('category') == 'Update' ? 'selected' : '' }}>Update</option>
-            <option value="Pengumuman" {{ request('category') == 'Pengumuman' ? 'selected' : '' }}>Pengumuman</option>
-            <option value="Event" {{ request('category') == 'Event' ? 'selected' : '' }}>Event</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+            @endforeach
         </select>
         <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">
             <option value="">Semua Status</option>
             <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
             <option value="archived" {{ request('status') == 'archived' ? 'selected' : '' }}>Arsip</option>
         </select>
-        <input type="date" name="date_from" value="{{ request('date_from') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">
+        <input type="date" name="date_from" value="{{ request('date_from') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">-
         <input type="date" name="date_to" value="{{ request('date_to') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">
         <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium text-sm transition">Cari</button>
         @if(request('search') || request('category') || request('status') || request('date_from') || request('date_to'))
@@ -54,6 +53,7 @@
                 <table class="w-full">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
                         <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Foto</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Judul</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Kategori</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Tanggal Publikasi</th>
@@ -65,12 +65,23 @@
                         @foreach($informations as $info)
                             <tr class="hover:bg-gray-50 transition-colors duration-200">
                                 <td class="px-6 py-4">
+                                    @if($info->photo)
+                                        <img src="{{ asset('storage/' . $info->photo) }}" alt="{{ $info->title }}" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+                                    @else
+                                        <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4">
                                     <p class="font-medium text-gray-900">{{ Str::limit($info->title, 50) }}</p>
                                     <p class="text-xs text-gray-500 mt-1">{{ Str::limit(strip_tags($info->content), 80) }}</p>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">
-                                        {{ $info->category }}
+                                        {{ $info->category->name ?? 'Umum' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">

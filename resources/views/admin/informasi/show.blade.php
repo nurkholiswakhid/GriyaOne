@@ -36,7 +36,7 @@
             <div>
                 <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Kategori</p>
                 <span class="inline-block mt-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                    {{ $informasi->category }}
+                    {{ $informasi->category->name ?? 'Umum' }}
                 </span>
             </div>
             <div>
@@ -55,6 +55,14 @@
             </div>
         </div>
 
+        <!-- Photo -->
+        @if($informasi->photo)
+            <div class="mb-8">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Foto Informasi</h3>
+                <img src="{{ asset('storage/' . $informasi->photo) }}" alt="{{ $informasi->title }}" class="w-full h-auto max-h-96 object-cover rounded-lg border border-gray-300">
+            </div>
+        @endif
+
         <!-- Content -->
         <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed">
             {!! nl2br(e($informasi->content)) !!}
@@ -65,7 +73,7 @@
             <a href="{{ route('informasi.index') }}" class="flex-1 text-center px-6 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
                 Kembali ke Daftar
             </a>
-        
+
         </div>
     </div>
 @endsection

@@ -68,7 +68,7 @@ class DashboardController extends Controller
         $totalContent = Content::count();
         $publishedContent = Content::where('is_published', true)->count();
         $draftContent = Content::where('is_published', false)->count();
-        $totalContentViews = Content::sum('views');
+        $totalContentViews = 0; // Kolom 'views' sudah dihapus dari tabel contents
 
         // Statistik Notifikasi
         $unreadNotifications = Notification::where('is_read', false)->count();
