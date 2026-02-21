@@ -193,21 +193,21 @@
 <script>
     function switchTab(event, tabName) {
         event.preventDefault();
-        
+
         // Hide all tab contents
         document.querySelectorAll('.tab-content').forEach(el => {
             el.classList.add('hidden');
         });
-        
+
         // Remove active class from all tabs
         document.querySelectorAll('.tab-btn').forEach(el => {
             el.classList.remove('active', 'border-b-2', 'border-orange-600', 'text-orange-600');
             el.classList.add('text-gray-600');
         });
-        
+
         // Show selected tab
         document.getElementById(tabName + '-form').classList.remove('hidden');
-        
+
         // Add active class to clicked tab
         event.target.classList.add('active', 'border-b-2', 'border-orange-600', 'text-orange-600');
         event.target.classList.remove('text-gray-600');
@@ -216,12 +216,12 @@
     function previewProfilePhoto(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            
+
             reader.onload = (e) => {
                 const preview = document.getElementById('previewPhoto');
                 preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
             };
-            
+
             reader.readAsDataURL(input.files[0]);
         }
     }
@@ -232,19 +232,19 @@
         border-bottom: 2px solid transparent;
         transition: all 0.3s ease;
     }
-    
+
     .tab-btn.active {
         border-bottom-color: currentColor;
     }
-    
+
     .tab-content {
         animation: fadeIn 0.3s ease-out;
     }
-    
+
     .tab-content.hidden {
         display: none;
     }
-    
+
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
