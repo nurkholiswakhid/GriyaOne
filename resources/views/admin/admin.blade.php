@@ -92,72 +92,30 @@
 
             <!-- Info Section -->
             <div class="fade-in">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">📋 Ringkasan Sistem</h3>
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Ringkasan Sistem</h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <!-- Admin Account Info -->
-                    <div class="bg-white rounded-xl p-6 shadow-md">
-                        <h4 class="font-bold text-gray-900 mb-4">👤 Data Admin</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <p class="text-gray-600 text-sm">Nama</p>
-                                <p class="text-gray-900 font-medium">{{ Auth::user()->name }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Email</p>
-                                <p class="text-gray-900 font-medium">{{ Auth::user()->email }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Role</p>
-                                <p class="text-gray-900 font-medium">Administrator</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Bergabung</p>
-                                <p class="text-gray-900 font-medium">{{ Auth::user()->created_at->format('d M Y') }}</p>
-                            </div>
+                <!-- Admin Account Info -->
+                <div class="bg-white rounded-xl p-6 shadow-md ">
+                    <h4 class="font-bold text-gray-900 mb-4">Data Admin</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-gray-600 text-sm">Nama</p>
+                            <p class="text-gray-900 font-medium">{{ Auth::user()->name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-sm">Email</p>
+                            <p class="text-gray-900 font-medium">{{ Auth::user()->email }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-sm">Role</p>
+                            <p class="text-gray-900 font-medium">Administrator</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600 text-sm">Bergabung</p>
+                            <p class="text-gray-900 font-medium">{{ Auth::user()->created_at->format('d M Y') }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Category Distribution and Status -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Asset by Category -->
-                    <div class="bg-white rounded-xl p-6 shadow-md">
-                        <h4 class="font-bold text-gray-900 mb-4">📊 Properti per Kategori</h4>
-                        <div class="space-y-2">
-                            @forelse($assetsByCategory as $asset)
-                            <div class="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
-                                <span class="text-gray-600">{{ $asset->category ?? 'Tidak Dikategorikan' }}</span>
-                                <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">{{ $asset->count }} properti</span>
-                            </div>
-                            @empty
-                            <p class="text-gray-600 text-sm">Belum ada data kategori</p>
-                            @endforelse
-                        </div>
-                    </div>
 
-                    <!-- System Status -->
-                    <div class="bg-white rounded-xl p-6 shadow-md">
-                        <h4 class="font-bold text-gray-900 mb-4">⚙️ Status Sistem</h4>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-gray-600">Total Users</span>
-                                <span class="text-gray-900 font-semibold">{{ $totalUsers }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2 border-y border-gray-200">
-                                <span class="text-gray-600">Unread Notifications</span>
-                                <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">{{ $unreadNotifications }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-gray-600">Hak Akses</span>
-                                <p class="text-green-600 font-semibold">✓ Full Access</p>
-                            </div>
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-gray-600">Status System</span>
-                                <p class="text-green-600 font-semibold">✓ Normal</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 @endsection
