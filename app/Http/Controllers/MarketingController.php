@@ -141,7 +141,9 @@ class MarketingController extends Controller
      */
     public function informasi()
     {
-        $informations = Information::latest()->paginate(12);
+        $informations = Information::where('status', 'active')
+                                    ->latest('published_date')
+                                    ->paginate(12);
         return view('marketing.informasi', compact('informations'));
     }
 

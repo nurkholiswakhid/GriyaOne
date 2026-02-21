@@ -13,49 +13,38 @@ class AssetSeeder extends Seeder
      */
     public function run(): void
     {
-        Asset::create([
-            'title' => 'Rumah Mewah di Jakarta Selatan',
-            'description' => '<h2>Deskripsi Properti</h2><p>Rumah mewah berlokasi di area premium Jakarta Selatan dengan akses mudah ke pusat bisnis dan fasilitas umum.</p><p><strong>Fitur Utama:</strong></p><ul><li>Luas bangunan: 500 m²</li><li>Luas tanah: 800 m²</li><li>4 kamar tidur + 3 kamar mandi</li><li>Garasi mobil 2 unit</li><li>Halaman luas dengan kolam renang</li><li>Sistem keamanan 24 jam</li></ul><p>Dibangun dengan arsitektur modern dan dilengkapi dengan semua amenities lengkap.</p>',
-            'category' => 'Bank Cessie',
-            'status' => 'Available',
-            'location' => 'Jakarta Selatan, DKI Jakarta',
-            'photos' => [],
-        ]);
+        $assets = [
+            // Bank Cessie - 5 properti
+            ['title' => 'Rumah Mewah di Jakarta Selatan', 'category' => 'Bank Cessie', 'status' => 'Available', 'location' => 'Jakarta Selatan, DKI Jakarta'],
+            ['title' => 'Rumah Cluster di Kawasan Berkembang', 'category' => 'Bank Cessie', 'status' => 'Sold Out', 'location' => 'Depok, Jawa Barat'],
+            ['title' => 'Rumah Tropis Modern Bogor', 'category' => 'Bank Cessie', 'status' => 'Available', 'location' => 'Bogor, Jawa Barat'],
+            ['title' => 'Villa Mewah di Sentul', 'category' => 'Bank Cessie', 'status' => 'Available', 'location' => 'Sentul, Bogor'],
+            ['title' => 'Rumah Minimalis di Tangerang', 'category' => 'Bank Cessie', 'status' => 'Available', 'location' => 'Tangerang Selatan, Banten'],
 
-        Asset::create([
-            'title' => 'Apartemen Modern di Pusat Kota',
-            'description' => '<h2>Apartemen Strategis</h2><p>Apartemen strategis dengan view kota yang menakjubkan.</p><p><strong>Spesifikasi:</strong></p><ul><li>Tipe: Studio & 2 Bedroom</li><li>Lantai: 15 - 28</li><li>View: Kota, Taman Kota</li><li>Fasilitas gym, kolam renang, taman bermain</li><li>Security 24 jam dengan CCTV</li></ul><p>Lokasi dekat dengan stasiun MRT, mall, dan pusat perbelanjaan. Unit dilengkapi dengan fasilitas premium dan fully furnished.</p>',
-            'category' => 'AYDA',
-            'status' => 'Available',
-            'location' => 'Jakarta Pusat, DKI Jakarta',
-            'photos' => [],
-        ]);
+            // AYDA - 5 properti
+            ['title' => 'Apartemen Modern di Pusat Kota', 'category' => 'AYDA', 'status' => 'Available', 'location' => 'Jakarta Pusat, DKI Jakarta'],
+            ['title' => 'Ruang Perkantoran di Gedung Komersial', 'category' => 'AYDA', 'status' => 'Available', 'location' => 'Jakarta Barat, DKI Jakarta'],
+            ['title' => 'Apartemen High-Rise di Senayan', 'category' => 'AYDA', 'status' => 'Available', 'location' => 'Jakarta Selatan, DKI Jakarta'],
+            ['title' => 'Ruko Komersial 3 Lantai', 'category' => 'AYDA', 'status' => 'Sold Out', 'location' => 'Kelapa Gading, Jakarta Utara'],
+            ['title' => 'Apartemen Grand Indonesia', 'category' => 'AYDA', 'status' => 'Available', 'location' => 'Jakarta Pusat, DKI Jakarta'],
 
-        Asset::create([
-            'title' => 'Tanah Komersial Lokasi Strategis',
-            'description' => '<h2>Lahan Komersial Premium</h2><p>Tanah komersial dengan lokasi yang sangat strategis untuk bisnis retail, kantor, atau pengembangan properti.</p><p><strong>Informasi Tanah:</strong></p><ul><li>Luas: 5000 m²</li><li>Legalitas: SHM (Sertifikat Hak Milik)</li><li>Akses jalan: Jalan utama</li><li>Zoning: Komersial</li><li>Infrastruktur lengkap</li></ul><p>Area dengan lalu lintas tinggi dan visibility sempurna untuk bisnis Anda.</p>',
-            'category' => 'Lelang',
-            'status' => 'Available',
-            'location' => 'Bandung, Jawa Barat',
-            'photos' => [],
-        ]);
+            // Lelang - 5 properti
+            ['title' => 'Tanah Komersial Lokasi Strategis', 'category' => 'Lelang', 'status' => 'Available', 'location' => 'Bandung, Jawa Barat'],
+            ['title' => 'Tanah Kavling Surabaya', 'category' => 'Lelang', 'status' => 'Available', 'location' => 'Surabaya, Jawa Timur'],
+            ['title' => 'Lahan Industri Bekasi', 'category' => 'Lelang', 'status' => 'Available', 'location' => 'Bekasi, Jawa Barat'],
+            ['title' => 'Perkebunan Holtikultura Cianjur', 'category' => 'Lelang', 'status' => 'Sold Out', 'location' => 'Cianjur, Jawa Barat'],
+            ['title' => 'Tanah Pertanian Premium Karawang', 'category' => 'Lelang', 'status' => 'Available', 'location' => 'Karawang, Jawa Barat'],
+        ];
 
-        Asset::create([
-            'title' => 'Rumah Cluster di Kawasan Berkembang',
-            'description' => '<h2>Rumah Cluster Modern</h2><p>Rumah cluster dengan desain minimalis modern di kawasan yang terus berkembang.</p><p><strong>Fasilitas Lengkap:</strong></p><ul><li>Keamanan 24 jam dengan gate system</li><li>Taman bermain anak</li><li>Jogging track</li><li>Area komersial (mini market, warung kopi)</li><li>Mushola</li><li>Tempat parkir tamu</li></ul><p>Lokasi strategis dengan akses mudah ke sekolah, rumah sakit, dan pusat perbelanjaan.</p>',
-            'category' => 'Bank Cessie',
-            'status' => 'Sold Out',
-            'location' => 'Depok, Jawa Barat',
-            'photos' => [],
-        ]);
-
-        Asset::create([
-            'title' => 'Ruang Perkantoran di Gedung Komersial',
-            'description' => '<h2>Office Space Premium</h2><p>Office space di gedung komersial kelas A dengan fasilitas modern dan infrastruktur terbaik.</p><p><strong>Fasilitas Perkantoran:</strong></p><ul><li>Luas unit: 100 - 1000 m²</li><li>Lantai berlangganan</li><li>Parking ratio 1:4</li><li>High speed internet</li><li>Meeting room</li><li>Reception area</li><li>Cafeteria & restaurant</li></ul><p>Lokasi di jantung CBD Jakarta dengan akses mudah ke berbagai transportasi umum.</p>',
-            'category' => 'AYDA',
-            'status' => 'Available',
-            'location' => 'Jakarta Barat, DKI Jakarta',
-            'photos' => [],
-        ]);
+        foreach ($assets as $asset) {
+            Asset::create([
+                'title' => $asset['title'],
+                'description' => '<h2>' . $asset['title'] . '</h2><p>Properti berkualitas tinggi di lokasi strategis. Lihat detail lengkap dan hubungi agen kami untuk informasi lebih lanjut.</p>',
+                'category' => $asset['category'],
+                'status' => $asset['status'],
+                'location' => $asset['location'],
+                'photos' => [],
+            ]);
+        }
     }
 }

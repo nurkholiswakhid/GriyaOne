@@ -89,8 +89,8 @@
                                     <p class="text-xs text-gray-400">{{ $info->published_date->format('H:i') }}</p>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold {{ $info->getStatusBadgeColor() === 'green' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                        {{ ucfirst($info->status) }}
+                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold {{ $info->getStatusBadgeClass() }}">
+                                        {{ $info->getStatusLabel() }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">

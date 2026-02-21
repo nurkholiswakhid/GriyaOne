@@ -50,19 +50,25 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     @foreach($informations as $info)
                     <div class="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition">
-                        <div class="bg-gray-100 h-32 flex items-center justify-center border-b border-gray-200">
-                            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
+                        <div class="bg-gray-100 h-32 flex items-center justify-center border-b border-gray-200 overflow-hidden">
+                            @if($info->photo)
+                                <img src="{{ asset('storage/' . $info->photo) }}" alt="{{ $info->title }}" class="w-full h-full object-cover">
+                            @else
+                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            @endif
                         </div>
                         <div class="p-4">
                             <div class="flex items-center gap-2 mb-2">
-                                <span class="inline-block px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs font-semibold">{{ $info->category }}</span>
+                                <span class="inline-block px-2 py-1 bg-gray-200 text-gray-700 rounded text-xs font-semibold">
+                                    {{ is_object($info->category) ? $info->category->name : $info->category }}
+                                </span>
                                 <span class="text-xs text-gray-500">{{ $info->published_date?->format('d M Y') ?? $info->created_at->format('d M Y') }}</span>
                             </div>
                             <h4 class="text-base font-semibold text-gray-900 mb-2">{{ $info->title }}</h4>
                             <p class="text-sm text-gray-600 mb-3 line-clamp-2">{!! Str::limit(strip_tags($info->content), 100) !!}</p>
-                            <a href="{{ route('marketing.informasi') }}" class="text-sm text-gray-700 hover:text-gray-900 font-semibold">Baca Selengkapnya →</a>
+                            <button onclick="openInformasiModal({{ json_encode($info) }})" class="text-sm text-gray-700 hover:text-gray-900 font-semibold cursor-pointer">Baca Selengkapnya →</button>
                         </div>
                     </div>
                     @endforeach
@@ -126,4 +132,114 @@
                     @endif
                 </div>
             </div>
+
+<!-- Informasi Modal -->
+<div id="informasiModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <!-- Header: Sticky dengan close button -->
+        <div class="sticky top-0 bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-5 flex items-center justify-between border-b border-orange-500">
+            <h3 class="text-2xl font-bold text-white" id="modalTitle">Informasi Terbaru</h3>
+            <button onclick="closeInformasiModal()" class="flex-shrink-0 text-white hover:text-orange-100 transition duration-200 p-1">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body: Square image & content -->
+        <div class="p-6 space-y-5">
+            <!-- Foto: Square aspect ratio -->
+            <div id="modalPhotoContainer" class="rounded-lg overflow-hidden border border-gray-300 shadow-sm">
+                <img id="modalPhoto" src="" alt="Foto" class="w-full aspect-square object-cover">
+            </div>
+
+            <!-- Judul di dalam modal -->
+            <h4 class="text-xl font-bold text-gray-900" id="modalTitle2">-</h4>
+
+            <!-- Metadata: Kategori & Tanggal -->
+            <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-block px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold" id="modalCategory">-</span>
+                <span class="text-sm text-gray-500" id="modalDate">-</span>
+            </div>
+
+            <!-- Divider -->
+            <div class="border-t border-gray-200"></div>
+
+            <!-- Konten: Teks dengan formatting -->
+            <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap" id="modalContent">-</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * Buka modal informasi dengan data lengkap
+     */
+    function openInformasiModal(info) {
+        const modal = document.getElementById('informasiModal');
+
+        // Set title di header
+        document.getElementById('modalTitle').textContent = info.title || 'Informasi Terbaru';
+
+        // Set title di dalam modal body
+        document.getElementById('modalTitle2').textContent = info.title || 'Informasi Terbaru';
+
+        // Set foto dengan fallback
+        const photoImg = document.getElementById('modalPhoto');
+        if (info.photo) {
+            photoImg.src = '/storage/' + info.photo;
+            photoImg.style.display = 'block';
+        } else {
+            photoImg.style.display = 'none';
+        }
+
+        // Set kategori - handle string atau object
+        const categoryName = typeof info.category === 'object'
+            ? (info.category.name || '-')
+            : info.category;
+        document.getElementById('modalCategory').textContent = categoryName;
+
+        // Set tanggal publikasi
+        const publishDate = info.published_date
+            ? new Date(info.published_date).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })
+            : '-';
+        document.getElementById('modalDate').textContent = publishDate;
+
+        // Set konten
+        document.getElementById('modalContent').textContent = info.content || 'Tidak ada konten';
+
+        // Tampilkan modal
+        modal.classList.remove('hidden');
+    }
+
+    /**
+     * Tutup modal informasi
+     */
+    function closeInformasiModal() {
+        document.getElementById('informasiModal').classList.add('hidden');
+    }
+
+    /**
+     * Event listeners untuk interaksi modal
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tutup modal saat click di luar (backdrop)
+        document.getElementById('informasiModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeInformasiModal();
+            }
+        });
+    });
+
+    // Tutup modal dengan tombol Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeInformasiModal();
+        }
+    });
+</script>
 @endsection

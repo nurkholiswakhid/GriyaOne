@@ -30,4 +30,18 @@ class Information extends Model
     {
         return $this->status === 'active' ? 'green' : 'gray';
     }
+
+    public function getStatusBadgeClass()
+    {
+        if ($this->status === 'active') {
+            return 'bg-green-100 text-green-800';
+        } else {
+            return 'bg-gray-100 text-gray-800';
+        }
+    }
+
+    public function getStatusLabel()
+    {
+        return $this->status === 'active' ? 'Aktif' : 'Arsip';
+    }
 }

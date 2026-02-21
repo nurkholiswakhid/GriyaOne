@@ -32,10 +32,8 @@ class InformasiController extends Controller
         // Filter by status
         if ($status = $request->input('status')) {
             $query->where('status', $status);
-        } else {
-            // Default: Only show active information if no status filter is applied
-            $query->where('status', 'active');
         }
+        // If no status filter, show ALL statuses (active and archived)
 
         // Filter by date range
         if ($dateFrom = $request->input('date_from')) {

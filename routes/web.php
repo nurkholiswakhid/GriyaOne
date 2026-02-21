@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
         Route::get('marketing/learning', [MarketingController::class, 'learning'])->name('marketing.learning');
         Route::get('marketing/materi', [MarketingController::class, 'materi'])->name('marketing.materi');
         Route::get('marketing/informasi', [MarketingController::class, 'informasi'])->name('marketing.informasi');
+        Route::get('marketing/pengaturan', [ProfileController::class, 'edit'])->name('marketing.pengaturan');
         Route::get('marketing/notifications', [MarketingController::class, 'notifications'])->name('marketing.notifications');
         Route::post('marketing/notifications/{notification}/read', [MarketingController::class, 'markNotificationAsRead'])->name('marketing.notification-read');
         Route::delete('marketing/notifications/{notification}', [MarketingController::class, 'deleteNotification'])->name('marketing.notification-delete');

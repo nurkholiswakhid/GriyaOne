@@ -28,6 +28,15 @@
     <div class="space-y-6 mb-8">
         @forelse($informations as $info)
         <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+            <div class="bg-gray-100 h-48 flex items-center justify-center border-b border-gray-200 overflow-hidden">
+                @if($info->photo)
+                    <img src="{{ asset('storage/' . $info->photo) }}" alt="{{ $info->title }}" class="w-full h-full object-cover">
+                @else
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                @endif
+            </div>
             <div class="p-6">
                 <!-- Header -->
                 <div class="flex items-start justify-between gap-4 mb-4">
@@ -41,10 +50,9 @@
                                 {{ $info->created_at->format('d M Y') }}
                             </span>
                             @if($info->category)
-                            <span class="inline-block px-2 py-1 bg-orange-100 text-orange-600 text-xs font-semibold rounded">{{ $info->category }}</span>
-                            @endif
-                            @if($info->status)
-                            <span class="inline-block px-2 py-1 {{ $info->status === 'active' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600' }} text-xs font-semibold rounded">{{ ucfirst($info->status) }}</span>
+                            <span class="inline-block px-2 py-1 bg-orange-100 text-orange-600 text-xs font-semibold rounded">
+                                {{ is_object($info->category) ? $info->category->name : $info->category }}
+                            </span>
                             @endif
                         </div>
                     </div>
@@ -89,62 +97,91 @@
 </div>
 
 <!-- Detail Modal -->
-<div id="infoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-    <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-96 overflow-y-auto">
-        <!-- Header -->
+<div id="infoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
+    <div class="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <!-- Header: Orange gradient with close button -->
         <div class="sticky top-0 bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-4 flex items-center justify-between">
             <h3 class="text-xl font-bold text-white" id="modalTitle">Informasi Terbaru</h3>
-            <button onclick="closeInfoModal()" class="text-white hover:text-gray-200 transition">
+            <button onclick="closeInfoModal()" class="text-white hover:text-gray-200 transition duration-200">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
 
-        <!-- Body -->
-        <div class="p-6">
-            <div class="mb-4">
-                <h4 class="text-sm text-gray-500 mb-2">Tanggal Publikasi</h4>
-                <p class="text-gray-700" id="modalPublishDate">-</p>
+        <!-- Body: Photo, metadata, content -->
+        <div class="p-6 space-y-4">
+            <!-- Photo with proper overflow handling -->
+            <div id="modalPhotoContainer" class="rounded-lg overflow-hidden border border-gray-300">
+                <img id="modalPhoto" src="" alt="Foto" class="w-full h-48 object-cover">
             </div>
-            <div class="mb-4">
-                <h4 class="text-sm text-gray-500 mb-2">Kategori</h4>
-                <p class="text-gray-700" id="modalCategory">-</p>
+
+            <!-- Metadata: Category and Date -->
+            <div class="flex items-center gap-3 pb-4 border-b border-gray-200">
+                <span class="inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold" id="modalCategory">-</span>
+                <span class="text-xs text-gray-500" id="modalPublishDate">-</span>
             </div>
-            <div class="mb-4">
-                <h4 class="text-sm text-gray-500 mb-2">Status</h4>
-                <p class="text-gray-700" id="modalStatus">-</p>
-            </div>
-            <div class="border-t border-gray-200 pt-4">
-                <h4 class="text-sm text-gray-500 mb-2">Konten</h4>
-                <div class="prose prose-sm max-w-none text-gray-700" id="modalContent">
-                    -
-                </div>
-            </div>
+
+            <!-- Content: Simplified text display -->
+            <div class="text-gray-700 text-sm leading-relaxed" id="modalContent">-</div>
         </div>
     </div>
 </div>
 
 <script>
+    /**
+     * Open information detail modal with provided data
+     */
     function openInfoModal(info) {
         const modal = document.getElementById('infoModal');
         document.getElementById('modalTitle').textContent = info.title || 'Informasi Terbaru';
-        document.getElementById('modalPublishDate').textContent = info.published_date ? new Date(info.published_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
-        document.getElementById('modalCategory').textContent = info.category || '-';
-        document.getElementById('modalStatus').textContent = info.status ? (info.status === 'active' ? 'Aktif' : 'Tidak Aktif') : '-';
+
+        // Set photo with fallback
+        const photoImg = document.getElementById('modalPhoto');
+        if (info.photo) {
+            photoImg.src = '/storage/' + info.photo;
+            photoImg.style.display = 'block';
+        } else {
+            photoImg.style.display = 'none';
+        }
+
+        // Format and display publish date
+        document.getElementById('modalPublishDate').textContent = info.published_date
+            ? new Date(info.published_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
+            : '-';
+
+        // Handle category - can be string or object
+        let categoryName = '-';
+        if (info.category) {
+            categoryName = typeof info.category === 'object' ? (info.category.name || '-') : info.category;
+        }
+        document.getElementById('modalCategory').textContent = categoryName;
+
+        // Display content
         document.getElementById('modalContent').textContent = info.content || 'Tidak ada konten';
 
+        // Show modal
         modal.classList.remove('hidden');
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) closeInfoModal();
-        });
     }
 
+    /**
+     * Close information detail modal
+     */
     function closeInfoModal() {
         document.getElementById('infoModal').classList.add('hidden');
     }
 
-    // Close with Escape key
+    /**
+     * Event listeners for modal interaction
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+        // Close modal when clicking outside (on backdrop)
+        document.getElementById('infoModal').addEventListener('click', function(e) {
+            if (e.target === this) closeInfoModal();
+        });
+    });
+
+    // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeInfoModal();
     });

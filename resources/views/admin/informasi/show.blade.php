@@ -41,8 +41,8 @@
             </div>
             <div>
                 <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Status</p>
-                <span class="inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold {{ $informasi->getStatusBadgeColor() === 'green' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                    {{ ucfirst($informasi->status) }}
+                <span class="inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold {{ $informasi->getStatusBadgeClass() }}">
+                    {{ $informasi->getStatusLabel() }}
                 </span>
             </div>
             <div>
