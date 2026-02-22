@@ -11,6 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Percayai semua proxy (termasuk ngrok, Cloudflare, load balancer, dll.)
+        // agar Laravel membaca header X-Forwarded-Proto/Host dengan benar
+        // dan menghasilkan URL HTTPS yang tepat.
+        $middleware->trustProxies(at: '*');
+
+        // Redirect authenticated users away from guest-only pages (login, register, etc.)
+        $middleware->redirectUsersTo('/dashboard');
+
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);

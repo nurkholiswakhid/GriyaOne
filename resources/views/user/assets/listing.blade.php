@@ -68,6 +68,17 @@
                 </div>
             </div>
 
+            <!-- Sort -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Urutkan</label>
+                <select name="sort" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-700 transition bg-white">
+                    <option value="newest" {{ request('sort', 'newest') === 'newest' ? 'selected' : '' }}>Terbaru</option>
+                    <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Terlama</option>
+                    <option value="title_asc" {{ request('sort') === 'title_asc' ? 'selected' : '' }}>Judul A–Z</option>
+                    <option value="title_desc" {{ request('sort') === 'title_desc' ? 'selected' : '' }}>Judul Z–A</option>
+                </select>
+            </div>
+
             <!-- Search Button -->
             <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold rounded-lg transition shadow-md hover:shadow-lg">
                 Cari Aset
@@ -87,6 +98,31 @@
             {{ session('error') }}
         </div>
     @endif
+
+    <!-- Tab Filter: Semua / Tersimpan -->
+    @php
+        $savedCount = count($bookmarkedIds ?? []);
+        $isSavedTab = request('saved') === '1';
+    @endphp
+    <div class="flex items-center gap-3 mb-6 fade-in">
+        <a href="{{ route('user.assets.listing', collect(request()->query())->except('saved')->toArray()) }}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm transition-all duration-200 {{ !$isSavedTab ? 'bg-orange-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            Semua Aset
+        </a>
+        <a href="{{ route('user.assets.listing', array_merge(collect(request()->query())->except('saved')->toArray(), ['saved' => '1'])) }}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold shadow-sm transition-all duration-200 {{ $isSavedTab ? 'bg-orange-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50' }}">
+            <svg class="w-4 h-4" fill="{{ $isSavedTab ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+            </svg>
+            Tersimpan
+            @if($savedCount > 0)
+                <span class="{{ $isSavedTab ? 'bg-white text-orange-600' : 'bg-orange-100 text-orange-700' }} text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">{{ $savedCount }}</span>
+            @endif
+        </a>
+    </div>
 
     <!-- Assets Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
@@ -152,6 +188,20 @@
                             <span class="inline-block px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">Terjual</span>
                         @endif
                     </div>
+
+                    <!-- Bookmark Button -->
+                    @php $isBookmarked = in_array($asset->id, $bookmarkedIds ?? []); @endphp
+                    <button
+                        type="button"
+                        onclick="toggleBookmark({{ $asset->id }}, this)"
+                        data-saved="{{ $isBookmarked ? 'true' : 'false' }}"
+                        title="{{ $isBookmarked ? 'Hapus dari simpanan' : 'Simpan aset ini' }}"
+                        class="absolute bottom-3 right-3 z-20 w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-200 {{ $isBookmarked ? 'bg-orange-500 text-white' : 'bg-white/90 text-gray-500 hover:bg-orange-50 hover:text-orange-500' }}"
+                    >
+                        <svg class="w-5 h-5" fill="{{ $isBookmarked ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                        </svg>
+                    </button>
                 </div>
 
                 <!-- Photo Counter Bar -->
@@ -258,8 +308,8 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
 </div>
 
 <!-- Asset Detail Modal -->
-<div id="detailModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 overflow-y-auto">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 overflow-hidden">
+<div id="detailModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-auto my-8 overflow-hidden">
         <!-- Header -->
         <div class="sticky top-0 bg-gradient-to-r from-orange-600 to-orange-700 px-8 py-6 flex items-center justify-between">
             <div class="px-4 py-3">
@@ -711,6 +761,71 @@ function modalCarouselPrev() {
 
 function closeModal() {
     document.getElementById('detailModal').classList.add('hidden');
+}
+
+// Toggle bookmark (simpan/hapus aset)
+async function toggleBookmark(assetId, btn) {
+    const isSaved = btn.dataset.saved === 'true';
+
+    // Optimistic UI — langsung ubah tampilan sebelum response
+    setBookmarkState(btn, !isSaved);
+
+    try {
+        const response = await fetch(`/listing-aset/${assetId}/bookmark`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept':       'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) throw new Error('Server error');
+
+        const data = await response.json();
+        setBookmarkState(btn, data.saved);
+        showToast(data.message, 'success');
+
+        // Update counter badge di tab "Tersimpan"
+        updateBookmarkTabBadge(data.saved);
+    } catch (e) {
+        // Rollback jika gagal
+        setBookmarkState(btn, isSaved);
+        showToast('Gagal menyimpan. Silakan coba lagi.', 'error');
+    }
+}
+
+function setBookmarkState(btn, saved) {
+    btn.dataset.saved = saved ? 'true' : 'false';
+    btn.title = saved ? 'Hapus dari simpanan' : 'Simpan aset ini';
+    const svg = btn.querySelector('svg');
+    if (saved) {
+        btn.classList.remove('bg-white/90', 'text-gray-500', 'hover:bg-orange-50', 'hover:text-orange-500');
+        btn.classList.add('bg-orange-500', 'text-white');
+        svg.setAttribute('fill', 'currentColor');
+    } else {
+        btn.classList.remove('bg-orange-500', 'text-white');
+        btn.classList.add('bg-white/90', 'text-gray-500', 'hover:bg-orange-50', 'hover:text-orange-500');
+        svg.setAttribute('fill', 'none');
+    }
+}
+
+function updateBookmarkTabBadge(saved) {
+    // Cari badge count di tab tersimpan dan update
+    const savedTab = document.querySelector('a[href*="saved=1"]');
+    if (!savedTab) return;
+    let badge = savedTab.querySelector('span');
+    let currentCount = badge ? parseInt(badge.textContent) || 0 : 0;
+    const newCount = saved ? currentCount + 1 : Math.max(0, currentCount - 1);
+    if (badge) {
+        badge.textContent = newCount;
+        if (newCount === 0) badge.remove();
+    } else if (newCount > 0) {
+        const span = document.createElement('span');
+        span.className = 'bg-orange-100 text-orange-700 text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center';
+        span.textContent = newCount;
+        savedTab.appendChild(span);
+    }
 }
 
 // Toast notification

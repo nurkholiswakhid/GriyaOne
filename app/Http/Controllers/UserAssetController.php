@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\AssetBookmark;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Auth;
 use ZipArchive;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,6 +18,16 @@ class UserAssetController extends Controller
     public function listing(Request $request)
     {
         $query = Asset::query();
+
+        // Ambil ID aset yang sudah di-bookmark (sekali saja)
+        $bookmarkedIds = AssetBookmark::where('user_id', Auth::user()->id)
+            ->pluck('asset_id')
+            ->toArray();
+
+        // Filter hanya aset yang di-bookmark
+        if ($request->input('saved') === '1') {
+            $query->whereIn('id', $bookmarkedIds);
+        }
 
         // Search by title or location
         if ($search = $request->input('search')) {
@@ -40,10 +52,48 @@ class UserAssetController extends Controller
             $query->where('status', $status);
         }
 
-        $assets = $query->latest()->paginate(9)->withQueryString();
+        // Sort
+        $sortMap = [
+            'oldest'     => ['created_at', 'asc'],
+            'title_asc'  => ['title', 'asc'],
+            'title_desc' => ['title', 'desc'],
+        ];
+        [$col, $dir] = $sortMap[$request->input('sort', 'newest')] ?? ['created_at', 'desc'];
+        $query->orderBy($col, $dir);
+
+        $assets    = $query->paginate(9)->withQueryString();
         $locations = Asset::select('location')->distinct()->orderBy('location')->get();
 
-        return view('user.assets.listing', compact('assets', 'locations'));
+        return view('user.assets.listing', compact('assets', 'locations', 'bookmarkedIds'));
+    }
+
+    /**
+     * Toggle bookmark (simpan/hapus) sebuah aset untuk user yang sedang login.
+     */
+    public function toggleBookmark(Asset $asset)
+    {
+        $user = Auth::user();
+
+        $bookmark = AssetBookmark::where('user_id', $user->id)
+            ->where('asset_id', $asset->id)
+            ->first();
+
+        if ($bookmark) {
+            $bookmark->delete();
+            $saved = false;
+        } else {
+            AssetBookmark::create([
+                'user_id'  => $user->id,
+                'asset_id' => $asset->id,
+            ]);
+            $saved = true;
+        }
+
+        return response()->json([
+            'saved'      => $saved,
+            'asset_id'   => $asset->id,
+            'message'    => $saved ? 'Aset berhasil disimpan.' : 'Aset dihapus dari simpanan.',
+        ]);
     }
 
     /**

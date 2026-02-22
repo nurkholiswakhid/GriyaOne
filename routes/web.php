@@ -16,15 +16,9 @@ use App\Http\Controllers\InformasiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LoginSettingController;
 
-Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect('/dashboard');
-    }
-    return view('welcome');
-});
-
-// Authentication Routes — guest middleware mencegah user yang sudah login mengakses halaman ini
+// Guest-only routes — authenticated users are redirected to /dashboard (via redirectUsersTo in bootstrap/app.php)
 Route::middleware('guest')->group(function () {
+    Route::get('/', fn () => view('welcome'));
     Route::get('/login', fn () => view('welcome'))->name('login');
     Route::get('/register', fn () => view('welcome'));
     Route::get('/password-reset', fn () => view('welcome'));
@@ -64,6 +58,7 @@ Route::middleware('auth')->group(function () {
 
     // User Asset Routes (All Authenticated Users)
     Route::get('listing-aset', [UserAssetController::class, 'listing'])->name('user.assets.listing');
+    Route::post('listing-aset/{asset}/bookmark', [UserAssetController::class, 'toggleBookmark'])->name('user.assets.bookmark');
     Route::get('listing-aset/{asset}/download', [UserAssetController::class, 'downloadPhotos'])->name('user.assets.download-photos');
     Route::get('listing-aset/{asset}/download/{photoIndex}', [UserAssetController::class, 'downloadSinglePhoto'])->name('user.assets.download-single');
     Route::get('api/aset/{asset}/broadcast', [UserAssetController::class, 'getBroadcastText'])->name('user.assets.broadcast-api');

@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -64,5 +65,21 @@ class User extends Authenticatable
         }
 
         return asset('storage/' . $this->profile_photo_path);
+    }
+
+    /**
+     * Relasi ke bookmark aset yang disimpan user.
+     */
+    public function assetBookmarks(): HasMany
+    {
+        return $this->hasMany(AssetBookmark::class);
+    }
+
+    /**
+     * Ambil array ID aset yang sudah di-bookmark user ini.
+     */
+    public function bookmarkedAssetIds(): array
+    {
+        return $this->assetBookmarks()->pluck('asset_id')->toArray();
     }
 }
