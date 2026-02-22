@@ -21,11 +21,16 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-colors duration-200 shadow-md" style="background: linear-gradient(135deg, #ea580c, #f97316);">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    </div>
+                    @php $__navLogo = \App\Models\Setting::get('login_logo_path',''); $__siteName = \App\Models\Setting::get('site_name','GriyaOne'); @endphp
+                    @if($__navLogo)
+                        <img src="{{ asset('storage/' . $__navLogo) }}" alt="Logo {{ $__siteName }}" class="w-10 h-10 rounded-lg object-contain bg-white p-1 shadow-md flex-shrink-0">
+                    @else
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-colors duration-200 shadow-md" style="background: linear-gradient(135deg, #ea580c, #f97316);">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        </div>
+                    @endif
                     <div class="hidden sm:block min-w-0">
-                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 truncate">GriyaOne</h1>
+                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 truncate">{{ $__siteName }}</h1>
                         <p class="text-xs text-orange-600 font-semibold">@yield('role', 'Admin Dashboard')</p>
                     </div>
                 </div>
@@ -145,10 +150,16 @@
 
                 <a href="{{ route('profile.edit') }}" class="group flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm transition-colors duration-200 rounded-lg">
                     <svg class="w-5 h-5 flex-shrink-0 text-gray-400 group-hover:text-orange-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    <span>Pengaturan</span>
+                    <span>Akun</span>
+                </a>
+
+                <a href="{{ route('admin.login-settings.edit') }}" class="group flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm transition-colors duration-200 rounded-lg">
+                    <svg class="w-5 h-5 flex-shrink-0 text-gray-400 group-hover:text-orange-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                    </svg>
+                    <span>Pengaturan Web</span>
                 </a>
 
                 <form action="/logout" method="POST">

@@ -1,6 +1,7 @@
 @extends('user.layouts.app')
 
 @section('title', 'Pengaturan Akun - GriyaOne')
+@section('role', 'Pengaturan Akun')
 
 @section('content')
 <div class="max-w-4xl mx-auto fade-in">

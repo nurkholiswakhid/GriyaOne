@@ -1,6 +1,7 @@
 @extends('user.layouts.app')
 
 @section('title', 'Listing Aset - GriyaOne')
+@section('role', 'Listing Aset')
 
 @section('content')
 <div class="max-w-7xl mx-auto">

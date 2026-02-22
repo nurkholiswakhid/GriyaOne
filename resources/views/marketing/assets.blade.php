@@ -249,13 +249,13 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
 
             <!-- Hidden broadcast text for copying -->
             <div id="broadcast-{{ $asset->id }}" style="display: none;">
-Halo! Ada aset menarik dari kategori {{ $asset->category }} nih!
+                Halo! Ada aset menarik dari kategori {{ $asset->category }} nih!
 
-Judul: {{ $asset->title }}
-Lokasi: {{ $asset->location }}
-Status: {{ $asset->status === 'Available' ? 'Tersedia' : 'Terjual' }}
+                Judul: {{ $asset->title }}
+                Lokasi: {{ $asset->location }}
+                Status: {{ $asset->status === 'Available' ? 'Tersedia' : 'Terjual' }}
 
-Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
+                Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
             </div>
 
             <!-- Hidden asset data for modal -->

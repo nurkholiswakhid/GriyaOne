@@ -1,111 +1,126 @@
-@extends('user.layouts.app')
+﻿@extends('user.layouts.app')
+
+@section('title', 'Dashboard - GriyaOne')
+@section('role', 'Dashboard')
 
 @section('content')
-            <!-- Header -->
-            <div class="mb-8 fade-in">
-                <h2 class="text-3xl font-bold text-gray-900 mb-1">Selamat datang, {{ Auth::user()->name }}!</h2>
-                <p class="text-gray-600">Kelola properti Anda dan pantau booking terbaru</p>
+
+{{-- Header --}}
+<div class="mb-5">
+    <h2 class="text-xl font-semibold text-gray-800">Selamat datang, {{ Auth::user()->name }}</h2>
+    <p class="text-sm text-gray-500 mt-0.5">Statistik properti {{ \App\Models\Setting::get('site_name','GriyaOne') }}</p>
+</div>
+
+{{-- Stat Cards — Single Horizontal Bar --}}
+<div class="bg-white border border-gray-200 rounded-xl flex divide-x divide-gray-200 mb-3">
+    <div class="flex-1 px-6 py-4">
+        <p class="text-xs text-gray-400 mb-1">Total Listing</p>
+        <p class="text-2xl font-bold text-gray-800">{{ $totalListings }}</p>
+    </div>
+    <div class="flex-1 px-6 py-4">
+        <p class="text-xs text-gray-400 mb-1">Tersedia</p>
+        <p class="text-2xl font-bold text-green-600">{{ $availableListings }}</p>
+    </div>
+    <div class="flex-1 px-6 py-4">
+        <p class="text-xs text-gray-400 mb-1">Terjual</p>
+        <p class="text-2xl font-bold text-red-500">{{ $soldListings }}</p>
+    </div>
+</div>
+
+{{-- Horizontal Layout: Left Panel + Right Panel --}}
+<div class="flex gap-5 items-start">
+
+    {{-- LEFT PANEL --}}
+    <div class="w-56 flex-shrink-0 space-y-4">
+
+        {{-- Category Breakdown --}}
+        @if($listingsByCategory->count())
+        @php $catColors = ['Bank Cessie'=>'bg-blue-100 text-blue-700','AYDA'=>'bg-purple-100 text-purple-700','Lelang'=>'bg-orange-100 text-orange-700']; @endphp
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Kategori</p>
+            <div class="space-y-2">
+                @foreach($listingsByCategory as $cat)
+                @php $badge = $catColors[$cat->category] ?? 'bg-gray-100 text-gray-600'; @endphp
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ $badge }}">{{ $cat->category }}</span>
+                    <span class="text-sm font-bold text-gray-700">{{ $cat->count }}</span>
+                </div>
+                @endforeach
             </div>
+        </div>
+        @endif
 
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 fade-in">
-                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
-                    <div class="btn-blue p-6 text-white">
-                        <h3 class="text-lg font-semibold mb-2">Properti Aktif</h3>
-                        <p class="text-3xl font-bold">0</p>
-                    </div>
+        {{-- Account Info --}}
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Akun</p>
+            <div class="space-y-2 text-xs">
+                <div>
+                    <span class="text-gray-400 block">Nama</span>
+                    <span class="text-gray-800 font-medium">{{ Auth::user()->name }}</span>
                 </div>
-                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 text-white">
-                        <h3 class="text-lg font-semibold mb-2">Total Booking</h3>
-                        <p class="text-3xl font-bold">0</p>
-                    </div>
+                <div>
+                    <span class="text-gray-400 block">Email</span>
+                    <span class="text-gray-800 font-medium break-all">{{ Auth::user()->email }}</span>
                 </div>
-                <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition">
-                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white">
-                        <h3 class="text-lg font-semibold mb-2">Pendapatan</h3>
-                        <p class="text-3xl font-bold">Rp 0</p>
-                    </div>
+                <div>
+                    <span class="text-gray-400 block">Bergabung</span>
+                    <span class="text-gray-800 font-medium">{{ Auth::user()->created_at->format('d M Y') }}</span>
                 </div>
-            </div>
-
-            <!-- Properti Section -->
-            <div class="fade-in mb-12">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-bold text-gray-900">Properti Saya</h3>
-                    <button class="btn-blue px-6 py-2 rounded-lg text-white font-medium text-sm">+ Tambah Properti</button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Empty State -->
-                    <div class="col-span-3 bg-white rounded-xl p-12 text-center shadow-md">
-                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 5h4"></path>
-                        </svg>
-                        <h4 class="text-gray-900 font-semibold mb-2">Belum Ada Properti</h4>
-                        <p class="text-gray-600 text-sm mb-4">Mulai dengan menambahkan properti pertama Anda</p>
-                        <button class="btn-blue px-6 py-2 rounded-lg text-white font-medium text-sm">Tambah Properti</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Booking Section -->
-            <div class="fade-in mb-12">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">Booking Terbaru</h3>
-
-                <div class="bg-white rounded-xl overflow-hidden shadow-md">
-                    <div class="p-8 text-center">
-                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <h4 class="text-gray-900 font-semibold mb-2">Tidak Ada Booking</h4>
-                        <p class="text-gray-600 text-sm">Belum ada booking untuk properti Anda</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Info Section -->
-            <div class="fade-in">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">Info Akun Anda</h3>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl p-6 shadow-md">
-                        <h4 class="font-bold text-gray-900 mb-4">Data Pribadi</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <p class="text-gray-600 text-sm">Nama</p>
-                                <p class="text-gray-900 font-medium">{{ Auth::user()->name }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Email</p>
-                                <p class="text-gray-900 font-medium">{{ Auth::user()->email }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Role</p>
-                                <p class="text-gray-900 font-medium">User</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-6 shadow-md">
-                        <h4 class="font-bold text-gray-900 mb-4">Status Akun</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <p class="text-gray-600 text-sm">Bergabung Sejak</p>
-                                <p class="text-gray-900 font-medium">{{ Auth::user()->created_at->format('d M Y') }}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Status</p>
-                                <p class="text-green-600 font-medium">Aktif</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600 text-sm">Verifikasi Email</p>
-                                <p class="text-orange-600 font-medium">Terverifikasi</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-gray-400">Status</span>
+                    <span class="text-green-600 font-semibold">Aktif</span>
                 </div>
             </div>
+        </div>
+
+    </div>{{-- end LEFT PANEL --}}
+
+    {{-- RIGHT PANEL: Recent Listings --}}
+    <div class="flex-1 min-w-0">
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <p class="text-sm font-semibold text-gray-700">Listing Terbaru</p>
+                <a href="{{ route('user.assets.listing') }}" class="text-xs text-orange-600 hover:text-orange-700 font-medium">Lihat semua →</a>
+            </div>
+
+            @if($recentListings->count())
+            <div class="divide-y divide-gray-100">
+                @foreach($recentListings as $asset)
+                @php
+                    $photos   = is_array($asset->photos) ? $asset->photos : [];
+                    $thumb    = $photos[0] ?? null;
+                    $catBadge = ['Bank Cessie'=>'bg-blue-100 text-blue-700','AYDA'=>'bg-purple-100 text-purple-700','Lelang'=>'bg-orange-100 text-orange-700'][$asset->category] ?? 'bg-gray-100 text-gray-600';
+                @endphp
+                <div class="flex items-center gap-4 px-5 py-3">
+                    <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                        @if($thumb)
+                            <img src="{{ asset('storage/' . $thumb) }}" alt="" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-800 truncate">{{ $asset->title }}</p>
+                        <p class="text-xs text-gray-400 truncate">{{ $asset->location ?? '-' }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <span class="text-xs px-2 py-0.5 rounded-full {{ $catBadge }}">{{ $asset->category }}</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full {{ $asset->status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600' }}">{{ $asset->status }}</span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="px-5 py-10 text-center text-sm text-gray-400">Belum ada listing properti.</div>
+            @endif
+        </div>
+    </div>{{-- end RIGHT PANEL --}}
+
+</div>
+
 @endsection
+
 
 

@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+@php $waNumber = \App\Models\Setting::get('login_wa_number', ''); @endphp
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -21,20 +22,35 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-colors duration-200 shadow-md" style="background: linear-gradient(135deg, #ea580c, #f97316);">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    </div>
+                    @php $__navLogo = \App\Models\Setting::get('login_logo_path',''); $__siteName = \App\Models\Setting::get('site_name','GriyaOne'); @endphp
+                    @if($__navLogo)
+                        <img src="{{ asset('storage/' . $__navLogo) }}" alt="Logo {{ $__siteName }}" class="w-10 h-10 rounded-lg object-contain bg-white p-1 shadow-md flex-shrink-0">
+                    @else
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-colors duration-200 shadow-md" style="background: linear-gradient(135deg, #ea580c, #f97316);">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        </div>
+                    @endif
                     <div class="hidden sm:block min-w-0">
-                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 truncate">GriyaOne</h1>
-                        <p class="text-xs text-orange-600 font-semibold">@yield('role', 'User Dashboard')</p>
+                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 truncate">{{ $__siteName }}</h1>
+                        <p class="text-xs text-orange-600 font-semibold">@yield('role', 'Dashboard')</p>
                     </div>
                 </div>
                 <button id="notificationBtn" class="relative p-2 text-gray-600 hover:text-orange-600 transition flex-shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                     </svg>
-                    <span id="notificationBadge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                    <span id="notificationBadge" class="hidden absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
                 </button>
+
+                <!-- Notification Dropdown -->
+                <div id="notificationDropdown" class="hidden absolute top-16 right-4 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 z-40 max-h-96 overflow-y-auto">
+                    <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-4 py-3 sticky top-0 z-10">
+                        <h3 class="text-white font-semibold text-sm">Notifikasi</h3>
+                    </div>
+                    <div id="notificationList" class="divide-y divide-gray-100">
+                        <div class="px-4 py-8 text-center text-gray-500 text-sm">Memuat notifikasi...</div>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -66,7 +82,7 @@
 
             <nav class="px-2 space-y-1">
                 <!-- Main Navigation -->
-                <a href="#" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-white font-medium text-sm shadow-md hover:shadow-lg transition-all duration-200 group">
+                <a href="{{ route('user.dashboard') }}" class="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-white font-medium text-sm shadow-md hover:shadow-lg transition-all duration-200 group">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 5h4"></path>
@@ -86,8 +102,6 @@
                     </div>
                     <span class="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full group-hover:bg-orange-200 transition-colors duration-200">5</span>
                 </a>
-
-
 
 
                 <div class="my-3 border-t border-gray-200"></div>
@@ -125,7 +139,11 @@
                     <div class="min-w-0">
                         <h4 class="font-bold text-gray-900 text-sm mb-1">Chat dengan Customer Service</h4>
                         <p class="text-xs text-gray-700 leading-relaxed">Hubungi kami di WhatsApp untuk bantuan, laporan, atau pertanyaan Anda.</p>
-                        <a href="https://wa.me/62XXX" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-green-600 hover:text-green-700 transition-colors duration-200">Buka WhatsApp →</a>
+                        @if($waNumber)
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $waNumber) }}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-green-600 hover:text-green-700 transition-colors duration-200">Buka WhatsApp →</a>
+                        @else
+                            <span class="inline-block mt-2 text-xs text-gray-400 italic">Kontak belum dikonfigurasi</span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -142,13 +160,111 @@
     <script>
         // ============ Notification System ============
         const notificationBtn = document.getElementById('notificationBtn');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notificationList = document.getElementById('notificationList');
         const notificationBadge = document.getElementById('notificationBadge');
 
-        // Toggle notification badge visibility (for user dashboard)
-        // In future, this can be extended with a dropdown like admin/marketing
+        const LAST_VIEWED_TIME_KEY = 'user_notification_last_viewed_time';
 
-        // Simple notification check - hide badge by default
-        notificationBadge.classList.add('hidden');
+        function initializeNotificationTracking() {
+            if (!localStorage.getItem(LAST_VIEWED_TIME_KEY)) {
+                localStorage.setItem(LAST_VIEWED_TIME_KEY, Math.floor(Date.now() / 1000));
+            }
+        }
+
+        function getLastViewedTime() {
+            return parseInt(localStorage.getItem(LAST_VIEWED_TIME_KEY)) || 0;
+        }
+
+        function checkNewNotifications(notifications) {
+            const lastViewedTime = getLastViewedTime();
+            return notifications.some(notif => notif.timestamp > lastViewedTime);
+        }
+
+        notificationBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const wasHidden = notificationDropdown.classList.contains('hidden');
+            notificationDropdown.classList.toggle('hidden');
+            if (wasHidden) {
+                loadNotifications();
+                localStorage.setItem(LAST_VIEWED_TIME_KEY, Math.floor(Date.now() / 1000));
+                notificationBadge.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('#notificationBtn') && !event.target.closest('#notificationDropdown')) {
+                notificationDropdown.classList.add('hidden');
+            }
+        });
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/notifications');
+                const data = await response.json();
+                displayNotifications(data);
+            } catch (error) {
+                notificationList.innerHTML = '<div class="px-4 py-8 text-center text-gray-500 text-sm">Gagal memuat notifikasi</div>';
+            }
+        }
+
+        function displayNotifications(notifications) {
+            // Filter: only new_asset and sold_out
+            notifications = (notifications || []).filter(n => n.type === 'new_asset' || n.type === 'sold_out');
+
+            if (!notifications.length) {
+                notificationList.innerHTML = '<div class="px-4 py-8 text-center text-gray-500 text-sm">Tidak ada notifikasi</div>';
+                notificationBadge.classList.add('hidden');
+                return;
+            }
+
+            notificationList.innerHTML = notifications.map(notif => `
+                <div class="px-4 py-3 hover:bg-orange-50 transition-colors">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 flex-shrink-0">${getNotificationIcon(notif.type)}</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-900 text-sm">${notif.title}</p>
+                            <p class="text-gray-600 text-xs mt-1">${notif.message}</p>
+                            <p class="text-gray-400 text-xs mt-2">${formatTime(notif.created_at)}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            if (notificationDropdown.classList.contains('hidden')) {
+                if (checkNewNotifications(notifications)) {
+                    notificationBadge.classList.remove('hidden');
+                } else {
+                    notificationBadge.classList.add('hidden');
+                }
+            }
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'info': '<svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                'new_asset': '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>',
+                'sold_out': '<svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m6-4a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+            };
+            return icons[type] || icons['info'];
+        }
+
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            if (days > 0) return `${days} hari yang lalu`;
+            if (hours > 0) return `${hours} jam yang lalu`;
+            if (minutes > 0) return `${minutes} menit yang lalu`;
+            return 'Baru saja';
+        }
+
+        initializeNotificationTracking();
+        loadNotifications();
+        setInterval(loadNotifications, 30000);
     </script>
 </body>
 </html>

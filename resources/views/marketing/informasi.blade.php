@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">📰 Informasi Terbaru</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Informasi Terbaru</h1>
         <p class="text-gray-600 mt-2">Dapatkan update terkini tentang produk, promosi, dan pengembangan bisnis</p>
     </div>
 

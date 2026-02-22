@@ -1,6 +1,7 @@
 @extends('user.layouts.app')
 
 @section('title', 'Detail Profil - GriyaOne')
+@section('role', 'Detail Profil')
 
 @section('content')
 <div class="max-w-4xl mx-auto fade-in">

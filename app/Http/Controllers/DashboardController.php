@@ -15,7 +15,20 @@ class DashboardController extends Controller
     public function userDashboard()
     {
         $this->checkRole('user');
-        return view('user.user');
+
+        $totalListings    = Asset::count();
+        $availableListings = Asset::where('status', 'Available')->count();
+        $soldListings     = Asset::where('status', 'Sold Out')->count();
+        $listingsByCategory = Asset::selectRaw('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->orderByDesc('count')
+            ->get();
+        $recentListings   = Asset::latest()->take(6)->get();
+
+        return view('user.user', compact(
+            'totalListings', 'availableListings', 'soldListings',
+            'listingsByCategory', 'recentListings'
+        ));
     }
 
     public function marketingDashboard()

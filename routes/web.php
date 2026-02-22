@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\InformasiController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LoginSettingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -115,5 +116,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class);
         Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
         Route::patch('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+
+        // Login Page Settings
+        Route::get('admin/login-settings', [LoginSettingController::class, 'edit'])->name('admin.login-settings.edit');
+        Route::patch('admin/login-settings', [LoginSettingController::class, 'update'])->name('admin.login-settings.update');
     });
 });
