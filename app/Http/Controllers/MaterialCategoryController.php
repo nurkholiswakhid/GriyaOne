@@ -89,10 +89,23 @@ class MaterialCategoryController extends Controller
     {
         // Check if category has materials
         if ($materialCategory->materials()->count() > 0) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak bisa menghapus kategori yang masih memiliki materi!'
+                ], 422);
+            }
             return redirect()->route('categories.index')->with('error', 'Tidak bisa menghapus kategori yang masih memiliki materi!');
         }
 
         $materialCategory->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kategori berhasil dihapus!'
+            ]);
+        }
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus!');
     }

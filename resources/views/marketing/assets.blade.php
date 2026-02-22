@@ -204,22 +204,16 @@
 
                 <!-- Broadcast Text Section -->
                 <div class="bg-orange-50 rounded-lg p-3 mb-4 border border-orange-200">
-                    <p class="text-xs font-semibold text-orange-900 mb-2">Text Broadcast:</p>
-                    <p class="text-sm text-orange-800 line-clamp-3">
-                        Halo! Ada aset menarik dari kategori {{ $asset->category }} nih!
-
-Judul: {{ $asset->title }}
-Lokasi: {{ $asset->location }}
-Status: {{ $asset->status === 'Available' ? 'Tersedia' : 'Terjual' }}
-
-Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
-                    </p>
+                    <p class="text-xs font-semibold text-orange-900 mb-2">Deskripsi:</p>
+                    <div class="text-sm text-orange-800 line-clamp-3 prose prose-sm max-w-none">
+                        {!! $asset->description ?? '<em>Tidak ada deskripsi</em>' !!}
+                    </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="flex gap-2">
-                    <!-- Copy Broadcast -->
-                    <button onclick="copyToClipboard('broadcast-{{ $asset->id }}')" class="flex-1 px-3 py-2 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2">
+                    <!-- Copy Description -->
+                    <button onclick="copyDescription({{ $asset->id }}, this)" class="flex-1 px-3 py-2 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
@@ -228,12 +222,12 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
 
                     <!-- Download Photos -->
                     @if($asset->photos && count($asset->photos) > 0)
-                    <a href="{{ route('marketing.download-photos', $asset) }}" class="flex-1 px-3 py-2 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2">
+                    <button onclick="downloadAllPhotos({{ $asset->id }}, '{{ addslashes($asset->title) }}', this)" class="flex-1 px-3 py-2 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
                         Download
-                    </a>
+                    </button>
                     @endif
 
                     <!-- View Detail -->
@@ -395,16 +389,154 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!
 </div>
 
 <script>
-function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    const text = element.innerText;
+function downloadAllPhotos(assetId, assetTitle, btn) {
+    const assetData = document.getElementById('asset-data-' + assetId);
+    if (!assetData) return;
 
-    navigator.clipboard.writeText(text).then(() => {
-        // Show success feedback
-        alert('Text broadcast berhasil disalin!');
-    }).catch(() => {
-        alert('Gagal menyalin text');
+    const data = JSON.parse(assetData.textContent);
+    const photos = data.photos || [];
+    if (photos.length === 0) return;
+
+    const originalHtml = btn ? btn.innerHTML : null;
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Mengunduh...';
+    }
+
+    const ext = (p) => p.split('.').pop().split('?')[0] || 'jpg';
+    const safeTitle = assetTitle.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
+
+    let completed = 0;
+    photos.forEach((photo, index) => {
+        setTimeout(() => {
+            fetch('/storage/' + photo)
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed');
+                    return res.blob();
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = safeTitle + '_foto_' + (index + 1) + '.' + ext(photo);
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                })
+                .catch(() => {})
+                .finally(() => {
+                    completed++;
+                    if (completed === photos.length && btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                    }
+                });
+        }, index * 600);
     });
+}
+
+// Convert HTML to WhatsApp-friendly formatted text
+function htmlToFormattedText(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+
+    function processNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            return node.textContent;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) return '';
+
+        const tag = node.tagName.toLowerCase();
+        const inner = Array.from(node.childNodes).map(processNode).join('');
+
+        switch (tag) {
+            case 'strong':
+            case 'b':
+                return `*${inner}*`;
+            case 'em':
+            case 'i':
+                return `_${inner}_`;
+            case 's':
+            case 'del':
+            case 'strike':
+                return `~${inner}~`;
+            case 'u':
+                return inner;
+            case 'br':
+                return '\n';
+            case 'p':
+                return inner.trim() ? inner.trim() + '\n\n' : '';
+            case 'h1': case 'h2': case 'h3':
+            case 'h4': case 'h5': case 'h6':
+                return `*${inner.trim()}*\n\n`;
+            case 'li':
+                return `• ${inner.trim()}\n`;
+            case 'ul':
+            case 'ol':
+                return inner + '\n';
+            case 'blockquote':
+                return inner.split('\n').map(l => l.trim() ? '> ' + l.trim() : '').filter(Boolean).join('\n') + '\n\n';
+            case 'code':
+                return '`' + inner + '`';
+            case 'pre':
+                return '```\n' + inner + '\n```\n';
+            case 'hr':
+                return '\n---\n\n';
+            default:
+                return inner;
+        }
+    }
+
+    return Array.from(tmp.childNodes).map(processNode).join('').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function doClipboardCopy(htmlContent, onSuccess, onFail) {
+    const formattedText = htmlToFormattedText(htmlContent);
+
+    try {
+        navigator.clipboard.write([
+            new ClipboardItem({
+                'text/html': new Blob([htmlContent], { type: 'text/html' }),
+                'text/plain': new Blob([formattedText], { type: 'text/plain' })
+            })
+        ]).then(onSuccess).catch(() => {
+            navigator.clipboard.writeText(formattedText).then(onSuccess).catch(onFail);
+        });
+    } catch(e) {
+        navigator.clipboard.writeText(formattedText).then(onSuccess).catch(onFail);
+    }
+}
+
+function copyDescription(assetId, btn) {
+    const assetData = document.getElementById('asset-data-' + assetId);
+    if (!assetData) return;
+
+    const data = JSON.parse(assetData.textContent);
+    const description = data.description || '';
+
+    const doSuccess = () => {
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Tersalin!';
+            btn.classList.replace('bg-orange-600', 'bg-green-600');
+            btn.classList.replace('hover:bg-orange-700', 'hover:bg-green-700');
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.replace('bg-green-600', 'bg-orange-600');
+                btn.classList.replace('hover:bg-green-700', 'hover:bg-orange-700');
+            }, 2000);
+        }
+    };
+    const doFail = () => {
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = 'Gagal!';
+            setTimeout(() => { btn.innerHTML = original; }, 2000);
+        }
+    };
+
+    doClipboardCopy(description, doSuccess, doFail);
 }
 
 function showDetail(assetId) {
@@ -538,19 +670,32 @@ function modalCarouselPrev() {
 
 function copyFromModal() {
     const data = window.currentModalAssetData;
-    const broadcastText = `Halo! Ada aset menarik dari kategori ${data.category} nih!
+    const description = data.description || '';
 
-Judul: ${data.title}
-Lokasi: ${data.location}
-Status: ${data.status === 'Available' ? 'Tersedia' : 'Terjual'}
+    const btn = document.querySelector('#detailModal button[onclick="copyFromModal()"]');
 
-Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!`;
+    const doSuccess = () => {
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Tersalin!';
+            btn.classList.replace('bg-orange-600', 'bg-green-600');
+            btn.classList.replace('hover:bg-orange-700', 'hover:bg-green-700');
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.replace('bg-green-600', 'bg-orange-600');
+                btn.classList.replace('hover:bg-green-700', 'hover:bg-orange-700');
+            }, 2000);
+        }
+    };
+    const doFail = () => {
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = 'Gagal!';
+            setTimeout(() => { btn.innerHTML = original; }, 2000);
+        }
+    };
 
-    navigator.clipboard.writeText(broadcastText).then(() => {
-        alert('Text broadcast berhasil disalin!');
-    }).catch(() => {
-        alert('Gagal menyalin text');
-    });
+    doClipboardCopy(description, doSuccess, doFail);
 }
 
 function closeModal() {

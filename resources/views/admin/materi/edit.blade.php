@@ -42,21 +42,20 @@
                     <!-- Category -->
                     <div class="mb-6">
                         <label for="category_id" class="block text-sm font-semibold text-gray-700 mb-2">Kategori *</label>
-                        <div class="flex items-end gap-3">
-                            <div class="flex-1">
-                                <select id="category_id" name="category_id" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 transition bg-gray-50 focus:bg-white @error('category_id') border-red-500 @enderror">
-                                    <option value="">-- Pilih Kategori --</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}" {{ old('category_id', $material->category_id) == $category->id ? 'selected' : '' }}>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <button type="button"
-                                onclick="openAddCategoryModal()"
-                                class="bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-4 rounded-lg transition whitespace-nowrap">
-                                + Kategori Baru
+                        <div class="flex gap-2">
+                            <select id="category_id" name="category_id" required class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 transition bg-gray-50 focus:bg-white @error('category_id') border-red-500 @enderror">
+                                <option value="">Pilih Kategori</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id', $material->category_id) == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <button type="button" onclick="openCategoryModal()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition whitespace-nowrap">+ Kategori Baru</button>
+                            <button type="button" id="deleteCategoryBtn" onclick="deleteSelectedCategory()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition hidden" title="Hapus kategori yang dipilih">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
                             </button>
                         </div>
                         @error('category_id')
@@ -126,34 +125,55 @@
     </div>
 
     <!-- Add Category Modal -->
-    <div id="addCategoryModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-lg max-w-md w-full">
+    <div id="categoryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                <h3 class="text-xl font-bold text-gray-900">Tambah Kategori Baru</h3>
-                <button type="button" onclick="closeAddCategoryModal()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                <h2 class="text-xl font-bold text-gray-900">+ Tambah Kategori Baru</h2>
+                <button onclick="closeCategoryModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-
-            <form id="addCategoryForm" class="p-6 space-y-4">
+            <form id="categoryForm" class="p-6 space-y-4">
                 @csrf
-                <!-- Name -->
                 <div>
-                    <label for="catName" class="block text-sm font-semibold text-gray-700 mb-2">Nama Kategori *</label>
-                    <input type="text" id="catName" name="name" required placeholder="Contoh: Matematika" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500/20 transition bg-gray-50 focus:bg-white">
-                    <span id="catNameError" class="mt-1 text-sm text-red-600 hidden"></span>
+                    <label for="categoryName" class="block text-sm font-semibold text-gray-700 mb-2">Nama Kategori</label>
+                    <input type="text" id="categoryName" required placeholder="Masukkan nama kategori..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition">
                 </div>
-
-                <!-- Buttons -->
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="closeAddCategoryModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg transition">
-                        Batal
-                    </button>
-                    <button type="submit" id="submitCategoryBtn" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-2 rounded-lg transition">
-                        Buat Kategori
-                    </button>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeCategoryModal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">Batal</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition">Tambah</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 class="text-lg font-bold text-gray-900">Hapus Kategori</h2>
+                <button onclick="closeDeleteConfirmationModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="flex-shrink-0">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-700">Apakah Anda yakin ingin menghapus kategori:</p>
+                        <p class="text-sm font-semibold text-gray-900" id="deleteConfirmationCategoryName"></p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mb-2">Jika kategori ini masih memiliki materi, penghapusan akan ditolak.</p>
+            </div>
+            <div class="flex gap-3 p-6 border-t border-gray-200">
+                <button type="button" onclick="closeDeleteConfirmationModal()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">Batal</button>
+                <button type="button" id="confirmDeleteCategoryBtn" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition">Hapus</button>
+            </div>
         </div>
     </div>
 
@@ -180,96 +200,135 @@
             }
         }
 
-        // Modal Functions
-        function openAddCategoryModal() {
-            document.getElementById('addCategoryModal').classList.remove('hidden');
-            document.getElementById('addCategoryModal').classList.add('flex');
-            document.getElementById('addCategoryForm').reset();
-            document.getElementById('catNameError').classList.add('hidden');
+        // ===== CATEGORY MODAL =====
+        function openCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
 
-        function closeAddCategoryModal() {
-            document.getElementById('addCategoryModal').classList.add('hidden');
-            document.getElementById('addCategoryModal').classList.remove('flex');
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').classList.add('hidden');
+            document.body.style.overflow = '';
+            document.getElementById('categoryForm').reset();
         }
 
-        // Close modal when clicking outside
-        document.getElementById('addCategoryModal')?.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeAddCategoryModal();
-            }
+        document.getElementById('categoryModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeCategoryModal();
         });
 
-        // Handle form submission
-        document.getElementById('addCategoryForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const btn = document.getElementById('submitCategoryBtn');
-            const originalText = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = 'Membuat...';
-
-            const formData = new FormData(this);
-
-            try {
-                const response = await fetch('{{ route("categories.store") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                        'Accept': 'application/json',
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    if (data.errors?.name) {
-                        const errorElement = document.getElementById('catNameError');
-                        errorElement.textContent = data.errors.name[0];
-                        errorElement.classList.remove('hidden');
-                    }
-                    throw new Error(data.message || 'Terjadi kesalahan');
-                }
-
-                // Success - reload categories
-                await reloadCategories();
-                closeAddCategoryModal();
-                showSuccessMessage('Kategori berhasil ditambahkan!');
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = originalText;
+        // Show trash button when a category is selected
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('category_id');
+            const deleteBtn = document.getElementById('deleteCategoryBtn');
+            function updateDeleteBtn() {
+                categorySelect.value ? deleteBtn.classList.remove('hidden') : deleteBtn.classList.add('hidden');
             }
+            categorySelect.addEventListener('change', updateDeleteBtn);
+            updateDeleteBtn();
         });
 
-        // Reload categories in select dropdown
-        async function reloadCategories() {
-            try {
-                const response = await fetch('{{ route("materi.edit", $material) }}');
-                const html = await response.text();
-
-                // Extract the new select options from the response
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const newSelect = doc.querySelector('#category_id');
-
-                if (newSelect) {
-                    const currentSelect = document.getElementById('category_id');
-                    currentSelect.innerHTML = newSelect.innerHTML;
-                }
-            } catch (error) {
-                console.error('Error reloading categories:', error);
-            }
+        // ===== DELETE CATEGORY =====
+        function deleteSelectedCategory() {
+            const categorySelect = document.getElementById('category_id');
+            const categoryId = categorySelect.value;
+            if (!categoryId) { showNotification('Pilih kategori terlebih dahulu', 'error'); return; }
+            const selectedOption = categorySelect.querySelector(`option[value="${categoryId}"]`);
+            const categoryName = selectedOption.textContent;
+            showDeleteConfirmationModal(categoryId, categoryName, selectedOption);
         }
 
-        // Show success message (optional - requires notification system)
-        function showSuccessMessage(message) {
-            // You can implement a toast notification here
-            console.log('Success:', message);
+        function showDeleteConfirmationModal(categoryId, categoryName, selectedOption) {
+            document.getElementById('deleteConfirmationCategoryName').textContent = categoryName;
+            document.getElementById('confirmDeleteCategoryBtn').onclick = function() {
+                performDeleteCategory(categoryId, selectedOption);
+                closeDeleteConfirmationModal();
+            };
+            document.getElementById('deleteConfirmationModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDeleteConfirmationModal() {
+            document.getElementById('deleteConfirmationModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('deleteConfirmationModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteConfirmationModal();
+        });
+
+        function performDeleteCategory(categoryId, selectedOption) {
+            fetch(`/categories/${categoryId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')?.value,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success !== false && !data.error) {
+                    selectedOption.remove();
+                    document.getElementById('category_id').value = '';
+                    document.getElementById('deleteCategoryBtn').classList.add('hidden');
+                    showNotification(data.message || 'Kategori berhasil dihapus');
+                } else {
+                    showNotification(data.message || 'Gagal menghapus kategori', 'error');
+                }
+            })
+            .catch(() => showNotification('Terjadi kesalahan saat menghapus kategori', 'error'));
+        }
+
+        // ===== ADD CATEGORY FORM =====
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('categoryForm')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const categoryName = document.getElementById('categoryName').value;
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Menambahkan...';
+                try {
+                    const csrfToken = document.querySelector('#categoryForm input[name="_token"]')?.value
+                        || document.querySelector('input[name="_token"]')?.value;
+                    const response = await fetch('{{ route("categories.store") }}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({ name: categoryName }),
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || 'Gagal menambahkan kategori');
+                    const select = document.getElementById('category_id');
+                    const option = document.createElement('option');
+                    option.value = data.category.id;
+                    option.textContent = data.category.name;
+                    option.selected = true;
+                    select.appendChild(option);
+                    document.getElementById('deleteCategoryBtn').classList.remove('hidden');
+                    closeCategoryModal();
+                    showNotification('Kategori berhasil ditambahkan!');
+                } catch (error) {
+                    showNotification('Error: ' + error.message, 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            });
+        });
+
+        // ===== TOAST NOTIFICATION =====
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200';
+            const textColor = type === 'error' ? 'text-red-800' : 'text-green-800';
+            notification.className = `fixed top-4 right-4 ${bgColor} border rounded-lg p-4 ${textColor} font-medium z-50 shadow-lg`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
         }
     </script>
 @endsection

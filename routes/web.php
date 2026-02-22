@@ -103,8 +103,9 @@ Route::middleware('auth')->group(function () {
         Route::patch('materi/{material}/publish', [MateriBelajarController::class, 'togglePublish'])->name('materi.togglePublish');
         Route::delete('materi/{material}/thumbnail', [MateriBelajarController::class, 'deleteThumbnail'])->name('materi.deleteThumbnail');
 
-        // Material Category Store Route (for modal)
+        // Material Category Routes (for modal add/delete)
         Route::post('categories', [MaterialCategoryController::class, 'store'])->name('categories.store');
+        Route::delete('categories/{materialCategory}', [MaterialCategoryController::class, 'destroy'])->name('categories.destroy');
 
         // Notification Management Routes
         Route::resource('notifications', NotificationController::class);

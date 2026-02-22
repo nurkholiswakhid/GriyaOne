@@ -212,12 +212,12 @@
 
                         <!-- Download Photos -->
                         @if($asset->photos && count($asset->photos) > 0)
-                            <a href="{{ route('user.assets.download-photos', $asset) }}" class="px-3 py-2 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1">
+                            <button onclick="downloadAllPhotos({{ $asset->id }}, '{{ addslashes($asset->title) }}', this)" class="px-3 py-2 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                 </svg>
                                 Unduh
-                            </a>
+                            </button>
                         @endif
                     </div>
 
@@ -366,6 +366,53 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
 </div>
 
 <script>
+function downloadAllPhotos(assetId, assetTitle, btn) {
+    const assetData = document.getElementById('asset-data-' + assetId);
+    if (!assetData) return;
+
+    const data = JSON.parse(assetData.textContent);
+    const photos = data.photos || [];
+    if (photos.length === 0) return;
+
+    const originalHtml = btn ? btn.innerHTML : null;
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Mengunduh...';
+    }
+
+    const ext = (p) => p.split('.').pop().split('?')[0] || 'jpg';
+    const safeTitle = assetTitle.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
+
+    let completed = 0;
+    photos.forEach((photo, index) => {
+        setTimeout(() => {
+            fetch('/storage/' + photo)
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed');
+                    return res.blob();
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = safeTitle + '_foto_' + (index + 1) + '.' + ext(photo);
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                })
+                .catch(() => {})
+                .finally(() => {
+                    completed++;
+                    if (completed === photos.length && btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                    }
+                });
+        }, index * 600);
+    });
+}
+
 // Carousel Functions
 function carouselNext(assetId) {
     const container = document.querySelector(`.carousel-container[data-asset-id="${assetId}"]`);
