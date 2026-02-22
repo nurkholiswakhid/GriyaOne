@@ -31,6 +31,11 @@
         /* Hide scrollbar */
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Hamburger: mobile only */
+        @media (min-width: 1024px) {
+            #hamburgerBtn { display: none !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
