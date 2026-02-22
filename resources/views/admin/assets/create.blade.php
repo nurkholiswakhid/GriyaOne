@@ -42,6 +42,7 @@
                         {!! old('description') !!}
                     </div>
                     <input type="hidden" name="description" id="description_content" value="">
+                    <p id="desc_error" class="hidden text-red-500 text-xs mt-2">Deskripsi kosong! Silakan isi deskripsi terlebih dahulu.</p>
                     @error('description')
                         <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                     @enderror
@@ -140,7 +141,7 @@
                         </div>
                         <div class="border-t border-red-200 pt-3">
                             <p class="font-semibold text-gray-900">Foto Berkualitas</p>
-                            <p class="text-xs text-gray-600 mt-1">Unggah minimal 3 foto dengan sudut berbeda untuk hasil terbaik.</p>
+                            <p class="text-xs text-gray-600 mt-1">Unggah foto dengan sudut berbeda untuk hasil terbaik.</p>
                         </div>
                         <div class="border-t border-red-200 pt-3">
                             <p class="font-semibold text-gray-900">Deskripsi Lengkap</p>
@@ -335,9 +336,15 @@
             if (!syncQuillToField()) {
                 event.preventDefault();
                 log('SYNC FAILED - Preventing form submission');
-                alert('Deskripsi kosong! Silakan isi deskripsi terlebih dahulu.');
+                const descErr = document.getElementById('desc_error');
+                if (descErr) {
+                    descErr.classList.remove('hidden');
+                    descErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return false;
             }
+            const descErr = document.getElementById('desc_error');
+            if (descErr) descErr.classList.add('hidden');
 
             log('SYNC SUCCESSFUL - Allowing form submission');
             log('========================================');

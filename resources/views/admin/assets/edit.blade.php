@@ -41,6 +41,7 @@
                                 {!! old('description', $asset->description) !!}
                             </div>
                             <input type="hidden" name="description" id="description_content" value="">
+                            <p id="desc_error" class="hidden text-red-500 text-xs mt-2">Deskripsi kosong! Silakan isi deskripsi terlebih dahulu.</p>
                             @error('description')
                                 <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                             @enderror
@@ -337,9 +338,15 @@
             if (!syncQuillToField()) {
                 event.preventDefault();
                 log('SYNC FAILED - Preventing form submission');
-                alert('Deskripsi kosong! Silakan isi deskripsi terlebih dahulu.');
+                const descErr = document.getElementById('desc_error');
+                if (descErr) {
+                    descErr.classList.remove('hidden');
+                    descErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return false;
             }
+            const descErr = document.getElementById('desc_error');
+            if (descErr) descErr.classList.add('hidden');
 
             log('SYNC SUCCESSFUL - Allowing form submission');
             log('========================================');
