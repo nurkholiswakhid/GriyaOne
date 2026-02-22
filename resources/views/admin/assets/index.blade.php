@@ -10,8 +10,11 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-1">Manajemen Listing Aset</h2>
             <p class="text-gray-600">Kelola aset Bank Cessie, AYDA, dan Lelang</p>
         </div>
-        <a href="{{ route('assets.create') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-2 rounded-lg text-white font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg">
-            + Tambah Aset Baru
+        <a href="{{ route('assets.create') }}" class="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Tambah Aset
         </a>
     </div>
 
@@ -124,7 +127,12 @@
                 </svg>
                 <h4 class="text-gray-900 font-semibold mb-2">Belum Ada Aset</h4>
                 <p class="text-gray-600 text-sm mb-4">Mulai dengan menambahkan aset pertama Anda</p>
-                <a href="{{ route('assets.create') }}" class="inline-block bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium text-sm transition">Tambah Aset</a>
+                <a href="{{ route('assets.create') }}" class="inline-flex items-center px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Tambah Aset
+                </a>
             </div>
         @endif
     </div>

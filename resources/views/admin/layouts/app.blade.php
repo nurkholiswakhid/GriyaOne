@@ -13,53 +13,171 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .slide-in { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* ===== Brand Theme: Button / Link Colors — matches logo orange & dark-gray ===== */
+        /* Primary solid (was red) → brand orange */
+        button.bg-red-600, a.bg-red-600                           { background-color: #ea580c !important; }
+        button.hover\:bg-red-700:hover, a.hover\:bg-red-700:hover { background-color: #c2410c !important; }
+
+        /* Edit solid (was yellow-500) → brand orange-light */
+        button.bg-yellow-500, a.bg-yellow-500                           { background-color: #f97316 !important; }
+        button.hover\:bg-yellow-600:hover, a.hover\:bg-yellow-600:hover { background-color: #ea580c !important; }
+
+        /* Edit solid (was yellow-600) → brand orange */
+        button.bg-yellow-600, a.bg-yellow-600                           { background-color: #ea580c !important; }
+        button.hover\:bg-yellow-700:hover, a.hover\:bg-yellow-700:hover { background-color: #c2410c !important; }
+
+        /* Ghost edit (was yellow-50/100/700) → orange tones */
+        button.bg-yellow-50, a.bg-yellow-50                             { background-color: #fff7ed !important; }
+        button.hover\:bg-yellow-100:hover, a.hover\:bg-yellow-100:hover { background-color: #ffedd5 !important; }
+        button.text-yellow-700, a.text-yellow-700                       { color: #ea580c !important; }
+
+        /* View/detail actions (was purple-600) → logo dark-gray */
+        button.bg-purple-600, a.bg-purple-600                           { background-color: #374151 !important; }
+        button.hover\:bg-purple-700:hover, a.hover\:bg-purple-700:hover { background-color: #1f2937 !important; }
+
+        /* Mobile sidebar slide */
+        #mobileSidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); }
+        #mobileSidebar.open { transform: translateX(0); }
+        #sidebarBackdrop { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        #sidebarBackdrop.open { opacity: 1; pointer-events: auto; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Navbar -->
     <nav class="sticky top-0 z-50 bg-white shadow-sm border-b border-orange-100">
-        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center gap-3 min-w-0">
+        <div class="max-w-full mx-auto px-3 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14 sm:h-16">
+
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <!-- Hamburger (mobile only) -->
+                    <button id="hamburgerBtn" class="lg:hidden p-2 -ml-1 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition flex-shrink-0" aria-label="Buka menu">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
                     @php $__navLogo = \App\Models\Setting::get('login_logo_path',''); $__siteName = \App\Models\Setting::get('site_name','GriyaOne'); @endphp
                     @if($__navLogo)
-                        <img src="{{ asset('storage/' . $__navLogo) }}" alt="Logo {{ $__siteName }}" class="w-10 h-10 rounded-lg object-contain bg-white p-1 shadow-md flex-shrink-0">
+                        <img src="{{ asset('storage/' . $__navLogo) }}" alt="Logo {{ $__siteName }}" class="h-8 w-auto sm:h-9 max-w-[100px] object-contain flex-shrink-0" style="filter:drop-shadow(0 1px 4px rgba(0,0,0,0.15));">
                     @else
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0 transition-colors duration-200 shadow-md" style="background: linear-gradient(135deg, #ea580c, #f97316);">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-white flex-shrink-0 shadow-md" style="background: linear-gradient(135deg, #ea580c, #f97316);">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                         </div>
                     @endif
                     <div class="hidden sm:block min-w-0">
-                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 truncate">{{ $__siteName }}</h1>
-                        <p class="text-xs text-orange-600 font-semibold">@yield('role', 'Admin Dashboard')</p>
+                        <h1 class="text-base sm:text-lg font-bold text-gray-900 truncate leading-tight">{{ $__siteName }}</h1>
+                        <p class="text-xs text-orange-600 font-semibold hidden sm:block">@yield('role', 'Admin Dashboard')</p>
                     </div>
                 </div>
-                <button id="notificationBtn" class="relative p-2 text-gray-600 hover:text-orange-600 transition flex-shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                    </svg>
-                    <span id="notificationBadge" class="hidden absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-                </button>
+
+                <div class="flex items-center gap-1">
+                    <button id="notificationBtn" class="relative p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition flex-shrink-0">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <span id="notificationBadge" class="hidden absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                    </button>
+                </div>
 
                 <!-- Notification Dropdown -->
-                <div id="notificationDropdown" class="hidden absolute top-16 right-4 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 z-40 max-h-96 overflow-y-auto">
-                    <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-4 py-3 sticky top-0 z-10">
+                <div id="notificationDropdown" class="hidden absolute top-14 sm:top-16 right-2 sm:right-4 w-[calc(100vw-1rem)] max-w-sm bg-white rounded-xl shadow-2xl border border-gray-200 z-40 max-h-96 overflow-y-auto">
+                    <div class="bg-gradient-to-r from-orange-600 to-orange-700 px-4 py-3 sticky top-0 z-10 rounded-t-xl">
                         <h3 class="text-white font-semibold text-sm">Notifikasi</h3>
                     </div>
                     <div id="notificationList" class="divide-y divide-gray-100">
-                        <div class="px-4 py-8 text-center text-gray-500 text-sm">
-                            Memuat notifikasi...
-                        </div>
+                        <div class="px-4 py-8 text-center text-gray-500 text-sm">Memuat notifikasi...</div>
                     </div>
                 </div>
+
             </div>
         </div>
     </nav>
 
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebarBackdrop" class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" onclick="closeMobileSidebar()"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <aside id="mobileSidebar" class="fixed left-0 top-0 bottom-0 z-50 w-72 bg-gradient-to-b from-white to-orange-50 border-r border-gray-200 overflow-y-auto scrollbar-hide lg:hidden shadow-2xl">
+        <div class="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white sticky top-0 z-10">
+            <div class="flex items-center gap-2">
+                @if($__navLogo ?? false)
+                    <img src="{{ asset('storage/' . $__navLogo) }}" alt="Logo" class="h-7 w-auto max-w-[80px] object-contain" style="filter:drop-shadow(0 1px 3px rgba(0,0,0,0.12));">
+                @else
+                    <div class="w-7 h-7 rounded-md flex items-center justify-center text-white" style="background: linear-gradient(135deg, #ea580c, #f97316);"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+                @endif
+                <span class="font-bold text-gray-900 text-sm">{{ $__siteName ?? 'GriyaOne' }}</span>
+            </div>
+            <button onclick="closeMobileSidebar()" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        @php $authUser = $authUser ?? Auth::user(); @endphp
+        <div class="pt-4">
+            <div class="mx-4 mb-5 bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
+                <div class="flex items-center gap-3">
+                    @if($authUser && $authUser->profilePhotoUrl())
+                        <img src="{{ $authUser->profilePhotoUrl() }}" alt="Foto Profil" class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200">
+                    @else
+                        <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0">{{ $authUser ? strtoupper(substr($authUser->name, 0, 1)) : 'A' }}</div>
+                    @endif
+                    <div class="min-w-0 flex-1">
+                        <h3 class="font-semibold text-gray-900 text-sm truncate">{{ $authUser?->name ?? 'Admin' }}</h3>
+                        <p class="text-xs text-gray-500 truncate">{{ $authUser?->email ?? '-' }}</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="px-2 space-y-1 pb-8">
+                <a href="{{ route('admin.dashboard') }}" onclick="closeMobileSidebar()" class="bg-gradient-to-r from-orange-600 to-orange-700 flex items-center gap-3 px-4 py-3 rounded-lg text-white font-medium text-sm shadow-md">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 5h4"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <div class="text-xs font-semibold text-gray-500 px-4 py-3 uppercase tracking-wider">Manajemen</div>
+                <a href="{{ route('users.index') }}" onclick="closeMobileSidebar()" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm rounded-lg">
+                    <div class="flex items-center gap-3"><svg class="w-5 h-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM16 11h6"/></svg><span>Manajemen User</span></div>
+                    <span class="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">{{ \App\Models\User::count() }}</span>
+                </a>
+                <a href="{{ route('assets.index') }}" onclick="closeMobileSidebar()" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm rounded-lg">
+                    <div class="flex items-center gap-3"><svg class="w-5 h-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span>Listing Aset</span></div>
+                    <span class="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">{{ \App\Models\Asset::count() }}</span>
+                </a>
+                <a href="{{ route('contents.index') }}" onclick="closeMobileSidebar()" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm rounded-lg">
+                    <div class="flex items-center gap-3"><svg class="w-5 h-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg><span>Video Pembelajaran</span></div>
+                    <span class="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">{{ \App\Models\Content::count() }}</span>
+                </a>
+                <a href="{{ route('materi.index') }}" onclick="closeMobileSidebar()" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm rounded-lg">
+                    <div class="flex items-center gap-3"><svg class="w-5 h-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg><span>Materi PDF</span></div>
+                    <span class="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">{{ \App\Models\Material::count() }}</span>
+                </a>
+                <a href="{{ route('informasi.index') }}" onclick="closeMobileSidebar()" class="flex items-center justify-between px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm rounded-lg">
+                    <div class="flex items-center gap-3"><svg class="w-5 h-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Informasi Terbaru</span></div>
+                    <span class="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">{{ \App\Models\Information::count() }}</span>
+                </a>
+                <div class="my-3 border-t border-gray-200"></div>
+                <div class="text-xs font-semibold text-gray-500 px-4 py-3 uppercase tracking-wider">Sistem</div>
+                <a href="{{ route('profile.edit') }}" onclick="closeMobileSidebar()" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm rounded-lg">
+                    <svg class="w-5 h-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>Akun</span>
+                </a>
+                <a href="{{ route('admin.login-settings.edit') }}" onclick="closeMobileSidebar()" class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm rounded-lg">
+                    <svg class="w-5 h-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    <span>Pengaturan Web</span>
+                </a>
+                <form action="/logout" method="POST">@csrf
+                    <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-orange-600 hover:bg-orange-50 font-medium text-sm rounded-lg">
+                        <svg class="w-5 h-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </nav>
+        </div>
+    </aside>
+
     <!-- Main Layout -->
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-64 bg-gradient-to-b from-white to-orange-50 border-r border-gray-200 min-h-screen pt-4 fixed left-0 top-16 bottom-0 overflow-y-auto lg:relative lg:top-0 hidden lg:block scrollbar-hide">
+        <aside class="w-64 bg-gradient-to-b from-white to-orange-50 border-r border-gray-200 min-h-screen pt-4 fixed left-0 top-16 bottom-0 overflow-y-auto lg:relative lg:top-0 hidden lg:block scrollbar-hide flex-shrink-0">
             <!-- User Profile Card -->
             <div class="mx-4 mb-6 bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
                 @php
@@ -177,8 +295,8 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 lg:ml-0 pt-4">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main class="flex-1 min-w-0 pt-0">
+            <div class="max-w-7xl mx-auto px-3 sm:px-5 lg:px-8 py-4 sm:py-6 lg:py-8">
                 @yield('content')
             </div>
         </main>
@@ -229,6 +347,22 @@
 
     <script>
         let pendingForm = null;
+
+        // ============ Mobile Sidebar ============
+        function openMobileSidebar() {
+            document.getElementById('mobileSidebar').classList.add('open');
+            document.getElementById('sidebarBackdrop').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMobileSidebar() {
+            document.getElementById('mobileSidebar').classList.remove('open');
+            document.getElementById('sidebarBackdrop').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('hamburgerBtn').addEventListener('click', openMobileSidebar);
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeMobileSidebar();
+        });
 
         // ============ Notification System ============
         const notificationBtn = document.getElementById('notificationBtn');

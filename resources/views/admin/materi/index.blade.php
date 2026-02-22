@@ -10,8 +10,11 @@
             <h2 class="text-3xl font-bold text-gray-900 mb-1">Materi PDF</h2>
             <p class="text-gray-600">Kelola kumpulan materi dalam bentuk PDF untuk pembelajaran</p>
         </div>
-        <a href="{{ route('materi.create') }}" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-2 rounded-lg text-white font-medium text-sm transition-all duration-200 shadow-md hover:shadow-lg">
-            + Tambah Materi
+        <a href="{{ route('materi.create') }}" class="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Tambah Materi Baru
         </a>
     </div>
 
@@ -169,9 +172,12 @@
             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             <h3 class="text-lg font-semibold text-gray-900 mb-2">Belum ada materi</h3>
             <p class="text-gray-600 mb-6">Mulai tambahkan materi PDF untuk pembelajaran</p>
-            <a href="{{ route('materi.create') }}" class="inline-block bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition">
-                + Tambah Materi Pertama
-            </a>
+            <a href="{{ route('materi.create') }}" class="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Tambah User Baru
+        </a>
         </div>
     @endif
 @endsection

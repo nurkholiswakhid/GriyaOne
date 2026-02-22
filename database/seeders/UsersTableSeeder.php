@@ -16,7 +16,7 @@ class UsersTableSeeder extends Seeder
         // Create 20 test users with varied roles
         $users = [
             // 8 Regular Users
-            ['name' => 'Budi Santoso', 'email' => 'budi.santoso@test.com', 'role' => 'user'],
+            ['name' => 'User Test', 'email' => 'user@test.com', 'role' => 'user'],
             ['name' => 'Siti Nurhaliza', 'email' => 'siti.nurhaliza@test.com', 'role' => 'user'],
             ['name' => 'Ahmad Wijaya', 'email' => 'ahmad.wijaya@test.com', 'role' => 'user'],
             ['name' => 'Dewi Lestari', 'email' => 'dewi.lestari@test.com', 'role' => 'user'],

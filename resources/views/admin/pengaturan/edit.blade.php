@@ -20,7 +20,7 @@
                     @if($user->profilePhotoUrl())
                         <img src="{{ $user->profilePhotoUrl() }}" alt="Foto Profil" class="w-20 h-20 rounded-full object-cover mb-4 border border-gray-200">
                     @else
-                        <div class="w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-2xl mb-4">
+                        <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-2xl mb-4">
                             {{ substr($user->name, 0, 1) }}
                         </div>
                     @endif
@@ -95,7 +95,7 @@
                 <!-- Tabs -->
                 <div class="mb-8 border-b border-gray-200">
                     <div class="flex gap-8">
-                        <button type="button" class="px-1 py-3 border-b-2 border-red-600 text-red-600 font-semibold text-sm transition" onclick="switchTab(event, 'profil')">
+                        <button type="button" class="px-1 py-3 border-b-2 border-orange-500 text-orange-600 font-semibold text-sm transition" onclick="switchTab(event, 'profil')">
                             Informasi Profil
                         </button>
                         <button type="button" class="px-1 py-3 border-b-2 border-transparent text-gray-600 hover:text-gray-900 font-semibold text-sm transition" onclick="switchTab(event, 'password')">
@@ -116,7 +116,7 @@
                             <div>
                                 <label for="name" class="block text-sm font-semibold text-gray-900 mb-2">Nama Lengkap</label>
                                 <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition @error('name') border-red-500 @enderror"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition @error('name') border-red-500 @enderror"
                                     placeholder="Masukkan nama lengkap">
                                 @error('name')
                                     <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
@@ -127,7 +127,7 @@
                             <div>
                                 <label for="email" class="block text-sm font-semibold text-gray-900 mb-2">Email</label>
                                 <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition @error('email') border-red-500 @enderror"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition @error('email') border-red-500 @enderror"
                                     placeholder="Masukkan email">
                                 @error('email')
                                     <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
@@ -138,7 +138,7 @@
                             <div>
                                 <label for="phone" class="block text-sm font-semibold text-gray-900 mb-2">Nomor Telepon</label>
                                 <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone) }}"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition @error('phone') border-red-500 @enderror"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition @error('phone') border-red-500 @enderror"
                                     placeholder="Masukkan nomor telepon">
                                 @error('phone')
                                     <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
@@ -149,7 +149,7 @@
                             <div>
                                 <label for="profile_photo" class="block text-sm font-semibold text-gray-900 mb-2">Foto Profil</label>
                                 <input type="file" id="profile_photo" name="profile_photo" accept="image/png,image/jpeg,image/jpg,image/webp"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition @error('profile_photo') border-red-500 @enderror">
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition @error('profile_photo') border-red-500 @enderror">
                                 <p class="text-xs text-gray-500 mt-2">Format: JPG, JPEG, PNG, WEBP. Maksimal 2MB.</p>
                                 @error('profile_photo')
                                     <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
@@ -158,7 +158,7 @@
 
                             <!-- Submit Button -->
                             <div class="flex gap-3 pt-4">
-                                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition duration-200">
+                                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition duration-200">
                                     Simpan Perubahan
                                 </button>
                                 <a href="{{ route('admin.dashboard') }}" class="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition duration-200">
@@ -181,7 +181,7 @@
                             <div>
                                 <label for="current_password" class="block text-sm font-semibold text-gray-900 mb-2">Password Saat Ini</label>
                                 <input type="password" id="current_password" name="current_password"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition @error('current_password') border-red-500 @enderror"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition @error('current_password') border-red-500 @enderror"
                                     placeholder="Masukkan password saat ini">
                                 @error('current_password')
                                     <p class="text-red-600 text-sm mt-2">{{ $message }}</p>
@@ -192,7 +192,7 @@
                             <div>
                                 <label for="password" class="block text-sm font-semibold text-gray-900 mb-2">Password Baru</label>
                                 <input type="password" id="password" name="password"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition @error('password') border-red-500 @enderror"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition @error('password') border-red-500 @enderror"
                                     placeholder="Masukkan password baru">
                                 <p class="text-xs text-gray-500 mt-2">Minimal 8 karakter</p>
                                 @error('password')
@@ -204,7 +204,7 @@
                             <div>
                                 <label for="password_confirmation" class="block text-sm font-semibold text-gray-900 mb-2">Konfirmasi Password Baru</label>
                                 <input type="password" id="password_confirmation" name="password_confirmation"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                                     placeholder="Konfirmasi password baru">
                             </div>
 
@@ -227,7 +227,7 @@
 
                             <!-- Submit Button -->
                             <div class="flex gap-3 pt-4">
-                                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition duration-200">
+                                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition duration-200">
                                     Perbarui Password
                                 </button>
                                 <a href="{{ route('admin.dashboard') }}" class="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition duration-200">
@@ -254,12 +254,12 @@
 
         // Update button styles
         document.querySelectorAll('[onclick*="switchTab"]').forEach(btn => {
-            btn.classList.remove('border-red-600', 'text-red-600');
+            btn.classList.remove('border-orange-500', 'text-orange-600');
             btn.classList.add('border-transparent', 'text-gray-600');
         });
 
         event.currentTarget.classList.remove('border-transparent', 'text-gray-600');
-        event.currentTarget.classList.add('border-red-600', 'text-red-600');
+        event.currentTarget.classList.add('border-orange-500', 'text-orange-600');
     }
 </script>
 @endsection
