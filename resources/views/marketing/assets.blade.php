@@ -121,44 +121,24 @@
                             >
                         @endforeach
 
-                        <!-- Carousel Controls (hanya muncul jika lebih dari 1 foto) -->
-                        @if(count($asset->photos) > 1)
-                            <!-- Previous Button -->
-                            <button onclick="carouselPrev({{ $asset->id }})" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-2 rounded-full transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                            </button>
 
-                            <!-- Next Button -->
-                            <button onclick="carouselNext({{ $asset->id }})" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-2 rounded-full transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </button>
-
-                            <!-- Carousel Indicators -->
-                            <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1">
-                                @foreach($asset->photos as $index => $photo)
-                                    <button
-                                        onclick="carouselGo({{ $asset->id }}, {{ $index }})"
-                                        class="carousel-indicator h-2 rounded-full transition {{ $index === 0 ? 'bg-white w-6' : 'bg-white bg-opacity-50 w-2 hover:bg-opacity-75' }}"
-                                        data-index="{{ $index }}"
-                                    ></button>
-                                @endforeach
-                            </div>
-
-                            <!-- Photo Counter -->
-                            <div class="absolute top-3 right-3 bg-black bg-opacity-70 text-white px-3 py-1 rounded text-xs font-semibold z-10">
-                                <span class="carousel-counter">1</span>/{{ count($asset->photos) }}
-                            </div>
-                        @else
-                            <!-- Single Photo Count -->
-                            <div class="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs font-semibold">
-                                1 foto
-                            </div>
-                        @endif
                     </div>
+
+                    @if(count($asset->photos) > 1)
+                        <!-- Previous Button -->
+                        <button onclick="carouselPrev({{ $asset->id }})" class="absolute left-0 top-0 h-full w-10 z-20 flex items-center justify-center bg-gradient-to-r from-black/40 to-transparent hover:from-black/60 transition text-white">
+                            <svg class="w-5 h-5 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Next Button -->
+                        <button onclick="carouselNext({{ $asset->id }})" class="absolute right-0 top-0 h-full w-10 z-20 flex items-center justify-center bg-gradient-to-l from-black/40 to-transparent hover:from-black/60 transition text-white">
+                            <svg class="w-5 h-5 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    @endif
                 @else
                     <div class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600">
                         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,6 +168,16 @@
                 </div>
             </div>
 
+            <!-- Photo Counter Bar -->
+            @if($asset->photos && count($asset->photos) > 0)
+            <div class="flex items-center justify-center gap-2 py-2 bg-gray-50 border-b border-gray-200">
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-xs text-gray-500">Foto <span id="carousel-counter-{{ $asset->id }}" class="font-semibold text-gray-700">1</span> / {{ count($asset->photos) }}</span>
+            </div>
+            @endif
+
             <!-- Content Section -->
             <div class="p-4">
                 <h3 class="text-lg font-bold text-gray-900 mb-2">{{ $asset->title }}</h3>
@@ -208,6 +198,9 @@
                     <div class="text-sm text-orange-800 line-clamp-3 prose prose-sm max-w-none">
                         {!! $asset->description ?? '<em>Tidak ada deskripsi</em>' !!}
                     </div>
+                    @if($asset->description && strlen(strip_tags($asset->description)) > 120)
+                        <p class="text-xs text-orange-500 mt-1 font-medium">Lihat selengkapnya di Detail →</p>
+                    @endif
                 </div>
 
                 <!-- Action Buttons -->
@@ -253,7 +246,7 @@
             </div>
 
             <!-- Hidden asset data for modal -->
-            <div id="asset-data-{{ $asset->id }}" style="display: none;">{{ json_encode(['id' => $asset->id, 'title' => $asset->title, 'category' => $asset->category, 'location' => $asset->location, 'status' => $asset->status, 'description' => $asset->description, 'photos_count' => count($asset->photos ?? []), 'photos' => $asset->photos ?? []]) }}</div>
+            <div id="asset-data-{{ $asset->id }}" style="display: none;">{{ json_encode(['id' => $asset->id, 'title' => $asset->title, 'category' => $asset->category, 'location' => $asset->location, 'status' => $asset->status, 'description' => $asset->description, 'photos_count' => count($asset->photos ?? []), 'photos' => array_map(fn($p) => asset('storage/' . $p), $asset->photos ?? [])]) }}</div>
         </div>
         @empty
         <div class="col-span-full text-center py-12">
@@ -409,7 +402,7 @@ function downloadAllPhotos(assetId, assetTitle, btn) {
     let completed = 0;
     photos.forEach((photo, index) => {
         setTimeout(() => {
-            fetch('/storage/' + photo)
+            fetch(photo)
                 .then(res => {
                     if (!res.ok) throw new Error('Failed');
                     return res.blob();
@@ -606,7 +599,7 @@ function setupModalCarousel(data) {
         // Create images
         data.photos.forEach((photo, index) => {
             const img = document.createElement('img');
-            img.src = '/storage/' + photo;
+            img.src = photo;
             img.alt = data.title + ' - ' + (index + 1);
             img.className = `modal-carousel-image absolute w-full h-full object-cover transition duration-300 ${index === 0 ? 'opacity-100' : 'opacity-0'}`;
             img.dataset.index = index;
@@ -735,15 +728,8 @@ function updateCarousel(assetId) {
         img.classList.toggle('opacity-0', index !== state.current);
     });
 
-    // Update indicators
-    container.querySelectorAll('.carousel-indicator').forEach((dot, index) => {
-        dot.classList.toggle('bg-opacity-50', index !== state.current);
-        dot.classList.toggle('w-6', index === state.current);
-        dot.classList.toggle('w-2', index !== state.current);
-    });
-
     // Update counter
-    const counter = container.querySelector('.carousel-counter');
+    const counter = document.getElementById('carousel-counter-' + assetId);
     if (counter) {
         counter.textContent = state.current + 1;
     }

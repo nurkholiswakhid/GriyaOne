@@ -107,45 +107,24 @@
                                 >
                             @endforeach
 
-                            <!-- Carousel Controls (only show if more than 1 photo) -->
-                            @if(count($asset->photos) > 1)
-                                <!-- Previous Button -->
-                                <button type="button" onclick="carouselPrev({{ $asset->id }})" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-2 rounded-full transition">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                    </svg>
-                                </button>
 
-                                <!-- Next Button -->
-                                <button type="button" onclick="carouselNext({{ $asset->id }})" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-50 hover:bg-opacity-75 text-white p-2 rounded-full transition">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </button>
-
-                                <!-- Carousel Indicators -->
-                                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1">
-                                    @foreach($asset->photos as $index => $photo)
-                                        <button
-                                            type="button"
-                                            onclick="carouselGo({{ $asset->id }}, {{ $index }})"
-                                            class="carousel-indicator h-2 rounded-full transition {{ $index === 0 ? 'bg-white w-6' : 'bg-white bg-opacity-50 w-2 hover:bg-opacity-75' }}"
-                                            data-index="{{ $index }}"
-                                        ></button>
-                                    @endforeach
-                                </div>
-
-                                <!-- Photo Counter -->
-                                <div class="absolute top-3 right-3 bg-black bg-opacity-70 text-white px-3 py-1 rounded text-xs font-semibold z-10">
-                                    <span class="carousel-counter">1</span>/{{ count($asset->photos) }}
-                                </div>
-                            @else
-                                <!-- Single Photo Count -->
-                                <div class="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs font-semibold z-10">
-                                    📷 1 Foto
-                                </div>
-                            @endif
                         </div>
+
+                        @if(count($asset->photos) > 1)
+                            <!-- Previous Button -->
+                            <button type="button" onclick="carouselPrev({{ $asset->id }})" class="absolute left-0 top-0 h-full w-10 z-20 flex items-center justify-center bg-gradient-to-r from-black/40 to-transparent hover:from-black/60 transition text-white">
+                                <svg class="w-5 h-5 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Next Button -->
+                            <button type="button" onclick="carouselNext({{ $asset->id }})" class="absolute right-0 top-0 h-full w-10 z-20 flex items-center justify-center bg-gradient-to-l from-black/40 to-transparent hover:from-black/60 transition text-white">
+                                <svg class="w-5 h-5 drop-shadow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        @endif
                     @else
                         <div class="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600">
                             <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,6 +154,16 @@
                     </div>
                 </div>
 
+                <!-- Photo Counter Bar -->
+                @if($asset->photos && count($asset->photos) > 0)
+                <div class="flex items-center justify-center gap-2 py-2 bg-gray-50 border-b border-gray-200">
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-xs text-gray-500">Foto <span id="carousel-counter-{{ $asset->id }}" class="font-semibold text-gray-700">1</span> / {{ count($asset->photos) }}</span>
+                </div>
+                @endif
+
                 <!-- Content Section -->
                 <div class="p-5">
                     <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{{ $asset->title }}</h3>
@@ -189,21 +178,21 @@
                         </div>
                     </div>
 
-                    <!-- Broadcast Text Preview -->
+                    <!-- Description Preview -->
                     <div class="bg-orange-50 rounded-lg p-3 mb-4 border border-orange-200">
-                        <p class="text-xs font-semibold text-orange-900 mb-2">📢 Text Broadcast:</p>
-                        <p class="text-sm text-orange-800 line-clamp-4">
-                            Halo! Ada aset menarik dari kategori {{ $asset->category }} nih!<br>
-                            <strong>Judul:</strong> {{ $asset->title }}<br>
-                            <strong>Lokasi:</strong> {{ $asset->location ?? '-' }}<br>
-                            Hubungi kami untuk info lebih lanjut!
-                        </p>
+                        <p class="text-xs font-semibold text-orange-900 mb-2">Deskripsi:</p>
+                        <div class="text-sm text-orange-800 line-clamp-3 prose prose-sm max-w-none">
+                            {!! $asset->description ?? '<em>Tidak ada deskripsi</em>' !!}
+                        </div>
+                        @if($asset->description && strlen(strip_tags($asset->description)) > 120)
+                            <p class="text-xs text-orange-500 mt-1 font-medium">Lihat selengkapnya di Detail →</p>
+                        @endif
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="grid grid-cols-2 gap-2 mb-3">
-                        <!-- Copy Broadcast -->
-                        <button type="button" onclick="copyBroadcast({{ $asset->id }})" class="px-3 py-2 bg-orange-600 text-white text-xs font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-1">
+                        <!-- Copy Description -->
+                        <button type="button" onclick="copyDescription({{ $asset->id }}, this)" class="px-3 py-2 bg-orange-600 text-white text-xs font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                             </svg>
@@ -241,7 +230,7 @@ Status: {{ $asset->status === 'Available' ? 'Tersedia' : 'Terjual' }}
 Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
 
                 <!-- Hidden asset data for modal -->
-                <div id="asset-data-{{ $asset->id }}" style="display: none;">{{ json_encode(['id' => $asset->id, 'title' => $asset->title, 'category' => $asset->category, 'location' => $asset->location, 'status' => $asset->status, 'description' => $asset->description, 'photos_count' => count($asset->photos ?? []), 'photos' => $asset->photos ?? []]) }}</div>
+                <div id="asset-data-{{ $asset->id }}" style="display: none;">{{ json_encode(['id' => $asset->id, 'title' => $asset->title, 'category' => $asset->category, 'location' => $asset->location, 'status' => $asset->status, 'description' => $asset->description, 'photos_count' => count($asset->photos ?? []), 'photos' => array_map(fn($p) => asset('storage/' . $p), $asset->photos ?? [])]) }}</div>
             </div>
         @empty
             <!-- Empty State -->
@@ -273,7 +262,7 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
     <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 overflow-hidden">
         <!-- Header -->
         <div class="sticky top-0 bg-gradient-to-r from-orange-600 to-orange-700 px-8 py-6 flex items-center justify-between">
-            <div>
+            <div class="px-4 py-3">
                 <h3 class="text-2xl font-bold text-white" id="modalTitle">Detail Aset</h3>
                 <p class="text-orange-100 text-sm mt-1" id="modalSubtitle">Informasi lengkap tentang aset</p>
             </div>
@@ -284,16 +273,36 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
             </button>
         </div>
 
-        <!-- Body -->
+        <!-- Body - Two Columns -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-8">
             <!-- Left Column - Photo Carousel -->
             <div>
                 <div class="relative bg-gray-200 rounded-lg overflow-hidden h-96 flex items-center justify-center" id="modalPhotoContainer">
-                    <!-- Photos will be injected here -->
-                    <div class="w-full h-full flex items-center justify-center text-gray-500">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    <div class="carousel-container relative w-full h-full modal-carousel">
+                        <!-- Photos will be injected here -->
+                        <div class="w-full h-full flex items-center justify-center text-gray-500">
+                            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Carousel Controls -->
+                    <button type="button" onclick="modalCarouselPrev()" class="absolute left-3 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full transition" id="modalPrevBtn" style="display: none;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
+                    </button>
+
+                    <button type="button" onclick="modalCarouselNext()" class="absolute right-3 top-1/2 -translate-y-1/2 z-10 bg-black bg-opacity-60 hover:bg-opacity-80 text-white p-2 rounded-full transition" id="modalNextBtn" style="display: none;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Counter -->
+                    <div class="absolute bottom-4 right-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-semibold" id="modalPhotoCounter" style="display: none;">
+                        <span id="modalCurrentPhoto">1</span>/<span id="modalTotalPhotos">1</span>
                     </div>
                 </div>
 
@@ -332,11 +341,15 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Foto</p>
                         <p class="text-lg font-bold text-gray-900 mt-1" id="modalDetailPhotoCount">-</p>
                     </div>
+                    <div>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tipe Aset</p>
+                        <p class="text-lg font-bold text-gray-900 mt-1" id="modalDetailAssetType">-</p>
+                    </div>
                 </div>
 
                 <!-- Description -->
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900 mb-3">Deskripsi</h3>
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">Deskripsi Lengkap</h3>
                     <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 prose prose-sm max-w-none" id="modalDetailDescription">-</div>
                 </div>
 
@@ -386,7 +399,7 @@ function downloadAllPhotos(assetId, assetTitle, btn) {
     let completed = 0;
     photos.forEach((photo, index) => {
         setTimeout(() => {
-            fetch('/storage/' + photo)
+            fetch(photo)
                 .then(res => {
                     if (!res.ok) throw new Error('Failed');
                     return res.blob();
@@ -417,8 +430,7 @@ function downloadAllPhotos(assetId, assetTitle, btn) {
 function carouselNext(assetId) {
     const container = document.querySelector(`.carousel-container[data-asset-id="${assetId}"]`);
     const images = container.querySelectorAll('.carousel-image');
-    const indicators = container.querySelectorAll('.carousel-indicator');
-    const counter = container.querySelector('.carousel-counter');
+    const counter = document.getElementById('carousel-counter-' + assetId);
 
     let currentIndex = 0;
     for (let i = 0; i < images.length; i++) {
@@ -430,15 +442,11 @@ function carouselNext(assetId) {
 
     images[currentIndex].classList.remove('opacity-100');
     images[currentIndex].classList.add('opacity-0');
-    indicators[currentIndex].classList.remove('bg-white', 'w-6');
-    indicators[currentIndex].classList.add('bg-opacity-50', 'w-2');
 
     currentIndex = (currentIndex + 1) % images.length;
 
     images[currentIndex].classList.remove('opacity-0');
     images[currentIndex].classList.add('opacity-100');
-    indicators[currentIndex].classList.remove('bg-opacity-50', 'w-2');
-    indicators[currentIndex].classList.add('bg-white', 'w-6');
 
     if (counter) {
         counter.textContent = currentIndex + 1;
@@ -448,8 +456,7 @@ function carouselNext(assetId) {
 function carouselPrev(assetId) {
     const container = document.querySelector(`.carousel-container[data-asset-id="${assetId}"]`);
     const images = container.querySelectorAll('.carousel-image');
-    const indicators = container.querySelectorAll('.carousel-indicator');
-    const counter = container.querySelector('.carousel-counter');
+    const counter = document.getElementById('carousel-counter-' + assetId);
 
     let currentIndex = 0;
     for (let i = 0; i < images.length; i++) {
@@ -461,15 +468,11 @@ function carouselPrev(assetId) {
 
     images[currentIndex].classList.remove('opacity-100');
     images[currentIndex].classList.add('opacity-0');
-    indicators[currentIndex].classList.remove('bg-white', 'w-6');
-    indicators[currentIndex].classList.add('bg-opacity-50', 'w-2');
 
     currentIndex = (currentIndex - 1 + images.length) % images.length;
 
     images[currentIndex].classList.remove('opacity-0');
     images[currentIndex].classList.add('opacity-100');
-    indicators[currentIndex].classList.remove('bg-opacity-50', 'w-2');
-    indicators[currentIndex].classList.add('bg-white', 'w-6');
 
     if (counter) {
         counter.textContent = currentIndex + 1;
@@ -479,8 +482,7 @@ function carouselPrev(assetId) {
 function carouselGo(assetId, index) {
     const container = document.querySelector(`.carousel-container[data-asset-id="${assetId}"]`);
     const images = container.querySelectorAll('.carousel-image');
-    const indicators = container.querySelectorAll('.carousel-indicator');
-    const counter = container.querySelector('.carousel-counter');
+    const counter = document.getElementById('carousel-counter-' + assetId);
 
     let currentIndex = 0;
     for (let i = 0; i < images.length; i++) {
@@ -492,105 +494,219 @@ function carouselGo(assetId, index) {
 
     images[currentIndex].classList.remove('opacity-100');
     images[currentIndex].classList.add('opacity-0');
-    indicators[currentIndex].classList.remove('bg-white', 'w-6');
-    indicators[currentIndex].classList.add('bg-opacity-50', 'w-2');
 
     images[index].classList.remove('opacity-0');
     images[index].classList.add('opacity-100');
-    indicators[index].classList.remove('bg-opacity-50', 'w-2');
-    indicators[index].classList.add('bg-white', 'w-6');
 
     if (counter) {
         counter.textContent = index + 1;
     }
 }
 
-// Copy to Clipboard
-function copyBroadcast(assetId) {
-    const element = document.getElementById(`broadcast-${assetId}`);
-    const text = element.innerText;
+// Convert HTML to WhatsApp-friendly formatted text
+function htmlToFormattedText(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
 
-    navigator.clipboard.writeText(text).then(() => {
-        showToast('Text broadcast berhasil disalin ke clipboard!');
-    }).catch(err => {
-        console.error('Gagal menyalin:', err);
-        showToast('Gagal menyalin text', 'error');
-    });
+    function processNode(node) {
+        if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+        if (node.nodeType !== Node.ELEMENT_NODE) return '';
+        const tag = node.tagName.toLowerCase();
+        const inner = Array.from(node.childNodes).map(processNode).join('');
+        switch (tag) {
+            case 'strong': case 'b': return `*${inner}*`;
+            case 'em': case 'i': return `_${inner}_`;
+            case 's': case 'del': case 'strike': return `~${inner}~`;
+            case 'u': return inner;
+            case 'br': return '\n';
+            case 'p': return inner.trim() ? inner.trim() + '\n\n' : '';
+            case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': return `*${inner.trim()}*\n\n`;
+            case 'li': return `• ${inner.trim()}\n`;
+            case 'ul': case 'ol': return inner + '\n';
+            case 'blockquote': return inner.split('\n').map(l => l.trim() ? '> ' + l.trim() : '').filter(Boolean).join('\n') + '\n\n';
+            case 'code': return '`' + inner + '`';
+            case 'pre': return '```\n' + inner + '\n```\n';
+            default: return inner;
+        }
+    }
+    return Array.from(tmp.childNodes).map(processNode).join('').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function doClipboardCopy(htmlContent, onSuccess, onFail) {
+    const formattedText = htmlToFormattedText(htmlContent);
+    try {
+        navigator.clipboard.write([
+            new ClipboardItem({
+                'text/html': new Blob([htmlContent], { type: 'text/html' }),
+                'text/plain': new Blob([formattedText], { type: 'text/plain' })
+            })
+        ]).then(onSuccess).catch(() => navigator.clipboard.writeText(formattedText).then(onSuccess).catch(onFail));
+    } catch(e) {
+        navigator.clipboard.writeText(formattedText).then(onSuccess).catch(onFail);
+    }
+}
+
+// Copy Description
+function copyDescription(assetId, btn) {
+    const assetData = document.getElementById('asset-data-' + assetId);
+    if (!assetData) return;
+    const data = JSON.parse(assetData.textContent);
+    const description = data.description || '';
+
+    const originalHtml = btn ? btn.innerHTML : null;
+    doClipboardCopy(
+        description,
+        () => {
+            if (btn) {
+                btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Tersalin!';
+                btn.classList.replace('bg-orange-600', 'bg-green-600');
+                btn.classList.replace('hover:bg-orange-700', 'hover:bg-green-700');
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.replace('bg-green-600', 'bg-orange-600');
+                    btn.classList.replace('hover:bg-green-700', 'hover:bg-orange-700');
+                }, 2000);
+            }
+        },
+        () => showToast('Gagal menyalin text', 'error')
+    );
 }
 
 function copyFromModal() {
-    const currentAssetId = window.currentAssetId;
-    const element = document.getElementById(`broadcast-${currentAssetId}`);
-    const text = element.innerText;
+    const data = window.currentModalAssetData;
+    if (!data) return;
+    const description = data.description || '';
 
-    navigator.clipboard.writeText(text).then(() => {
-        showToast('Text broadcast berhasil disalin ke clipboard!');
-    }).catch(err => {
-        console.error('Gagal menyalin:', err);
-        showToast('Gagal menyalin text', 'error');
-    });
+    const btn = document.querySelector('#detailModal button[onclick="copyFromModal()"]');
+    const originalHtml = btn ? btn.innerHTML : null;
+
+    const doSuccess = () => {
+        if (btn) {
+            btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Tersalin!';
+            btn.classList.replace('bg-orange-600', 'bg-green-600');
+            btn.classList.replace('hover:bg-orange-700', 'hover:bg-green-700');
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.replace('bg-green-600', 'bg-orange-600');
+                btn.classList.replace('hover:bg-green-700', 'hover:bg-orange-700');
+            }, 2000);
+        } else {
+            showToast('Deskripsi berhasil disalin!');
+        }
+    };
+    const doFail = () => showToast('Gagal menyalin text', 'error');
+
+    doClipboardCopy(description, doSuccess, doFail);
 }
 
 // Modal Functions
 function showDetail(assetId) {
-    const dataElement = document.getElementById(`asset-data-${assetId}`);
-    const data = JSON.parse(dataElement.innerText);
+    const dataElement = document.getElementById('asset-data-' + assetId);
+    if (!dataElement) return;
+    const data = JSON.parse(dataElement.textContent);
 
     window.currentAssetId = assetId;
+    window.currentModalAssetData = data;
 
-    // Update modal content
-    document.getElementById('modalTitle').innerText = data.title;
-    document.getElementById('modalDetailTitle').innerText = data.title;
-    document.getElementById('modalDetailLocation').innerText = data.location || '-';
-    document.getElementById('modalDetailCategory').innerText = data.category;
-    document.getElementById('modalDetailPhotoCount').innerText = data.photos_count;
-    document.getElementById('modalDetailDescription').innerText = data.description || 'Tidak ada deskripsi';
+    // Populate header
+    document.getElementById('modalTitle').textContent = data.title;
+    document.getElementById('modalSubtitle').textContent = (data.location || '-') + ' • ' + data.category;
 
-    // Status badge
-    const statusBadge = document.getElementById('modalDetailStatus');
+    // Populate details
+    document.getElementById('modalDetailTitle').textContent = data.title;
+    document.getElementById('modalDetailLocation').textContent = data.location || '-';
+    document.getElementById('modalDetailCategory').textContent = data.category;
+    document.getElementById('modalDetailPhotoCount').textContent = data.photos_count + ' foto';
+    document.getElementById('modalDetailAssetType').textContent = 'Property';
+    document.getElementById('modalDetailDescription').innerHTML = data.description || '<em>Tidak ada deskripsi tersedia</em>';
+
+    // Status badge (in grid)
+    const statusDetail = document.getElementById('modalDetailStatus');
     if (data.status === 'Available') {
-        statusBadge.innerHTML = '<span class="inline-block px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">Tersedia</span>';
+        statusDetail.innerHTML = '<span class="inline-block px-3 py-1 bg-green-500 text-white text-sm font-bold rounded-full animate-pulse">Tersedia</span>';
     } else {
-        statusBadge.innerHTML = '<span class="inline-block px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">Terjual</span>';
+        statusDetail.innerHTML = '<span class="inline-block px-3 py-1 bg-red-500 text-white text-sm font-bold rounded-full">Terjual</span>';
     }
 
-    // Category badge
+    // Status badge (below photo)
+    const statusBadge = document.getElementById('modalStatusBadge');
+    if (data.status === 'Available') {
+        statusBadge.className = 'inline-block px-4 py-2 bg-green-500 text-white text-sm font-bold rounded-full animate-pulse';
+        statusBadge.textContent = 'Tersedia';
+    } else {
+        statusBadge.className = 'inline-block px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-full';
+        statusBadge.textContent = 'Terjual';
+    }
+
+    // Category badge (below photo)
+    let categoryClass = 'bg-orange-600';
+    if (data.category === 'AYDA') categoryClass = 'bg-green-600';
+    else if (data.category === 'Lelang') categoryClass = 'bg-purple-600';
     const categoryBadge = document.getElementById('modalCategoryBadge');
-    if (data.category === 'Bank Cessie') {
-        categoryBadge.innerHTML = 'Bank Cessie';
-        categoryBadge.className = 'inline-block px-4 py-2 bg-orange-600 text-white text-sm font-bold rounded-full';
-    } else if (data.category === 'AYDA') {
-        categoryBadge.innerHTML = 'AYDA';
-        categoryBadge.className = 'inline-block px-4 py-2 bg-green-600 text-white text-sm font-bold rounded-full';
-    } else {
-        categoryBadge.innerHTML = 'Lelang';
-        categoryBadge.className = 'inline-block px-4 py-2 bg-purple-600 text-white text-sm font-bold rounded-full';
-    }
+    categoryBadge.className = `inline-block px-4 py-2 ${categoryClass} text-white text-sm font-bold rounded-full`;
+    categoryBadge.textContent = data.category;
 
-    // Photos
-    const photoContainer = document.getElementById('modalPhotoContainer');
-    photoContainer.innerHTML = '';
+    // Setup photo carousel
+    setupModalCarousel(data);
+
+    document.getElementById('detailModal').classList.remove('hidden');
+}
+
+function setupModalCarousel(data) {
+    const container = document.querySelector('#detailModal .modal-carousel');
+    container.innerHTML = '';
 
     if (data.photos && data.photos.length > 0) {
         data.photos.forEach((photo, index) => {
             const img = document.createElement('img');
-            img.src = '/storage/' + photo;
-            img.alt = data.title + ' - Foto ' + (index + 1);
-            img.className = `absolute w-full h-full object-cover transition duration-300 ${index === 0 ? 'opacity-100' : 'opacity-0'}`;
-            img.setAttribute('data-index', index);
-            photoContainer.appendChild(img);
+            img.src = photo;
+            img.alt = data.title + ' - ' + (index + 1);
+            img.className = `modal-carousel-image absolute w-full h-full object-cover transition duration-300 ${index === 0 ? 'opacity-100' : 'opacity-0'}`;
+            img.dataset.index = index;
+            container.appendChild(img);
         });
+
+        window.modalCarouselState = { current: 0, total: data.photos.length };
 
         if (data.photos.length > 1) {
             document.getElementById('modalPrevBtn').style.display = 'block';
             document.getElementById('modalNextBtn').style.display = 'block';
             document.getElementById('modalPhotoCounter').style.display = 'block';
+            document.getElementById('modalCurrentPhoto').textContent = '1';
+            document.getElementById('modalTotalPhotos').textContent = data.photos.length;
+        } else {
+            document.getElementById('modalPrevBtn').style.display = 'none';
+            document.getElementById('modalNextBtn').style.display = 'none';
+            document.getElementById('modalPhotoCounter').style.display = 'none';
         }
     } else {
-        photoContainer.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500"><svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'w-full h-full flex items-center justify-center text-gray-500';
+        placeholder.innerHTML = '<svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+        container.appendChild(placeholder);
     }
+}
 
-    document.getElementById('detailModal').classList.remove('hidden');
+function updateModalCarousel() {
+    const state = window.modalCarouselState;
+    const container = document.querySelector('#detailModal .modal-carousel');
+    container.querySelectorAll('.modal-carousel-image').forEach((img, index) => {
+        img.classList.toggle('opacity-100', index === state.current);
+        img.classList.toggle('opacity-0', index !== state.current);
+    });
+    document.getElementById('modalCurrentPhoto').textContent = state.current + 1;
+}
+
+function modalCarouselNext() {
+    const state = window.modalCarouselState;
+    state.current = (state.current + 1) % state.total;
+    updateModalCarousel();
+}
+
+function modalCarouselPrev() {
+    const state = window.modalCarouselState;
+    state.current = (state.current - 1 + state.total) % state.total;
+    updateModalCarousel();
 }
 
 function closeModal() {
@@ -633,6 +749,28 @@ document.getElementById('detailModal')?.addEventListener('click', function(event
     }
 });
 </script>
+
+<style>
+#modalDetailDescription p { margin-bottom: 1rem; line-height: 1.6; }
+#modalDetailDescription h1,
+#modalDetailDescription h2,
+#modalDetailDescription h3,
+#modalDetailDescription h4,
+#modalDetailDescription h5,
+#modalDetailDescription h6 { margin: 1rem 0 0.5rem 0; font-weight: 600; }
+#modalDetailDescription h1 { font-size: 1.5rem; }
+#modalDetailDescription h2 { font-size: 1.25rem; }
+#modalDetailDescription h3 { font-size: 1.1rem; }
+#modalDetailDescription ul,
+#modalDetailDescription ol { margin: 1rem 0; padding-left: 2rem; }
+#modalDetailDescription li { margin-bottom: 0.5rem; }
+#modalDetailDescription strong { font-weight: 600; color: #1f2937; }
+#modalDetailDescription em { font-style: italic; color: #6b7280; }
+#modalDetailDescription blockquote { border-left: 4px solid #f97316; padding-left: 1rem; margin: 1rem 0; color: #6b7280; }
+#modalDetailDescription code { background-color: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; }
+#modalDetailDescription a { color: #f97316; text-decoration: underline; }
+#modalDetailDescription a:hover { color: #ea580c; }
+</style>
 @endsection
 
 

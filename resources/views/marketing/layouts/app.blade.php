@@ -21,7 +21,7 @@
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center gap-3 min-w-0">
-                    @php $__navLogo = \App\Models\Setting::get('login_logo_path',''); $__siteName = \App\Models\Setting::get('site_name','GriyaOne'); @endphp
+                    @php $__navLogo = \App\Models\Setting::get('login_logo_path',''); $__siteName = \App\Models\Setting::get('site_name','GriyaOne'); $waNumber = \App\Models\Setting::get('whatsapp_number',''); @endphp
                     @if($__navLogo)
                         <img src="{{ asset('storage/' . $__navLogo) }}" alt="Logo {{ $__siteName }}" class="w-10 h-10 rounded-lg object-contain bg-white p-1 shadow-md flex-shrink-0">
                     @else
@@ -161,7 +161,19 @@
                     </button>
                 </form>
             </nav>
-
+            <div class="mx-4 mt-8 mb-8 bg-gradient-to-br from-green-50 via-green-50 to-green-100 border-l-4 border-green-400 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="flex items-start gap-2">
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-gray-900 text-sm mb-1">Chat dengan Customer Service</h4>
+                        <p class="text-xs text-gray-700 leading-relaxed">Hubungi kami di WhatsApp untuk bantuan, laporan, atau pertanyaan Anda.</p>
+                        @if($waNumber)
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $waNumber) }}" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-xs font-semibold text-green-600 hover:text-green-700 transition-colors duration-200">Buka WhatsApp →</a>
+                        @else
+                            <span class="inline-block mt-2 text-xs text-gray-400 italic">Kontak belum dikonfigurasi</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
 
         </aside>
 

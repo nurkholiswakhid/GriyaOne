@@ -7,7 +7,7 @@
 
 {{-- Header --}}
 <div class="mb-5">
-    <h2 class="text-xl font-semibold text-gray-800">Selamat datang, {{ Auth::user()->name }}</h2>
+    <h2 class="text-xl font-semibold text-gray-800">Selamat datang, {{ Auth::user()?->name ?? 'Guest' }}</h2>
     <p class="text-sm text-gray-500 mt-0.5">Statistik properti {{ \App\Models\Setting::get('site_name','GriyaOne') }}</p>
 </div>
 
@@ -56,7 +56,7 @@
             <div class="space-y-2 text-xs">
                 <div>
                     <span class="text-gray-400 block">Nama</span>
-                    <span class="text-gray-800 font-medium">{{ Auth::user()->name }}</span>
+                    <span class="text-gray-800 font-medium">{{ Auth::user()?->name ?? 'N/A' }}</span>
                 </div>
                 <div>
                     <span class="text-gray-400 block">Email</span>
