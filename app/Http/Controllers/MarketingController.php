@@ -18,12 +18,33 @@ class MarketingController extends Controller
      */
     public function dashboard()
     {
+        // Informasi Terbaru
         $informations = Information::where('status', 'active')
             ->latest('published_date')
             ->take(3)
             ->get();
 
-        return view('marketing.marketing', compact('informations'));
+        // Statistik Listing/Asset
+        $totalListings      = Asset::count();
+        $availableListings  = Asset::where('status', 'Available')->count();
+        $soldListings       = Asset::where('status', 'Sold Out')->count();
+
+        // Listing berdasarkan kategori
+        $listingsByCategory = Asset::selectRaw('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->get();
+
+        // Listing terbaru
+        $recentListings = Asset::latest()->take(5)->get();
+
+        return view('marketing.marketing', compact(
+            'informations',
+            'totalListings',
+            'availableListings',
+            'soldListings',
+            'listingsByCategory',
+            'recentListings'
+        ));
     }
 
     /**

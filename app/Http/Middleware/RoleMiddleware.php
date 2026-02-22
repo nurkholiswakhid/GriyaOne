@@ -16,14 +16,16 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
+        // Catatan: auth middleware seharusnya sudah menjamin user terautentikasi.
+        // Guard ini sebagai fail-safe jika middleware diterapkan tanpa auth.
         if (!Auth::check()) {
-            return redirect('/login');
+            return redirect()->route('login');
         }
 
-        if (in_array(Auth::user()->role, $roles)) {
+        if (empty($roles) || in_array(Auth::user()->role, $roles)) {
             return $next($request);
         }
 
-        return abort(403, 'Unauthorized');
+        abort(403, 'Anda tidak memiliki akses ke halaman ini.');
     }
 }

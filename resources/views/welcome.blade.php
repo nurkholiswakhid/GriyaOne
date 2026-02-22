@@ -322,7 +322,8 @@
                     </div>
                 </div>
 
-                <!-- Test Credentials -->
+                {{-- Demo credentials: HANYA ditampilkan di environment non-production (local/staging) --}}
+                @if(!app()->isProduction())
                 <div class="fade-up fade-up-3" style="margin-top:16px; padding:14px 18px; background:#fff7ed; border:1px solid #fed7aa; border-radius:14px;">
                     <div style="display:flex; align-items:center; gap:7px; margin-bottom:10px;">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -343,6 +344,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <p style="text-align:center; font-size:11px; color:#d1d5db; margin-top:20px;">&copy; 2026 {{ $s['site_name'] ?? 'GriyaOne' }}. Semua hak dilindungi.</p>
             </div>

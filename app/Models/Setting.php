@@ -19,18 +19,22 @@ class Setting extends Model
     }
 
     /**
-     * Set / upsert a setting value.
+     * Set / upsert a setting value and clear the settings cache.
      */
     public static function set(string $key, ?string $value): void
     {
         static::updateOrCreate(['key' => $key], ['value' => $value]);
+        Cache::forget('settings.all');
     }
 
     /**
      * Get all settings as a key => value array.
+     * Di-cache 1 jam untuk menghindari query DB berulang di setiap page load.
      */
     public static function getAllAsArray(): array
     {
-        return static::all()->pluck('value', 'key')->toArray();
+        return Cache::remember('settings.all', 3600, function () {
+            return static::all()->pluck('value', 'key')->toArray();
+        });
     }
 }

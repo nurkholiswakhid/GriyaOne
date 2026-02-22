@@ -17,42 +17,41 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LoginSettingController;
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect('/dashboard');
+    }
     return view('welcome');
 });
 
-// Authentication Routes
-Route::get('/login', function () {
-    return view('welcome');
-})->name('login');
+// Authentication Routes — guest middleware mencegah user yang sudah login mengakses halaman ini
+Route::middleware('guest')->group(function () {
+    Route::get('/login', fn () => view('welcome'))->name('login');
+    Route::get('/register', fn () => view('welcome'));
+    Route::get('/password-reset', fn () => view('welcome'));
+});
 
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::get('/register', function () {
-    return view('welcome');
-});
 
 Route::post('/register', function () {
     // Registration logic will be implemented here
     return redirect('/login');
 });
 
-Route::get('/password-reset', function () {
-    return view('welcome');
-});
-
 // Dashboard Routes - Protected by auth middleware
 Route::middleware('auth')->group(function () {
     Route::get('/user-dashboard', [DashboardController::class, 'userDashboard'])->name('user.dashboard');
-    Route::get('/marketing-dashboard', [DashboardController::class, 'marketingDashboard'])->name('marketing.dashboard');
+    // Catatan: route ini tidak lagi digunakan sebagai default redirect login marketing.
+    // Login marketing kini mengarah ke marketing/dashboard (MarketingController, dengan role:marketing middleware).
+    Route::get('/marketing-dashboard', [DashboardController::class, 'marketingDashboard'])->name('marketing.legacy-dashboard');
     Route::get('/admin-dashboard', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
 
     // Redirect generic dashboard to role-specific dashboard
     Route::get('/dashboard', fn () => match(Auth::user()->role) {
-        'admin' => redirect('/admin-dashboard'),
-        'marketing' => redirect('/marketing-dashboard'),
-        default => redirect('/user-dashboard'),
+        'admin'     => redirect('/admin-dashboard'),
+        'marketing' => redirect()->route('marketing.dashboard'),
+        default     => redirect('/user-dashboard'),
     });
 
     // API Routes
