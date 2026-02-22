@@ -119,11 +119,11 @@
             <!-- Profile Card -->
             <div class="mx-4 mb-5 bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
                 <div class="flex items-center gap-3">
-                    @if($authUser && $authUser->profilePhotoUrl())
+                    @if($authUser && method_exists($authUser, 'profilePhotoUrl') && $authUser->profilePhotoUrl())
                         <img src="{{ $authUser->profilePhotoUrl() }}" alt="Foto Profil" class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200">
                     @else
                         <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0">
-                            {{ $authUser ? strtoupper(substr($authUser->name, 0, 1)) : 'U' }}
+                            {{ $authUser && isset($authUser->name) && strlen($authUser->name) > 0 ? strtoupper(substr($authUser->name, 0, 1)) : 'U' }}
                         </div>
                     @endif
                     <div class="min-w-0 flex-1">
