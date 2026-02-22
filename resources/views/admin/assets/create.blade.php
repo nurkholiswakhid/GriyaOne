@@ -75,10 +75,22 @@
                             </div>
                         </div>
 
-                        <!-- Alamat -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Alamat </label>
-                            <input type="text" name="location" value="{{ old('location') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('location') border-red-500 @enderror" placeholder="Jakarta Selatan, DKI Jakarta">
+                        <!-- Lokasi Wilayah Indonesia -->
+                        <div class="space-y-3">
+                            <label class="block text-sm font-semibold text-gray-700">Lokasi <span class="text-gray-400 font-normal">(Provinsi / Kota / Kecamatan)</span></label>
+                            <div class="grid grid-cols-1 gap-3">
+                                <select id="sel_provinsi" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition">
+                                    <option value="">-- Pilih Provinsi --</option>
+                                </select>
+                                <select id="sel_kota" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition disabled:bg-gray-50 disabled:text-gray-400">
+                                    <option value="">-- Pilih Kabupaten / Kota --</option>
+                                </select>
+                                <select id="sel_kecamatan" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition disabled:bg-gray-50 disabled:text-gray-400">
+                                    <option value="">-- Pilih Kecamatan --</option>
+                                </select>
+                            </div>
+                            <input type="hidden" name="location" id="location_value" value="{{ old('location') }}">
+                            <p id="lokasi_preview" class="text-xs text-gray-500 italic hidden"></p>
                             @error('location')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -353,6 +365,96 @@
                 log('Quill already initialized');
             }
         });
+    </script>
+
+    {{-- ===== WILAYAH INDONESIA CASCADE ===== --}}
+    <script>
+    (function() {
+        const API = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+        const selProv  = document.getElementById('sel_provinsi');
+        const selKota  = document.getElementById('sel_kota');
+        const selKec   = document.getElementById('sel_kecamatan');
+        const hidLoc   = document.getElementById('location_value');
+        const preview  = document.getElementById('lokasi_preview');
+
+        function setOptions(sel, items, valKey, nameKey, placeholder) {
+            sel.innerHTML = `<option value="">${placeholder}</option>`;
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item[valKey];
+                opt.dataset.name = item[nameKey];
+                opt.textContent = item[nameKey];
+                sel.appendChild(opt);
+            });
+        }
+
+        function updateHidden() {
+            const pOpt = selProv.options[selProv.selectedIndex];
+            const kOpt = selKota.options[selKota.selectedIndex];
+            const cOpt = selKec.options[selKec.selectedIndex];
+            const parts = [];
+            if (cOpt && cOpt.value) parts.push('Kec. ' + cOpt.dataset.name);
+            if (kOpt && kOpt.value) parts.push(kOpt.dataset.name);
+            if (pOpt && pOpt.value) parts.push(pOpt.dataset.name);
+            const val = parts.join(', ');
+            hidLoc.value = val;
+            if (val) {
+                preview.textContent = val;
+                preview.classList.remove('hidden');
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
+
+        // Load provinces
+        fetch(`${API}/provinces.json`)
+            .then(r => r.json())
+            .then(data => {
+                setOptions(selProv, data, 'id', 'name', '-- Pilih Provinsi --');
+                // Restore old value if any
+                const oldVal = hidLoc.value;
+                if (oldVal) {
+                    preview.textContent = oldVal;
+                    preview.classList.remove('hidden');
+                }
+            })
+            .catch(() => console.warn('Gagal memuat data provinsi'));
+
+        selProv.addEventListener('change', function() {
+            const provId = this.value;
+            selKota.innerHTML = '<option value="">-- Pilih Kabupaten / Kota --</option>';
+            selKota.disabled = true;
+            selKec.innerHTML  = '<option value="">-- Pilih Kecamatan --</option>';
+            selKec.disabled   = true;
+            hidLoc.value = '';
+            preview.classList.add('hidden');
+            if (!provId) return;
+            fetch(`${API}/regencies/${provId}.json`)
+                .then(r => r.json())
+                .then(data => {
+                    setOptions(selKota, data, 'id', 'name', '-- Pilih Kabupaten / Kota --');
+                    selKota.disabled = false;
+                })
+                .catch(() => console.warn('Gagal memuat kota'));
+        });
+
+        selKota.addEventListener('change', function() {
+            const kotaId = this.value;
+            selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+            selKec.disabled  = true;
+            updateHidden();
+            if (!kotaId) return;
+            fetch(`${API}/districts/${kotaId}.json`)
+                .then(r => r.json())
+                .then(data => {
+                    setOptions(selKec, data, 'id', 'name', '-- Pilih Kecamatan --');
+                    selKec.disabled = false;
+                })
+                .catch(() => console.warn('Gagal memuat kecamatan'));
+        });
+
+        selKec.addEventListener('change', updateHidden);
+    })();
     </script>
 @endsection
 
