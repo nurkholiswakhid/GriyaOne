@@ -135,9 +135,9 @@
                 @if(!empty($s['login_logo_path']))
                     <img src="{{ asset('storage/' . $s['login_logo_path']) }}"
                         alt="Logo GriyaOne"
-                        style="width:46px; height:46px; border-radius:12px; object-fit:contain; background:#fff; padding:4px; box-shadow:0 4px 14px rgba(0,0,0,0.25);">
+                        style="height:46px; width:auto; max-width:120px;border-radius: 12px; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.35));">
                 @else
-                    <div style="width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg,#ea580c,#f97316); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(234,88,12,0.4);">
+                    <div style="width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg,#ea580c,#f97316); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(255, 255, 255, 0.4);">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                     </div>
                 @endif
@@ -207,7 +207,7 @@
                     @if(!empty($s['login_logo_path']))
                         <img src="{{ asset('storage/' . $s['login_logo_path']) }}"
                             alt="Logo GriyaOne"
-                            style="display:inline-block; width:60px; height:60px; border-radius:16px; object-fit:contain; background:#fff; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,0.15); margin-bottom:12px;">
+                            style="display:inline-block; height:64px; width:auto; max-width:180px; object-fit:contain; margin-bottom:12px; filter:drop-shadow(0 2px 10px rgba(0,0,0,0.12));">
                     @else
                         <div style="display:inline-flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:16px; background:linear-gradient(135deg,#ea580c,#f97316); box-shadow:0 8px 24px rgba(234,88,12,0.35); margin-bottom:12px;">
                             <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -296,9 +296,7 @@
                                     <input type="checkbox" name="remember" id="remember" style="width:15px; height:15px; accent-color:#ea580c; cursor:pointer;" {{ old('remember') ? 'checked' : '' }}>
                                     <span style="font-size:13px; color:#6b7280; user-select:none;">Ingat saya</span>
                                 </label>
-                                <a href="/password-reset" style="font-size:13px; font-weight:600; color:#ea580c; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                                    Lupa password?
-                                </a>
+
                             </div>
 
                             <!-- Submit -->
@@ -307,13 +305,6 @@
                             </button>
                         </form>
 
-                        <!-- Register -->
-                        <div style="margin-top:22px; padding-top:20px; border-top:1px solid #f3f4f6; text-align:center;">
-                            <span style="font-size:13px; color:#9ca3af;">Belum punya akun? </span>
-                            <a href="/register" style="font-size:13px; font-weight:700; color:#ea580c; text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                                Daftar sekarang
-                            </a>
-                        </div>
 
                         @if(!empty($s['login_wa_number']))
                         <!-- WhatsApp CS Button -->

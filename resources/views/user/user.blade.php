@@ -60,11 +60,11 @@
                 </div>
                 <div>
                     <span class="text-gray-400 block">Email</span>
-                    <span class="text-gray-800 font-medium break-all">{{ Auth::user()->email }}</span>
+                    <span class="text-gray-800 font-medium break-all">{{ Auth::user()?->email ?? 'N/A' }}</span>
                 </div>
                 <div>
                     <span class="text-gray-400 block">Bergabung</span>
-                    <span class="text-gray-800 font-medium">{{ Auth::user()->created_at->format('d M Y') }}</span>
+                    <span class="text-gray-800 font-medium">{{ Auth::user()?->created_at_readable ?? 'N/A' }}</span>
                 </div>
                 <div class="flex items-center justify-between pt-1">
                     <span class="text-gray-400">Status</span>
