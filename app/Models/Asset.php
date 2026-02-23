@@ -12,6 +12,7 @@ class Asset extends Model
         'category',
         'status',
         'location',
+        'gmap_link',
         'photos',
     ];
 

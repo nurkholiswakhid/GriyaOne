@@ -56,6 +56,7 @@ class AssetController extends Controller
             'category' => 'required|in:Bank Cessie,AYDA,Lelang',
             'status' => 'required|in:Available,Sold Out',
             'location' => 'nullable|string|max:255',
+            'gmap_link' => 'nullable|url|max:1000',
             'photos' => 'nullable|array',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -114,6 +115,7 @@ class AssetController extends Controller
             'category' => 'required|in:Bank Cessie,AYDA,Lelang',
             'status' => 'required|in:Available,Sold Out',
             'location' => 'nullable|string|max:255',
+            'gmap_link' => 'nullable|url|max:1000',
             'photos' => 'nullable|array',
             'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'deleted_photos' => 'nullable|array',

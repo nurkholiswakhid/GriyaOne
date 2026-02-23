@@ -76,6 +76,25 @@
                             </div>
                         </div>
 
+                        <!-- Link Google Maps -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                Link Google Maps
+                                <span class="text-gray-400 font-normal">(opsional)</span>
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <input type="url" name="gmap_link" value="{{ old('gmap_link') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-red-500 transition @error('gmap_link') border-red-500 @enderror" placeholder="https://maps.google.com/...">
+                            </div>
+                            @error('gmap_link')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                            <p class="text-xs text-gray-400 mt-1">Tempel link Google Maps lokasi aset agar bisa disalin oleh tim marketing dan user.</p>
+                        </div>
+
                         <!-- Lokasi Wilayah Indonesia -->
                         <div class="space-y-3">
                             <label class="block text-sm font-semibold text-gray-700">Lokasi <span class="text-gray-400 font-normal">(Provinsi / Kota / Kecamatan)</span></label>

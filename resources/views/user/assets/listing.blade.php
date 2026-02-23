@@ -240,22 +240,35 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="grid grid-cols-2 gap-2 mb-3">
-                        <!-- Copy Description -->
-                        <button type="button" onclick="copyDescription({{ $asset->id }}, this)" class="px-3 py-2 bg-orange-600 text-white text-xs font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                            </svg>
-                            Salin
-                        </button>
-
-                        <!-- Download Photos -->
-                        @if($asset->photos && count($asset->photos) > 0)
-                            <button onclick="downloadAllPhotos({{ $asset->id }}, '{{ addslashes($asset->title) }}', this)" class="px-3 py-2 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1">
+                    <div class="space-y-2 mb-3">
+                        <div class="flex gap-2">
+                            <!-- Copy Description -->
+                            <button type="button" onclick="copyDescription({{ $asset->id }}, this)" class="flex-1 px-3 py-2 bg-orange-600 text-white text-xs font-semibold rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                                 </svg>
-                                Unduh
+                                Salin
+                            </button>
+
+                            <!-- Download Photos -->
+                            @if($asset->photos && count($asset->photos) > 0)
+                                <button onclick="downloadAllPhotos({{ $asset->id }}, '{{ addslashes($asset->title) }}', this)" class="flex-1 px-3 py-2 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    Unduh
+                                </button>
+                            @endif
+                        </div>
+
+                        <!-- Copy GMap Link -->
+                        @if($asset->gmap_link)
+                            <button type="button" onclick="copyGmapLink({{ $asset->id }}, this)" class="w-full px-3 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Salin Lokasi GMaps
                             </button>
                         @endif
                     </div>
@@ -280,7 +293,7 @@ Status: {{ $asset->status === 'Available' ? 'Tersedia' : 'Terjual' }}
 Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
 
                 <!-- Hidden asset data for modal -->
-                <div id="asset-data-{{ $asset->id }}" style="display: none;">{{ json_encode(['id' => $asset->id, 'title' => $asset->title, 'category' => $asset->category, 'location' => $asset->location, 'status' => $asset->status, 'description' => $asset->description, 'photos_count' => count($asset->photos ?? []), 'photos' => array_map(fn($p) => asset('storage/' . $p), $asset->photos ?? [])]) }}</div>
+                <div id="asset-data-{{ $asset->id }}" style="display: none;">{{ json_encode(['id' => $asset->id, 'title' => $asset->title, 'category' => $asset->category, 'location' => $asset->location, 'gmap_link' => $asset->gmap_link, 'status' => $asset->status, 'description' => $asset->description, 'photos_count' => count($asset->photos ?? []), 'photos' => array_map(fn($p) => asset('storage/' . $p), $asset->photos ?? [])]) }}</div>
             </div>
         @empty
             <!-- Empty State -->
@@ -404,12 +417,19 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex gap-3 pt-4 border-t border-gray-200">
+                <div class="flex gap-3 pt-4 border-t border-gray-200 flex-wrap">
                     <button type="button" onclick="copyFromModal()" class="flex-1 px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
                         Salin Text
+                    </button>
+                    <button type="button" id="modalGmapBtn" onclick="copyGmapFromModal()" class="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2" style="display:none;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Salin GMaps
                     </button>
                     <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition">
                         Tutup
@@ -622,6 +642,51 @@ function copyDescription(assetId, btn) {
     );
 }
 
+// Copy Google Maps Link
+function copyGmapLink(assetId, btn) {
+    const assetData = document.getElementById('asset-data-' + assetId);
+    if (!assetData) return;
+    const data = JSON.parse(assetData.textContent);
+    const link = data.gmap_link || '';
+    if (!link) return;
+
+    const originalHtml = btn ? btn.innerHTML : null;
+    navigator.clipboard.writeText(link).then(() => {
+        if (btn) {
+            btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Tersalin!';
+            btn.classList.replace('bg-blue-600', 'bg-green-600');
+            btn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.replace('bg-green-600', 'bg-blue-600');
+                btn.classList.replace('hover:bg-green-700', 'hover:bg-blue-700');
+            }, 2000);
+        }
+        showToast('Link Google Maps berhasil disalin!');
+    }).catch(() => showToast('Gagal menyalin link', 'error'));
+}
+
+function copyGmapFromModal() {
+    const data = window.currentModalAssetData;
+    if (!data || !data.gmap_link) return;
+
+    const btn = document.getElementById('modalGmapBtn');
+    const originalHtml = btn ? btn.innerHTML : null;
+    navigator.clipboard.writeText(data.gmap_link).then(() => {
+        if (btn) {
+            btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Tersalin!';
+            btn.classList.replace('bg-blue-600', 'bg-green-600');
+            btn.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.replace('bg-green-600', 'bg-blue-600');
+                btn.classList.replace('hover:bg-green-700', 'hover:bg-blue-700');
+            }, 2000);
+        }
+        showToast('Link Google Maps berhasil disalin!');
+    }).catch(() => showToast('Gagal menyalin link', 'error'));
+}
+
 function copyFromModal() {
     const data = window.currentModalAssetData;
     if (!data) return;
@@ -669,6 +734,17 @@ function showDetail(assetId) {
     document.getElementById('modalDetailPhotoCount').textContent = data.photos_count + ' foto';
     document.getElementById('modalDetailAssetType').textContent = 'Property';
     document.getElementById('modalDetailDescription').innerHTML = data.description || '<em>Tidak ada deskripsi tersedia</em>';
+
+    // Show/hide GMaps button in modal
+    const gmapBtn = document.getElementById('modalGmapBtn');
+    if (gmapBtn) {
+        if (data.gmap_link) {
+            gmapBtn.style.removeProperty('display');
+            gmapBtn.style.display = 'flex';
+        } else {
+            gmapBtn.style.display = 'none';
+        }
+    }
 
     // Status badge (in grid)
     const statusDetail = document.getElementById('modalDetailStatus');
