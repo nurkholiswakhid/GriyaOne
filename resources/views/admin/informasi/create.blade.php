@@ -76,7 +76,8 @@
             <!-- Published Date -->
             <div>
                 <label for="published_date" class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Publikasi <span class="text-red-500">*</span></label>
-                <input type="datetime-local" id="published_date" name="published_date" value="{{ old('published_date', now()->format('Y-m-d\TH:i')) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition @error('published_date') border-red-500 @enderror">
+                <input type="datetime-local" id="published_date" name="published_date" value="{{ old('published_date', now()->format('Y-m-d\TH:i')) }}" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-100 cursor-not-allowed focus:outline-none transition @error('published_date') border-red-500 @enderror">
+                <p class="text-gray-500 text-xs mt-2">Waktu otomatis saat ini (tidak dapat diubah)</p>
                 @error('published_date')
                     <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                 @enderror
@@ -500,6 +501,29 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeDeleteConfirmationModal();
     }
+});
+
+// Auto-update published date and time to current real-time
+document.addEventListener('DOMContentLoaded', function() {
+    const publishedDateInput = document.getElementById('published_date');
+
+    function updatePublishedDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        const datetimeValue = `${year}-${month}-${day}T${hours}:${minutes}`;
+        publishedDateInput.value = datetimeValue;
+    }
+
+    // Set initial value
+    updatePublishedDate();
+
+    // Update every second for real-time display
+    setInterval(updatePublishedDate, 1000);
 });
 </script>
 @endsection
