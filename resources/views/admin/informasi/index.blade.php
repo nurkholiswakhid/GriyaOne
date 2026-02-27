@@ -117,7 +117,6 @@
                                 <!-- Tanggal -->
                                 <td class="px-4 py-3 whitespace-nowrap">
                                     <p class="text-gray-700 font-medium">{{ $info->published_date->format('d M Y') }}</p>
-                                    <p class="text-xs text-gray-400">{{ $info->published_date->format('H:i') }}</p>
                                 </td>
                                 <!-- Aksi ikon -->
                                 <td class="px-4 py-3">

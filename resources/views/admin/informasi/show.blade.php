@@ -12,7 +12,7 @@
         <div class="flex justify-between items-start">
             <div>
                 <h2 class="text-3xl font-bold text-gray-900">{{ $informasi->title }}</h2>
-                <p class="text-gray-600 mt-2">Diterbitkan: {{ $informasi->published_date->format('d M Y H:i') }}</p>
+                <p class="text-gray-600 mt-2">Diterbitkan: {{ $informasi->published_date->format('d M Y') }}</p>
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('informasi.edit', $informasi->id) }}" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-semibold text-sm transition">
@@ -47,11 +47,11 @@
             </div>
             <div>
                 <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Dibuat</p>
-                <p class="mt-1 text-sm text-gray-700">{{ $informasi->created_at->format('d M Y H:i') }}</p>
+                <p class="mt-1 text-sm text-gray-700">{{ $informasi->created_at->format('d M Y') }}</p>
             </div>
             <div>
                 <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Diperbarui</p>
-                <p class="mt-1 text-sm text-gray-700">{{ $informasi->updated_at->format('d M Y H:i') }}</p>
+                <p class="mt-1 text-sm text-gray-700">{{ $informasi->updated_at->format('d M Y') }}</p>
             </div>
         </div>
 
