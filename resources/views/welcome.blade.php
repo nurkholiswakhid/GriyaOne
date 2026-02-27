@@ -327,30 +327,6 @@
                     </div>
                 </div>
 
-                {{-- Demo credentials: HANYA ditampilkan di environment non-production (local/staging) --}}
-                @if(!app()->isProduction())
-                <div class="fade-up fade-up-3" style="margin-top:16px; padding:14px 18px; background:#fff7ed; border:1px solid #fed7aa; border-radius:14px;">
-                    <div style="display:flex; align-items:center; gap:7px; margin-bottom:10px;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <span style="font-size:11px; font-weight:800; color:#9a3412; text-transform:uppercase; letter-spacing:0.05em;">Akun Demo</span>
-                    </div>
-                    <div style="display:grid; gap:5px; font-size:12px; color:#78350f;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="font-weight:600; color:#92400e;">User</span>
-                            <span style="font-family:monospace; letter-spacing:0.02em;">user@test.com / password</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="font-weight:600; color:#92400e;">Marketing</span>
-                            <span style="font-family:monospace; letter-spacing:0.02em;">marketing@test.com / password</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="font-weight:600; color:#92400e;">Admin</span>
-                            <span style="font-family:monospace; letter-spacing:0.02em;">admin@test.com / password</span>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
                 <p style="text-align:center; font-size:11px; color:#d1d5db; margin-top:20px;">&copy; 2026 {{ $s['site_name'] ?? 'GriyaOne' }}. Semua hak dilindungi.</p>
             </div>
         </div>
