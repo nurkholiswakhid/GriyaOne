@@ -350,6 +350,9 @@
 
 <!-- Download Image Picker Modal -->
 <style>
+    #downloadModal {
+        scroll-behavior: smooth;
+    }
     #downloadModal .dm-backdrop {
         animation: dmFadeIn 0.25s ease;
     }
@@ -392,10 +395,30 @@
     .dm-btn-action:not(:disabled):active {
         transform: translateY(0);
     }
+
+    /* Smooth scrolling for image grid */
+    #downloadModal .dm-panel {
+        scroll-behavior: smooth;
+    }
+
+    /* Scrollbar styling for the body area */
+    #downloadModal .flex-1::-webkit-scrollbar {
+        width: 8px;
+    }
+    #downloadModal .flex-1::-webkit-scrollbar-track {
+        background: #f9fafb;
+    }
+    #downloadModal .flex-1::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    #downloadModal .flex-1::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
 </style>
 
-<div id="downloadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background: rgba(10,10,20,0.65); backdrop-filter: blur(6px);">
-    <div class="dm-panel bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col" style="box-shadow: 0 32px 80px rgba(0,0,0,0.35);">
+<div id="downloadModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto" style="background: rgba(10,10,20,0.65); backdrop-filter: blur(6px);">
+    <div class="dm-panel bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col my-4" style="box-shadow: 0 32px 80px rgba(0,0,0,0.35);">
 
         <!-- Header -->
         <div class="relative overflow-hidden px-6 py-5 flex items-center justify-between flex-shrink-0" style="background: linear-gradient(135deg, #065f46 0%, #059669 55%, #10b981 100%);">
@@ -658,6 +681,9 @@ function openDownloadModal(assetId, assetTitle, btn) {
     // Render images grid
     renderDownloadImageGrid();
 
+    // Freeze background
+    document.body.style.overflow = 'hidden';
+
     // Show modal
     document.getElementById('downloadModal').classList.remove('hidden');
 }
@@ -667,6 +693,9 @@ function closeDownloadModal() {
     document.getElementById('downloadModal').classList.add('hidden');
     downloadModalState.selectedPhotos.clear();
     updateImageSelectedCount();
+
+    // Unfreeze background
+    document.body.style.overflow = '';
 }
 
 // Render Image Grid in Download Modal
