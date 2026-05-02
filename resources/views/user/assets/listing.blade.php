@@ -500,7 +500,7 @@ Tunggu apalagi? Hubungi kami sekarang untuk info lebih lanjut!</div>
         <!-- ── Header ── -->
         <div class="relative overflow-hidden px-6 py-5 flex items-center justify-between flex-shrink-0" style="background: linear-gradient(135deg, #065f46 0%, #059669 55%, #10b981 100%);">
             <!-- decorative circles -->
-          
+
 
             <div class="relative flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
