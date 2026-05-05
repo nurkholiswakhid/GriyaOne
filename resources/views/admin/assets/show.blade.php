@@ -3,6 +3,13 @@
 @section('title', $asset->title . ' - GriyaOne')
 @section('role', 'Detail Aset')
 
+@if($asset->photos && count($asset->photos) > 0)
+@push('preload')
+    {{-- Preload gambar utama (LCP element) agar browser fetch lebih awal --}}
+    <link rel="preload" as="image" href="{{ asset('storage/' . $asset->photos[0]) }}" fetchpriority="high">
+@endpush
+@endif
+
 @section('content')
     <!-- Header -->
     <div class="mb-8 flex justify-between items-start fade-in">
@@ -29,13 +36,32 @@
             <!-- Photo Gallery -->
             @if($asset->photos && count($asset->photos) > 0)
                 <div class="bg-white rounded-xl overflow-hidden shadow-md">
-                    <div class="bg-gray-900 h-96 relative overflow-hidden">
-                        <img id="main-image" src="{{ asset('storage/' . $asset->photos[0]) }}" class="w-full h-full object-cover" alt="{{ $asset->title }}">
+                    <!-- Main image: dimensi eksplisit + fetchpriority=high untuk LCP -->
+                    <div class="bg-gray-900 relative overflow-hidden" style="height:384px;">
+                        <img
+                            id="main-image"
+                            src="{{ asset('storage/' . $asset->photos[0]) }}"
+                            class="w-full h-full object-cover"
+                            alt="{{ $asset->title }}"
+                            width="800"
+                            height="384"
+                            fetchpriority="high"
+                            decoding="async"
+                        >
                     </div>
                     <div class="p-4 flex items-center justify-between bg-gray-50">
                         <div class="flex gap-2 overflow-x-auto flex-1">
                             @foreach($asset->photos as $index => $photo)
-                                <img src="{{ asset('storage/' . $photo) }}" alt="Foto {{ $index + 1 }}" class="h-20 w-20 object-contain bg-gray-100 rounded-lg cursor-pointer border-2 border-transparent hover:border-red-500 transition flex-shrink-0" onclick="document.getElementById('main-image').src = this.src">
+                                <img
+                                    src="{{ asset('storage/' . $photo) }}"
+                                    alt="Foto {{ $index + 1 }}"
+                                    class="h-20 w-20 object-contain bg-gray-100 rounded-lg cursor-pointer border-2 border-transparent hover:border-red-500 transition flex-shrink-0"
+                                    width="80"
+                                    height="80"
+                                    loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                    decoding="async"
+                                    onclick="switchMainImage(this.src)"
+                                >
                             @endforeach
                         </div>
                         <button type="button" onclick="downloadAllPhotos()" class="ml-4 flex-shrink-0 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition flex items-center gap-2">
@@ -188,6 +214,12 @@
     </div>
 
     <script>
+        // Switch main image WITHOUT causing reflow
+        function switchMainImage(src) {
+            const mainImg = document.getElementById('main-image');
+            if (mainImg) mainImg.src = src;
+        }
+
         // Download all photos one by one
         const photoUrls = @json($asset->photos ? array_map(fn($p) => asset('storage/' . $p), $asset->photos) : []);
         const photoNames = @json($asset->photos ?? []);

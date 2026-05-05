@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class AssetController extends Controller
 {
@@ -58,7 +59,7 @@ class AssetController extends Controller
             'location' => 'nullable|string|max:255',
             'gmap_link' => 'nullable|url|max:1000',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photos.*' =>'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         Log::info('Validated data:', $validated);
@@ -117,15 +118,21 @@ class AssetController extends Controller
             'location' => 'nullable|string|max:255',
             'gmap_link' => 'nullable|url|max:1000',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'deleted_photos' => 'nullable|array',
         ]);
 
         $photos = $asset->photos ?? [];
 
-        // Remove deleted photos
+        // Remove deleted photos (and delete physical files from storage)
         $deletedPhotos = $request->input('deleted_photos', []);
         if (!empty($deletedPhotos)) {
+            foreach ($deletedPhotos as $deletedPhoto) {
+                // Delete the physical file from storage
+                if (Storage::disk('public')->exists($deletedPhoto)) {
+                    Storage::disk('public')->delete($deletedPhoto);
+                }
+            }
             $photos = array_filter($photos, function($photo) use ($deletedPhotos) {
                 return !in_array($photo, $deletedPhotos);
             });

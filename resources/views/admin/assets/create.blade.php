@@ -120,19 +120,49 @@
 
                 <!-- Upload Foto -->
                 <div class="bg-white rounded-xl p-6 shadow-md">
-                    <h3 class="text-lg font-bold text-gray-900 mb-6">Upload Foto</h3>
-
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-red-500 hover:bg-red-50 transition" id="photo-dropzone">
-                        <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        <p class="text-gray-600 font-medium mb-1">Drag dan drop foto di sini</p>
-                        <p class="text-gray-500 text-sm mb-3">atau</p>
-                        <input type="file" name="photos[]" multiple accept="image/*" class="hidden" id="photo-input">
-                        <button type="button" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition" onclick="document.getElementById('photo-input').click()">Pilih Foto</button>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Upload Foto</h3>
+                        <span id="photo-counter" class="hidden items-center gap-1.5 bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-full">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+                            <span id="photo-count-text">0 foto</span>
+                        </span>
                     </div>
 
-                    <div id="photo-preview" class="mt-6 grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+                    <!-- Dropzone -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-orange-400 hover:bg-orange-50/40 transition-all duration-200 group" id="photo-dropzone">
+                        <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-100 transition pointer-events-none">
+                            <svg class="w-7 h-7 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-700 font-semibold mb-1 pointer-events-none">Seret &amp; lepas foto di sini</p>
+                        <p class="text-gray-500 text-sm pointer-events-none">atau klik tombol di bawah</p>
+                        <p class="text-xs text-gray-400 mt-2 pointer-events-none">JPG, PNG, WEBP &bull; Maks. 5MB per foto</p>
+                        <input type="file" name="photos[]" id="photo-input" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                        <button type="button" id="pick-btn"
+                            class="mt-4 inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg font-semibold text-sm transition shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Pilih Foto
+                        </button>
+                    </div>
+
+                    <!-- Error box -->
+                    <div id="upload-errors" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-xs font-semibold text-red-700 mb-1">File diabaikan:</p>
+                        <ul id="upload-error-list" class="text-xs text-red-600 space-y-0.5 list-disc list-inside"></ul>
+                    </div>
+
+                    <!-- File List (tampil setelah dipilih) -->
+                    <div id="file-list-wrapper" class="hidden mt-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-sm font-semibold text-gray-700">Foto yang akan diupload:</p>
+                            <button type="button" id="clear-all-btn"
+                                class="text-xs text-red-500 hover:text-red-700 font-semibold underline">Hapus Semua</button>
+                        </div>
+                        <!-- Grid preview -->
+                        <div id="photo-preview" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                    </div>
+
                     @error('photos')
                         <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                     @enderror
@@ -177,67 +207,139 @@
     </form>
 
     <script>
-        // ===== PHOTO UPLOAD HANDLING =====
-        const dropzone = document.getElementById('photo-dropzone');
-        const photoInput = document.getElementById('photo-input');
-        const photoPreview = document.getElementById('photo-preview');
+        // ===== PHOTO UPLOAD — robust array-based approach =====
+        (function() {
+            const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const MAX_MB = 5;
+            let photoFiles = []; // master array of File objects
 
-        if (dropzone && photoInput && photoPreview) {
-            dropzone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropzone.classList.add('border-red-500', 'bg-red-50');
-            });
-
-            dropzone.addEventListener('dragleave', () => {
-                dropzone.classList.remove('border-red-500', 'bg-red-50');
-            });
-
-            dropzone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropzone.classList.remove('border-red-500', 'bg-red-50');
-                photoInput.files = e.dataTransfer.files;
-                updatePreview();
-            });
-
-            photoInput.addEventListener('change', updatePreview);
-        }
-
-        function updatePreview() {
+            const dropzone     = document.getElementById('photo-dropzone');
+            const photoInput   = document.getElementById('photo-input');
             const photoPreview = document.getElementById('photo-preview');
-            const photoInput = document.getElementById('photo-input');
-            if (!photoPreview || !photoInput) return;
+            const errorBox     = document.getElementById('upload-errors');
+            const errorList    = document.getElementById('upload-error-list');
+            const counter      = document.getElementById('photo-counter');
+            const counterText  = document.getElementById('photo-count-text');
+            const listWrapper  = document.getElementById('file-list-wrapper');
+            const clearAllBtn  = document.getElementById('clear-all-btn');
+            const pickBtn      = document.getElementById('pick-btn');
 
-            photoPreview.innerHTML = '';
-            const files = Array.from(photoInput.files);
+            // Pilih foto
+            pickBtn.addEventListener('click', () => photoInput.click());
 
-            files.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const div = document.createElement('div');
-                    div.className = 'relative group';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" class="w-full h-32 object-contain bg-gray-100 rounded-lg border border-gray-200">
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 rounded-lg transition flex items-center justify-center">
-                            <button type="button" class="hidden group-hover:block bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-semibold" onclick="removePhoto(${index})"> Hapus</button>
-                        </div>
-                    `;
-                    photoPreview.appendChild(div);
-                };
-                reader.readAsDataURL(file);
+            // Hapus semua
+            clearAllBtn.addEventListener('click', () => {
+                photoFiles = [];
+                syncInputFiles();
+                render();
             });
-        }
 
-        function removePhoto(index) {
-            const photoInput = document.getElementById('photo-input');
-            if (!photoInput) return;
+            // Drag & drop
+            dropzone.addEventListener('dragover', e => {
+                e.preventDefault();
+                dropzone.classList.add('border-orange-400', 'bg-orange-50');
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+            });
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+                addFiles(e.dataTransfer.files);
+            });
 
-            const files = Array.from(photoInput.files);
-            files.splice(index, 1);
-            const dt = new DataTransfer();
-            files.forEach(file => dt.items.add(file));
-            photoInput.files = dt.files;
-            updatePreview();
-        }
+            // File input change
+            photoInput.addEventListener('change', () => {
+                addFiles(photoInput.files);
+                // Reset input agar file yang sama bisa dipilih lagi
+                photoInput.value = '';
+            });
+
+            function addFiles(fileList) {
+                const errors = [];
+                Array.from(fileList).forEach(file => {
+                    if (!ALLOWED_TYPES.includes(file.type)) {
+                        errors.push(`"${file.name}" – format tidak didukung`);
+                        return;
+                    }
+                    if (file.size > MAX_MB * 1024 * 1024) {
+                        errors.push(`"${file.name}" – melebihi ${MAX_MB}MB (${(file.size/1024/1024).toFixed(1)}MB)`);
+                        return;
+                    }
+                    // Deduplikasi berdasarkan nama+ukuran
+                    const dup = photoFiles.some(f => f.name === file.name && f.size === file.size);
+                    if (!dup) photoFiles.push(file);
+                });
+                showErrors(errors);
+                syncInputFiles();
+                render();
+            }
+
+            function removeFile(idx) {
+                photoFiles.splice(idx, 1);
+                syncInputFiles();
+                render();
+            }
+
+            // Sinkronisasi photoFiles → input.files (untuk dikirim via form)
+            function syncInputFiles() {
+                const dt = new DataTransfer();
+                photoFiles.forEach(f => dt.items.add(f));
+                photoInput.files = dt.files;
+            }
+
+            function render() {
+                photoPreview.innerHTML = '';
+
+                if (photoFiles.length === 0) {
+                    listWrapper.classList.add('hidden');
+                    counter.classList.add('hidden');
+                    counter.classList.remove('inline-flex');
+                    return;
+                }
+
+                listWrapper.classList.remove('hidden');
+                counterText.textContent = photoFiles.length + ' foto';
+                counter.classList.remove('hidden');
+                counter.classList.add('inline-flex');
+
+                photoFiles.forEach((file, idx) => {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        const card = document.createElement('div');
+                        card.className = 'relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100';
+                        card.dataset.idx = idx;
+                        card.innerHTML = `
+                            <img src="${ev.target.result}" class="w-full h-32 object-cover" alt="Foto ${idx+1}">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
+                            <div class="absolute bottom-0 left-0 right-0 p-2 pointer-events-none">
+                                <p class="text-white text-[10px] font-semibold truncate">${file.name}</p>
+                                <p class="text-white/60 text-[9px]">${(file.size/1024).toFixed(0)} KB</p>
+                            </div>
+                            <span class="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">Foto ${idx+1}</span>
+                            <button type="button"
+                                onclick="window.__removePhoto(${idx})"
+                                title="Hapus foto ini"
+                                class="absolute top-1.5 right-1.5 flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow transition hover:scale-105">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Hapus
+                            </button>
+                        `;
+                        photoPreview.appendChild(card);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            function showErrors(errors) {
+                if (!errors.length) { errorBox.classList.add('hidden'); return; }
+                errorList.innerHTML = errors.map(e => `<li>${e}</li>`).join('');
+                errorBox.classList.remove('hidden');
+            }
+
+            // Expose removeFile ke global scope (dipanggil dari onclick di innerHTML)
+            window.__removePhoto = function(idx) { removeFile(idx); };
+        })();
 
         // ===== QUILL EDITOR =====
         let quillInstance = null;

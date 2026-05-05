@@ -11,6 +11,7 @@
     <link rel="apple-touch-icon" href="{{ asset('storage/' . $__faviconPath) }}">
     @endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('preload')
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;

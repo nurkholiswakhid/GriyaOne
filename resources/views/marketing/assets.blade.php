@@ -516,7 +516,7 @@
             </div>
 
             <!-- helper text -->
-            <p class="text-center text-xs text-gray-400 mt-2.5">
+            <p class="text-center text-xs text-gray-400 mt-2.5" id="downloadHelperText">
                 Klik gambar untuk memilih • Download akan dimulai otomatis
             </p>
         </div>
@@ -644,7 +644,10 @@
 </div>
 
 <script>
-// Download Modal State
+// ── iOS Detection ──────────────────────────────────────────
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+// ── Download Modal State ───────────────────────────────────
 let downloadModalState = {
     assetId: null,
     assetTitle: null,
@@ -677,6 +680,18 @@ function openDownloadModal(assetId, assetTitle, btn) {
     document.getElementById('downloadModalSubtitle').textContent = `${assetTitle} • ${photos.length} foto`;
     const totalEl = document.getElementById('downloadTotalCount');
     if (totalEl) totalEl.textContent = `dari ${photos.length} gambar`;
+
+    // iOS: update helper text & button label
+    const helperText = document.getElementById('downloadHelperText');
+    const downloadBtn = document.getElementById('downloadIndividualBtn');
+    const zipBtn = document.getElementById('downloadZipBtn');
+    if (isIOS) {
+        if (helperText) helperText.textContent = 'Klik gambar untuk memilih • Gambar akan dibuka di tab baru, tekan lama → Simpan Gambar';
+        if (downloadBtn) downloadBtn.innerHTML = downloadBtn.innerHTML.replace('Download', 'Buka di Safari');
+        if (zipBtn) zipBtn.innerHTML = zipBtn.innerHTML.replace('ZIP', 'Buka Semua');
+    } else {
+        if (helperText) helperText.textContent = 'Klik gambar untuk memilih • Download akan dimulai otomatis';
+    }
 
     // Render images grid
     renderDownloadImageGrid();
@@ -852,6 +867,21 @@ async function downloadSelectedImages() {
     const ext = (p) => p.split('.').pop().split('?')[0] || 'jpg';
     const safeTitle = downloadModalState.assetTitle.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
 
+    // ── iOS: buka tiap gambar di tab baru (Safari tidak support a.download) ──
+    if (isIOS) {
+        selectedPhotos.forEach((photoIndex, count) => {
+            setTimeout(() => {
+                window.open(photos[photoIndex], '_blank');
+            }, count * 700);
+        });
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        showToast('Gambar dibuka di tab baru. Tekan lama → Simpan Gambar 📥', 'success');
+        closeDownloadModal();
+        return;
+    }
+
+    // ── Non-iOS: download via blob ──
     let completed = 0;
     selectedPhotos.forEach((photoIndex, count) => {
         setTimeout(() => {
@@ -892,6 +922,18 @@ async function downloadSelectedImagesAsZip() {
 
     if (selectedPhotos.length === 0) {
         showToast('Pilih gambar terlebih dahulu', 'error');
+        return;
+    }
+
+    // ── iOS: ZIP tidak didukung, fallback buka tab per gambar ──
+    if (isIOS) {
+        selectedPhotos.forEach((photoIndex, count) => {
+            setTimeout(() => {
+                window.open(photos[photoIndex], '_blank');
+            }, count * 700);
+        });
+        showToast('ZIP tidak didukung iPhone. Gambar dibuka di tab baru 📥', 'success');
+        closeDownloadModal();
         return;
     }
 
