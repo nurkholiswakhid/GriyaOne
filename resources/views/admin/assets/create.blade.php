@@ -224,8 +224,11 @@
             const clearAllBtn  = document.getElementById('clear-all-btn');
             const pickBtn      = document.getElementById('pick-btn');
 
-            // Pilih foto
-            pickBtn.addEventListener('click', () => photoInput.click());
+            // Buka file picker — stopPropagation agar tidak bubble ke dropzone
+            pickBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                photoInput.click();
+            });
 
             // Hapus semua
             clearAllBtn.addEventListener('click', () => {
@@ -248,11 +251,11 @@
                 addFiles(e.dataTransfer.files);
             });
 
-            // File input change
+            // File input change — JANGAN reset value setelah addFiles
+            // karena reset value juga menghapus files dari input!
             photoInput.addEventListener('change', () => {
                 addFiles(photoInput.files);
-                // Reset input agar file yang sama bisa dipilih lagi
-                photoInput.value = '';
+                // syncInputFiles() di dalam addFiles sudah mengatur files dengan benar
             });
 
             function addFiles(fileList) {

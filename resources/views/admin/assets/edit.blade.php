@@ -259,40 +259,71 @@
             const clearAllBtn = document.getElementById('clear-all-btn');
             const pickBtn     = document.getElementById('pick-btn');
 
-            pickBtn.addEventListener('click', () => photoInput.click());
+            // Guard: pastikan semua elemen ada
+            if (!dropzone || !photoInput || !photoPreview || !pickBtn) {
+                console.error('[Upload] Elemen tidak ditemukan, cek ID HTML');
+                return;
+            }
 
-            clearAllBtn.addEventListener('click', () => {
+            // Buka file picker — stopPropagation agar tidak bubble ke dropzone
+            pickBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                photoInput.click();
+            });
+
+            clearAllBtn && clearAllBtn.addEventListener('click', () => {
                 photoFiles = [];
                 syncInput();
                 render();
             });
 
-            dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-orange-400','bg-orange-50'); });
-            dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('border-orange-400','bg-orange-50'); });
+            dropzone.addEventListener('dragover', e => {
+                e.preventDefault();
+                dropzone.classList.add('border-orange-400', 'bg-orange-50');
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+            });
             dropzone.addEventListener('drop', e => {
                 e.preventDefault();
-                dropzone.classList.remove('border-orange-400','bg-orange-50');
+                dropzone.classList.remove('border-orange-400', 'bg-orange-50');
                 addFiles(e.dataTransfer.files);
             });
+
+            // PERBAIKAN: Jangan reset photoInput.value setelah addFiles
+            // karena reset value juga menghapus files dari input!
             photoInput.addEventListener('change', () => {
                 addFiles(photoInput.files);
-                photoInput.value = '';
+                // TIDAK reset value di sini — syncInput() sudah mengatur files dengan benar
             });
 
             function addFiles(fileList) {
                 const errors = [];
                 Array.from(fileList).forEach(file => {
-                    if (!ALLOWED_TYPES.includes(file.type)) { errors.push(`"${file.name}" – format tidak didukung`); return; }
-                    if (file.size > MAX_MB*1024*1024) { errors.push(`"${file.name}" – melebihi ${MAX_MB}MB`); return; }
-                    if (!photoFiles.some(f => f.name===file.name && f.size===file.size)) photoFiles.push(file);
+                    if (!ALLOWED_TYPES.includes(file.type)) {
+                        errors.push(`"${file.name}" – format tidak didukung (JPG/PNG/WEBP)`);
+                        return;
+                    }
+                    if (file.size > MAX_MB * 1024 * 1024) {
+                        errors.push(`"${file.name}" – ukuran melebihi ${MAX_MB}MB`);
+                        return;
+                    }
+                    // Deduplikasi berdasarkan nama + ukuran
+                    const isDup = photoFiles.some(f => f.name === file.name && f.size === file.size);
+                    if (!isDup) photoFiles.push(file);
                 });
                 showErrors(errors);
                 syncInput();
                 render();
             }
 
-            function removeFile(idx) { photoFiles.splice(idx,1); syncInput(); render(); }
+            function removeFile(idx) {
+                photoFiles.splice(idx, 1);
+                syncInput();
+                render();
+            }
 
+            // Sinkronisasi array photoFiles → input.files agar terkirim saat form submit
             function syncInput() {
                 const dt = new DataTransfer();
                 photoFiles.forEach(f => dt.items.add(f));
@@ -300,15 +331,18 @@
             }
 
             function render() {
+                if (!photoPreview) return;
                 photoPreview.innerHTML = '';
+
                 if (photoFiles.length === 0) {
-                    listWrapper.classList.add('hidden');
-                    counter.classList.add('hidden'); counter.classList.remove('inline-flex');
+                    listWrapper && listWrapper.classList.add('hidden');
+                    if (counter) { counter.classList.add('hidden'); counter.classList.remove('inline-flex'); }
                     return;
                 }
-                listWrapper.classList.remove('hidden');
-                counterText.textContent = photoFiles.length + ' foto';
-                counter.classList.remove('hidden'); counter.classList.add('inline-flex');
+
+                listWrapper && listWrapper.classList.remove('hidden');
+                if (counterText) counterText.textContent = photoFiles.length + ' foto';
+                if (counter) { counter.classList.remove('hidden'); counter.classList.add('inline-flex'); }
 
                 photoFiles.forEach((file, idx) => {
                     const reader = new FileReader();
@@ -337,11 +371,13 @@
             }
 
             function showErrors(errs) {
+                if (!errorBox || !errorList) return;
                 if (!errs.length) { errorBox.classList.add('hidden'); return; }
                 errorList.innerHTML = errs.map(e => `<li>${e}</li>`).join('');
                 errorBox.classList.remove('hidden');
             }
 
+            // Expose ke global scope — dipanggil dari onclick di innerHTML
             window.__editRemovePhoto = idx => removeFile(idx);
         })();
 
