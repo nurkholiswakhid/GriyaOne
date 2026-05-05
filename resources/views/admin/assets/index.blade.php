@@ -55,7 +55,7 @@
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Judul</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Kategori</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase w-32">Kategori</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Alamat</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Foto</th>
@@ -75,7 +75,7 @@
                                         ];
                                         $color = $colors[$asset->category] ?? ['bg' => 'bg-gray-100', 'text' => 'text-gray-700'];
                                     @endphp
-                                    <span class="{{ $color['bg'] }} {{ $color['text'] }} px-3 py-1 rounded-full text-xs font-semibold">{{ $asset->category }}</span>
+                                    <span class="{{ $color['bg'] }} {{ $color['text'] }} px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">{{ $asset->category }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $asset->location ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm">
