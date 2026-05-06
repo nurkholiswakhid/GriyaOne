@@ -129,7 +129,7 @@
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="existing-photos-container">
                             @foreach($asset->photos as $index => $photo)
                                 <div class="relative rounded-xl border border-gray-200 bg-white shadow-sm photo-item" data-photo="{{ $photo }}" style="overflow:hidden;">
-                                    <img src="{{ asset('storage/' . $photo) }}" class="w-full h-32 object-cover block" alt="Foto {{ $index + 1 }}">
+                                    <img src="{{ asset('storage/' . \App\Helpers\ImageHelper::thumbnail($photo)) }}" class="w-full h-32 object-cover block" alt="Foto {{ $index + 1 }}" width="200" height="128" loading="lazy" decoding="async">
 
                                     <!-- Tombol Hapus — bar merah di bawah gambar, selalu terlihat -->
                                     <div class="flex items-center justify-between px-3 py-2 bg-gray-50 border-t border-gray-200">
@@ -242,11 +242,16 @@
     </form>
 
     <script>
-        // ===== PHOTO UPLOAD BARU — robust array-based =====
+        // ===== PHOTO UPLOAD BARU — with client-side compression =====
         (function() {
             const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
             const MAX_MB = 5;
+            const COMPRESS_MAX_WIDTH = 1920;
+            const COMPRESS_MAX_HEIGHT = 1920;
+            const COMPRESS_QUALITY = 0.8;
             let photoFiles = [];
+            let photoThumbs = [];
+            let isProcessing = false;
 
             const dropzone    = document.getElementById('photo-dropzone');
             const photoInput  = document.getElementById('photo-input');
@@ -259,20 +264,74 @@
             const clearAllBtn = document.getElementById('clear-all-btn');
             const pickBtn     = document.getElementById('pick-btn');
 
-            // Guard: pastikan semua elemen ada
             if (!dropzone || !photoInput || !photoPreview || !pickBtn) {
                 console.error('[Upload] Elemen tidak ditemukan, cek ID HTML');
                 return;
             }
 
-            // Buka file picker — stopPropagation agar tidak bubble ke dropzone
+            /**
+             * Compress an image File using Canvas API.
+             */
+            function compressImage(file) {
+                return new Promise((resolve) => {
+                    if (file.size < 500 * 1024) {
+                        resolve(file);
+                        return;
+                    }
+
+                    const img = new Image();
+                    const url = URL.createObjectURL(file);
+
+                    img.onload = () => {
+                        URL.revokeObjectURL(url);
+                        let { width, height } = img;
+
+                        if (width > COMPRESS_MAX_WIDTH || height > COMPRESS_MAX_HEIGHT) {
+                            const ratio = Math.min(COMPRESS_MAX_WIDTH / width, COMPRESS_MAX_HEIGHT / height);
+                            width = Math.round(width * ratio);
+                            height = Math.round(height * ratio);
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                        const quality = outputType === 'image/png' ? undefined : COMPRESS_QUALITY;
+
+                        canvas.toBlob((blob) => {
+                            if (!blob) { resolve(file); return; }
+                            const ext = outputType === 'image/png' ? '.png' : '.jpg';
+                            const baseName = file.name.replace(/\.[^.]+$/, '');
+                            const compressedFile = new File([blob], baseName + ext, {
+                                type: outputType,
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        }, outputType, quality);
+                    };
+
+                    img.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        resolve(file);
+                    };
+
+                    img.src = url;
+                });
+            }
+
             pickBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (isProcessing) return;
                 photoInput.click();
             });
 
             clearAllBtn && clearAllBtn.addEventListener('click', () => {
+                photoThumbs.forEach(url => URL.revokeObjectURL(url));
                 photoFiles = [];
+                photoThumbs = [];
                 syncInput();
                 render();
             });
@@ -290,15 +349,17 @@
                 addFiles(e.dataTransfer.files);
             });
 
-            // PERBAIKAN: Jangan reset photoInput.value setelah addFiles
-            // karena reset value juga menghapus files dari input!
             photoInput.addEventListener('change', () => {
                 addFiles(photoInput.files);
-                // TIDAK reset value di sini — syncInput() sudah mengatur files dengan benar
             });
 
-            function addFiles(fileList) {
+            async function addFiles(fileList) {
+                if (isProcessing) return;
+                isProcessing = true;
+
                 const errors = [];
+                const validFiles = [];
+
                 Array.from(fileList).forEach(file => {
                     if (!ALLOWED_TYPES.includes(file.type)) {
                         errors.push(`"${file.name}" – format tidak didukung (JPG/PNG/WEBP)`);
@@ -308,22 +369,40 @@
                         errors.push(`"${file.name}" – ukuran melebihi ${MAX_MB}MB`);
                         return;
                     }
-                    // Deduplikasi berdasarkan nama + ukuran
                     const isDup = photoFiles.some(f => f.name === file.name && f.size === file.size);
-                    if (!isDup) photoFiles.push(file);
+                    if (!isDup) validFiles.push(file);
                 });
+
                 showErrors(errors);
-                syncInput();
-                render();
+
+                if (validFiles.length > 0) {
+                    pickBtn.disabled = true;
+                    pickBtn.textContent = 'Mengompresi...';
+
+                    for (const file of validFiles) {
+                        const compressed = await compressImage(file);
+                        photoFiles.push(compressed);
+                        photoThumbs.push(URL.createObjectURL(compressed));
+                    }
+
+                    pickBtn.disabled = false;
+                    pickBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Pilih Foto Baru';
+
+                    syncInput();
+                    render();
+                }
+
+                isProcessing = false;
             }
 
             function removeFile(idx) {
+                URL.revokeObjectURL(photoThumbs[idx]);
                 photoFiles.splice(idx, 1);
+                photoThumbs.splice(idx, 1);
                 syncInput();
                 render();
             }
 
-            // Sinkronisasi array photoFiles → input.files agar terkirim saat form submit
             function syncInput() {
                 const dt = new DataTransfer();
                 photoFiles.forEach(f => dt.items.add(f));
@@ -345,28 +424,24 @@
                 if (counter) { counter.classList.remove('hidden'); counter.classList.add('inline-flex'); }
 
                 photoFiles.forEach((file, idx) => {
-                    const reader = new FileReader();
-                    reader.onload = ev => {
-                        const card = document.createElement('div');
-                        card.className = 'relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100';
-                        card.innerHTML = `
-                            <img src="${ev.target.result}" class="w-full h-32 object-cover" alt="Foto ${idx+1}">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-2 pointer-events-none">
-                                <p class="text-white text-[10px] font-semibold truncate">${file.name}</p>
-                                <p class="text-white/60 text-[9px]">${(file.size/1024).toFixed(0)} KB</p>
-                            </div>
-                            <span class="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">Foto ${idx+1}</span>
-                            <button type="button"
-                                onclick="window.__editRemovePhoto(${idx})"
-                                class="absolute top-1.5 right-1.5 flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow transition hover:scale-105">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
-                                Hapus
-                            </button>
-                        `;
-                        photoPreview.appendChild(card);
-                    };
-                    reader.readAsDataURL(file);
+                    const card = document.createElement('div');
+                    card.className = 'relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100';
+                    card.innerHTML = `
+                        <img src="${photoThumbs[idx]}" class="w-full h-32 object-cover" alt="Foto ${idx+1}" width="200" height="128" decoding="async">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-2 pointer-events-none">
+                            <p class="text-white text-[10px] font-semibold truncate">${file.name}</p>
+                            <p class="text-white/60 text-[9px]">${(file.size/1024).toFixed(0)} KB</p>
+                        </div>
+                        <span class="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">Foto ${idx+1}</span>
+                        <button type="button"
+                            onclick="window.__editRemovePhoto(${idx})"
+                            class="absolute top-1.5 right-1.5 flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow transition hover:scale-105">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Hapus
+                        </button>
+                    `;
+                    photoPreview.appendChild(card);
                 });
             }
 
@@ -377,7 +452,6 @@
                 errorBox.classList.remove('hidden');
             }
 
-            // Expose ke global scope — dipanggil dari onclick di innerHTML
             window.__editRemovePhoto = idx => removeFile(idx);
         })();
 

@@ -89,7 +89,7 @@
                                     @if($asset->photos && count($asset->photos) > 0)
                                         <div class="flex items-center gap-1">
                                             @foreach(array_slice($asset->photos, 0, 3) as $photo)
-                                                <img src="{{ asset('storage/' . $photo) }}" alt="Foto" class="w-10 h-10 rounded object-cover border border-gray-200">
+                                                <img src="{{ asset('storage/' . \App\Helpers\ImageHelper::thumbnail($photo)) }}" alt="Foto" class="w-10 h-10 rounded object-cover border border-gray-200" width="40" height="40" loading="lazy" decoding="async">
                                             @endforeach
                                             @if(count($asset->photos) > 3)
                                                 <span class="w-10 h-10 rounded bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-semibold text-gray-500">+{{ count($asset->photos) - 3 }}</span>

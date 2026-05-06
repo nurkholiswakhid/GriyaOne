@@ -167,10 +167,15 @@
                     <div class="carousel-container relative h-full" data-asset-id="{{ $asset->id }}">
                         @foreach($asset->photos as $index => $photo)
                             <img
-                                src="{{ asset('storage/' . $photo) }}"
+                                src="{{ asset('storage/' . \App\Helpers\ImageHelper::thumbnail($photo)) }}"
                                 alt="{{ $asset->title }} - {{ $index + 1 }}"
                                 class="carousel-image absolute w-full h-full object-cover transition duration-300 {{ $index === 0 ? 'opacity-100' : 'opacity-0' }}"
                                 data-index="{{ $index }}"
+                                data-full-src="{{ asset('storage/' . $photo) }}"
+                                width="400"
+                                height="192"
+                                loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                decoding="async"
                             >
                         @endforeach
 

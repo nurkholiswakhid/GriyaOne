@@ -1,4 +1,4 @@
-﻿@extends('user.layouts.app')
+@extends('user.layouts.app')
 
 @section('title', 'Dashboard - GriyaOne')
 @section('role', 'Dashboard')
@@ -94,7 +94,7 @@
                 <div class="flex items-center gap-4 px-5 py-3">
                     <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
                         @if($thumb)
-                            <img src="{{ asset('storage/' . $thumb) }}" alt="" class="w-full h-full object-cover">
+                            <img src="{{ asset('storage/' . \App\Helpers\ImageHelper::thumbnail($thumb)) }}" alt="" class="w-full h-full object-cover" width="40" height="40" loading="lazy" decoding="async">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>

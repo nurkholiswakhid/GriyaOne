@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ImageHelper;
 use App\Models\Asset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -69,6 +70,9 @@ class AssetController extends Controller
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('assets', 'public');
                 $photos[] = $path;
+
+                // Generate thumbnail for faster page loads (LCP optimization)
+                ImageHelper::generateThumbnail($path);
             }
         }
 
@@ -144,6 +148,9 @@ class AssetController extends Controller
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('assets', 'public');
                 $photos[] = $path;
+
+                // Generate thumbnail for faster page loads (LCP optimization)
+                ImageHelper::generateThumbnail($path);
             }
         }
 

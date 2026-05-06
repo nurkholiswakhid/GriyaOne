@@ -207,11 +207,16 @@
     </form>
 
     <script>
-        // ===== PHOTO UPLOAD — robust array-based approach =====
+        // ===== PHOTO UPLOAD — with client-side compression for fast uploads =====
         (function() {
             const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
             const MAX_MB = 5;
-            let photoFiles = []; // master array of File objects
+            const COMPRESS_MAX_WIDTH = 1920;  // Max width after compression
+            const COMPRESS_MAX_HEIGHT = 1920; // Max height after compression
+            const COMPRESS_QUALITY = 0.8;     // JPEG/WebP quality (0-1)
+            let photoFiles = []; // master array of compressed File/Blob objects
+            let photoThumbs = []; // blob URLs for preview (instant, no base64)
+            let isProcessing = false;
 
             const dropzone     = document.getElementById('photo-dropzone');
             const photoInput   = document.getElementById('photo-input');
@@ -224,15 +229,78 @@
             const clearAllBtn  = document.getElementById('clear-all-btn');
             const pickBtn      = document.getElementById('pick-btn');
 
-            // Buka file picker — stopPropagation agar tidak bubble ke dropzone
+            /**
+             * Compress an image File using Canvas API.
+             * Returns a new File with reduced size.
+             */
+            function compressImage(file) {
+                return new Promise((resolve) => {
+                    // If file is already small (< 500KB), skip compression
+                    if (file.size < 500 * 1024) {
+                        resolve(file);
+                        return;
+                    }
+
+                    const img = new Image();
+                    const url = URL.createObjectURL(file);
+
+                    img.onload = () => {
+                        URL.revokeObjectURL(url);
+
+                        let { width, height } = img;
+
+                        // Calculate scale to fit within max dimensions
+                        if (width > COMPRESS_MAX_WIDTH || height > COMPRESS_MAX_HEIGHT) {
+                            const ratio = Math.min(COMPRESS_MAX_WIDTH / width, COMPRESS_MAX_HEIGHT / height);
+                            width = Math.round(width * ratio);
+                            height = Math.round(height * ratio);
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Output as JPEG for best compression (unless PNG needed for transparency)
+                        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                        const quality = outputType === 'image/png' ? undefined : COMPRESS_QUALITY;
+
+                        canvas.toBlob((blob) => {
+                            if (!blob) { resolve(file); return; }
+                            // Create a new File object to preserve the filename
+                            const ext = outputType === 'image/png' ? '.png' : '.jpg';
+                            const baseName = file.name.replace(/\.[^.]+$/, '');
+                            const compressedFile = new File([blob], baseName + ext, {
+                                type: outputType,
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        }, outputType, quality);
+                    };
+
+                    img.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        resolve(file); // Fallback to original on error
+                    };
+
+                    img.src = url;
+                });
+            }
+
+            // Buka file picker
             pickBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (isProcessing) return;
                 photoInput.click();
             });
 
             // Hapus semua
             clearAllBtn.addEventListener('click', () => {
+                // Revoke all blob URLs to free memory
+                photoThumbs.forEach(url => URL.revokeObjectURL(url));
                 photoFiles = [];
+                photoThumbs = [];
                 syncInputFiles();
                 render();
             });
@@ -251,15 +319,18 @@
                 addFiles(e.dataTransfer.files);
             });
 
-            // File input change — JANGAN reset value setelah addFiles
-            // karena reset value juga menghapus files dari input!
             photoInput.addEventListener('change', () => {
                 addFiles(photoInput.files);
-                // syncInputFiles() di dalam addFiles sudah mengatur files dengan benar
             });
 
-            function addFiles(fileList) {
+            async function addFiles(fileList) {
+                if (isProcessing) return;
+                isProcessing = true;
+
                 const errors = [];
+                const validFiles = [];
+
+                // Phase 1: Validate
                 Array.from(fileList).forEach(file => {
                     if (!ALLOWED_TYPES.includes(file.type)) {
                         errors.push(`"${file.name}" – format tidak didukung`);
@@ -269,22 +340,43 @@
                         errors.push(`"${file.name}" – melebihi ${MAX_MB}MB (${(file.size/1024/1024).toFixed(1)}MB)`);
                         return;
                     }
-                    // Deduplikasi berdasarkan nama+ukuran
+                    // Deduplikasi
                     const dup = photoFiles.some(f => f.name === file.name && f.size === file.size);
-                    if (!dup) photoFiles.push(file);
+                    if (!dup) validFiles.push(file);
                 });
+
                 showErrors(errors);
-                syncInputFiles();
-                render();
+
+                if (validFiles.length > 0) {
+                    // Show processing indicator
+                    pickBtn.disabled = true;
+                    pickBtn.textContent = 'Mengompresi...';
+
+                    // Phase 2: Compress all valid files
+                    for (const file of validFiles) {
+                        const compressed = await compressImage(file);
+                        photoFiles.push(compressed);
+                        photoThumbs.push(URL.createObjectURL(compressed));
+                    }
+
+                    pickBtn.disabled = false;
+                    pickBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Pilih Foto';
+
+                    syncInputFiles();
+                    render();
+                }
+
+                isProcessing = false;
             }
 
             function removeFile(idx) {
+                URL.revokeObjectURL(photoThumbs[idx]);
                 photoFiles.splice(idx, 1);
+                photoThumbs.splice(idx, 1);
                 syncInputFiles();
                 render();
             }
 
-            // Sinkronisasi photoFiles → input.files (untuk dikirim via form)
             function syncInputFiles() {
                 const dt = new DataTransfer();
                 photoFiles.forEach(f => dt.items.add(f));
@@ -307,30 +399,26 @@
                 counter.classList.add('inline-flex');
 
                 photoFiles.forEach((file, idx) => {
-                    const reader = new FileReader();
-                    reader.onload = ev => {
-                        const card = document.createElement('div');
-                        card.className = 'relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100';
-                        card.dataset.idx = idx;
-                        card.innerHTML = `
-                            <img src="${ev.target.result}" class="w-full h-32 object-cover" alt="Foto ${idx+1}">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-2 pointer-events-none">
-                                <p class="text-white text-[10px] font-semibold truncate">${file.name}</p>
-                                <p class="text-white/60 text-[9px]">${(file.size/1024).toFixed(0)} KB</p>
-                            </div>
-                            <span class="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">Foto ${idx+1}</span>
-                            <button type="button"
-                                onclick="window.__removePhoto(${idx})"
-                                title="Hapus foto ini"
-                                class="absolute top-1.5 right-1.5 flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow transition hover:scale-105">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
-                                Hapus
-                            </button>
-                        `;
-                        photoPreview.appendChild(card);
-                    };
-                    reader.readAsDataURL(file);
+                    const card = document.createElement('div');
+                    card.className = 'relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100';
+                    card.dataset.idx = idx;
+                    card.innerHTML = `
+                        <img src="${photoThumbs[idx]}" class="w-full h-32 object-cover" alt="Foto ${idx+1}" width="200" height="128" decoding="async">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-2 pointer-events-none">
+                            <p class="text-white text-[10px] font-semibold truncate">${file.name}</p>
+                            <p class="text-white/60 text-[9px]">${(file.size/1024).toFixed(0)} KB</p>
+                        </div>
+                        <span class="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">Foto ${idx+1}</span>
+                        <button type="button"
+                            onclick="window.__removePhoto(${idx})"
+                            title="Hapus foto ini"
+                            class="absolute top-1.5 right-1.5 flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow transition hover:scale-105">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Hapus
+                        </button>
+                    `;
+                    photoPreview.appendChild(card);
                 });
             }
 
@@ -340,7 +428,6 @@
                 errorBox.classList.remove('hidden');
             }
 
-            // Expose removeFile ke global scope (dipanggil dari onclick di innerHTML)
             window.__removePhoto = function(idx) { removeFile(idx); };
         })();
 

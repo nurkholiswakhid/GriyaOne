@@ -53,14 +53,14 @@
                         <div class="flex gap-2 overflow-x-auto flex-1">
                             @foreach($asset->photos as $index => $photo)
                                 <img
-                                    src="{{ asset('storage/' . $photo) }}"
+                                    src="{{ asset('storage/' . \App\Helpers\ImageHelper::thumbnail($photo)) }}"
                                     alt="Foto {{ $index + 1 }}"
                                     class="h-20 w-20 object-contain bg-gray-100 rounded-lg cursor-pointer border-2 border-transparent hover:border-red-500 transition flex-shrink-0"
                                     width="80"
                                     height="80"
                                     loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
                                     decoding="async"
-                                    onclick="switchMainImage(this.src)"
+                                    onclick="switchMainImage('{{ asset('storage/' . $photo) }}')"
                                 >
                             @endforeach
                         </div>
