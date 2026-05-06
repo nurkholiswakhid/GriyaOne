@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::get('listing-aset', [UserAssetController::class, 'listing'])->name('user.assets.listing');
     Route::post('listing-aset/{asset}/bookmark', [UserAssetController::class, 'toggleBookmark'])->name('user.assets.bookmark');
     Route::get('listing-aset/{asset}/download', [UserAssetController::class, 'downloadPhotos'])->name('user.assets.download-photos');
+    Route::post('listing-aset/{asset}/download-selected', [UserAssetController::class, 'downloadSelectedPhotos'])->name('user.assets.download-selected');
     Route::get('listing-aset/{asset}/download/{photoIndex}', [UserAssetController::class, 'downloadSinglePhoto'])->name('user.assets.download-single');
     Route::get('api/aset/{asset}/broadcast', [UserAssetController::class, 'getBroadcastText'])->name('user.assets.broadcast-api');
 
@@ -68,6 +69,7 @@ Route::middleware('auth')->group(function () {
         Route::get('marketing/dashboard', [MarketingController::class, 'dashboard'])->name('marketing.dashboard');
         Route::get('marketing/assets', [MarketingController::class, 'assets'])->name('marketing.assets');
         Route::get('marketing/assets/{asset}/download', [MarketingController::class, 'downloadPhotos'])->name('marketing.download-photos');
+        Route::post('marketing/assets/{asset}/download-selected', [MarketingController::class, 'downloadSelectedPhotos'])->name('marketing.download-selected');
         Route::get('marketing/learning', [MarketingController::class, 'learning'])->name('marketing.learning');
         Route::get('marketing/materi', [MarketingController::class, 'materi'])->name('marketing.materi');
         Route::get('marketing/informasi', [MarketingController::class, 'informasi'])->name('marketing.informasi');

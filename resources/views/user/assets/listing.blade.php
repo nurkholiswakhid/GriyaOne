@@ -899,9 +899,8 @@ async function downloadSelectedImages() {
     });
 }
 
-// Download selected images as ZIP (using JSZip library)
+// Download selected images as ZIP (server-side generation - Safari compatible)
 async function downloadSelectedImagesAsZip() {
-    const photos = downloadModalState.photos;
     const selectedPhotos = Array.from(downloadModalState.selectedPhotos).sort((a, b) => a - b);
 
     if (selectedPhotos.length === 0) {
@@ -909,70 +908,59 @@ async function downloadSelectedImagesAsZip() {
         return;
     }
 
-    // ── iOS: ZIP tidak didukung, fallback buka tab per gambar ──
+    // ── iOS: Download individual images instead of ZIP ──
     if (isIOS) {
+        const photos = downloadModalState.photos;
         selectedPhotos.forEach((photoIndex, count) => {
             setTimeout(() => {
                 window.open(photos[photoIndex], '_blank');
             }, count * 700);
         });
-        showToast('ZIP tidak didukung iPhone. Gambar dibuka di tab baru 📥', 'success');
+        showToast('Gambar dibuka di tab baru. Tekan lama → Simpan Gambar 📥', 'success');
         closeDownloadModal();
         return;
     }
 
-    // Check if JSZip is available, if not load it
-    if (typeof JSZip === 'undefined') {
-        // Load JSZip library from CDN
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-        script.onload = () => performZipDownload(photos, selectedPhotos);
-        script.onerror = () => showToast('Gagal memuat library ZIP', 'error');
-        document.head.appendChild(script);
-    } else {
-        performZipDownload(photos, selectedPhotos);
-    }
-}
-
-// Perform ZIP download
-async function performZipDownload(photos, selectedPhotos) {
+    // Server-side ZIP generation (compatible with Safari and all browsers)
     const btn = document.getElementById('downloadZipBtn');
     const originalHtml = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Membuat ZIP...';
 
     try {
-        const zip = new JSZip();
-        const ext = (p) => p.split('.').pop().split('?')[0] || 'jpg';
-        const safeTitle = downloadModalState.assetTitle.replace(/[^a-zA-Z0-9_\- ]/g, '').trim();
+        const assetId = downloadModalState.assetId;
+        const downloadRoute = `{{ route('user.assets.download-selected', ['asset' => ':assetId']) }}`.replace(':assetId', assetId);
 
-        // Fetch all selected images
-        const imagePromises = selectedPhotos.map((photoIndex) => {
-            return fetch(photos[photoIndex])
-                .then(res => {
-                    if (!res.ok) throw new Error('Failed to fetch');
-                    return res.blob();
-                })
-                .then(blob => {
-                    const filename = safeTitle + '_foto_' + (photoIndex + 1) + '.' + ext(photos[photoIndex]);
-                    zip.file(filename, blob);
-                });
+        // Send POST request to server with selected photo indices
+        const response = await fetch(downloadRoute, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({ indices: selectedPhotos })
         });
 
-        await Promise.all(imagePromises);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
 
-        // Generate ZIP file
-        const content = await zip.generateAsync({ type: 'blob' });
+        // Get the blob from response
+        const blob = await response.blob();
 
-        // Download ZIP
-        const url = URL.createObjectURL(content);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = safeTitle + '_gambar_' + new Date().getTime() + '.zip';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        // Create download link and trigger download
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Aset_${downloadModalState.assetTitle.replace(/[^a-zA-Z0-9_\- ]/g, '').trim()}_${new Date().toISOString().split('T')[0]}.zip`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up
+        setTimeout(() => URL.revokeObjectURL(url), 100);
 
         btn.disabled = false;
         btn.innerHTML = originalHtml;
@@ -982,7 +970,7 @@ async function performZipDownload(photos, selectedPhotos) {
         console.error('ZIP download error:', error);
         btn.disabled = false;
         btn.innerHTML = originalHtml;
-        showToast('Gagal membuat file ZIP', 'error');
+        showToast('Gagal membuat file ZIP: ' + error.message, 'error');
     }
 }
 

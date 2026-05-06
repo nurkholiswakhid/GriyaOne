@@ -164,6 +164,80 @@ class UserAssetController extends Controller
     }
 
     /**
+     * Download selected photos as ZIP file (for modal selection).
+     * Accepts photo indices as query parameter or JSON body.
+     */
+    public function downloadSelectedPhotos(Request $request, Asset $asset)
+    {
+        if (!$asset->photos || count($asset->photos) === 0) {
+            return response()->json(['error' => 'Aset ini tidak memiliki foto'], 400);
+        }
+
+        // Get photo indices from query param or JSON body
+        $indices = $request->input('indices') ?? [];
+
+        // If indices is a string (from query param), parse it as JSON
+        if (is_string($indices)) {
+            $indices = json_decode($indices, true) ?? [];
+        }
+
+        // Validate indices
+        $indices = array_filter($indices, fn($i) => is_numeric($i) && $i >= 0 && $i < count($asset->photos));
+        $indices = array_unique(array_map('intval', $indices));
+        sort($indices);
+
+        if (empty($indices)) {
+            return response()->json(['error' => 'Tidak ada foto yang dipilih'], 400);
+        }
+
+        // Create a temporary ZIP file
+        $zipPath = storage_path('app/temp/assets-' . $asset->id . '-' . time() . '.zip');
+        $directory = dirname($zipPath);
+
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            return response()->json(['error' => 'Gagal membuat file ZIP'], 500);
+        }
+
+        $photoCount = 0;
+        foreach ($indices as $index) {
+            if (isset($asset->photos[$index])) {
+                $photo = $asset->photos[$index];
+                $photoPath = storage_path('app/public/' . $photo);
+
+                if (file_exists($photoPath)) {
+                    $fileName = $asset->id . '_foto_' . ($index + 1) . '_' . basename($photo);
+                    $zip->addFile($photoPath, $fileName);
+                    $photoCount++;
+                }
+            }
+        }
+
+        $zip->close();
+
+        if ($photoCount === 0) {
+            @unlink($zipPath);
+            return response()->json(['error' => 'Tidak ada foto yang dapat diunduh'], 400);
+        }
+
+        // Download the ZIP file with proper Safari compatibility headers
+        $fileName = 'Aset_' . str_replace(' ', '_', $asset->title) . '_' . now()->format('Y-m-d') . '.zip';
+
+        return response()->download(
+            $zipPath,
+            $fileName,
+            [
+                'Content-Type' => 'application/zip',
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
+            ]
+        )->deleteFileAfterSend(true);
+    }
+
+    /**
      * Download single photo.
      */
     public function downloadSinglePhoto(Asset $asset, $photoIndex)
