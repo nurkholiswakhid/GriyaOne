@@ -82,7 +82,7 @@ class InformasiController extends Controller
         // Handle photo upload
         if ($request->hasFile('photo')) {
             $validated['photo'] = $request->file('photo')->store('informasi', 'public');
-            
+
             // Compress image to 854x480 (480p)
             ImageHelper::compressImage($validated['photo']);
         }
@@ -134,7 +134,7 @@ class InformasiController extends Controller
                 Storage::disk('public')->delete($informasi->photo);
             }
             $validated['photo'] = $request->file('photo')->store('informasi', 'public');
-            
+
             // Compress image to 854x480 (480p)
             ImageHelper::compressImage($validated['photo']);
         }

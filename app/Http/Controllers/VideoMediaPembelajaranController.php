@@ -75,7 +75,7 @@ class VideoMediaPembelajaranController extends Controller
         $thumbnail = null;
         if ($request->hasFile('thumbnail')) {
             $thumbnail = $request->file('thumbnail')->store('contents', 'public');
-            
+
             // Compress image to 854x480 (480p)
             ImageHelper::compressImage($thumbnail);
         }
@@ -123,7 +123,7 @@ class VideoMediaPembelajaranController extends Controller
                 Storage::disk('public')->delete($content->thumbnail);
             }
             $validated['thumbnail'] = $request->file('thumbnail')->store('contents', 'public');
-            
+
             // Compress image to 854x480 (480p)
             ImageHelper::compressImage($validated['thumbnail']);
         }

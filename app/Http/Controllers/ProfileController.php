@@ -88,10 +88,10 @@ class ProfileController extends Controller
             }
 
             $photoPath = $request->file('profile_photo')->store('profile-photos', 'public');
-            
+
             // Compress image to 854x480 (480p)
             \App\Helpers\ImageHelper::compressImage($photoPath);
-            
+
             $validated['profile_photo_path'] = $photoPath;
         }
 

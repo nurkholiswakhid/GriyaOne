@@ -59,10 +59,10 @@ class LoginSettingController extends Controller
             }
 
             $path = $request->file('login_logo')->store('settings', 'public');
-            
+
             // Compress image to 854x480 (480p)
             ImageHelper::compressImage($path);
-            
+
             Setting::set('login_logo_path', $path);
         }
 
