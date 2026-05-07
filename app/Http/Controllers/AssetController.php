@@ -71,6 +71,9 @@ class AssetController extends Controller
                 $path = $photo->store('assets', 'public');
                 $photos[] = $path;
 
+                // Compress image to 854x480 (480p)
+                ImageHelper::compressImage($path);
+
                 // Generate thumbnail for faster page loads (LCP optimization)
                 ImageHelper::generateThumbnail($path);
             }
@@ -148,6 +151,9 @@ class AssetController extends Controller
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('assets', 'public');
                 $photos[] = $path;
+
+                // Compress image to 854x480 (480p)
+                ImageHelper::compressImage($path);
 
                 // Generate thumbnail for faster page loads (LCP optimization)
                 ImageHelper::generateThumbnail($path);

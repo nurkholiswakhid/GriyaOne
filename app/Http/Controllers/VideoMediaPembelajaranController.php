@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Content;
+use App\Helpers\ImageHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -74,6 +75,9 @@ class VideoMediaPembelajaranController extends Controller
         $thumbnail = null;
         if ($request->hasFile('thumbnail')) {
             $thumbnail = $request->file('thumbnail')->store('contents', 'public');
+            
+            // Compress image to 854x480 (480p)
+            ImageHelper::compressImage($thumbnail);
         }
 
         $validated['thumbnail'] = $thumbnail;
@@ -119,6 +123,9 @@ class VideoMediaPembelajaranController extends Controller
                 Storage::disk('public')->delete($content->thumbnail);
             }
             $validated['thumbnail'] = $request->file('thumbnail')->store('contents', 'public');
+            
+            // Compress image to 854x480 (480p)
+            ImageHelper::compressImage($validated['thumbnail']);
         }
 
         $validated['is_published'] = $request->has('is_published');

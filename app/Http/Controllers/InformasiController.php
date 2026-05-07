@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Information;
 use App\Models\InformationCategory;
+use App\Helpers\ImageHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -81,6 +82,9 @@ class InformasiController extends Controller
         // Handle photo upload
         if ($request->hasFile('photo')) {
             $validated['photo'] = $request->file('photo')->store('informasi', 'public');
+            
+            // Compress image to 854x480 (480p)
+            ImageHelper::compressImage($validated['photo']);
         }
 
         Information::create($validated);
@@ -130,6 +134,9 @@ class InformasiController extends Controller
                 Storage::disk('public')->delete($informasi->photo);
             }
             $validated['photo'] = $request->file('photo')->store('informasi', 'public');
+            
+            // Compress image to 854x480 (480p)
+            ImageHelper::compressImage($validated['photo']);
         }
 
         $informasi->update($validated);

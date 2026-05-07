@@ -87,7 +87,12 @@ class ProfileController extends Controller
                 Storage::disk('public')->delete($user->profile_photo_path);
             }
 
-            $validated['profile_photo_path'] = $request->file('profile_photo')->store('profile-photos', 'public');
+            $photoPath = $request->file('profile_photo')->store('profile-photos', 'public');
+            
+            // Compress image to 854x480 (480p)
+            \App\Helpers\ImageHelper::compressImage($photoPath);
+            
+            $validated['profile_photo_path'] = $photoPath;
         }
 
         unset($validated['profile_photo']);
