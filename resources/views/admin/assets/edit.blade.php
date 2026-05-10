@@ -242,14 +242,14 @@
     </form>
 
     <script>
-        // ===== PHOTO UPLOAD BARU — with client-side compression =====
+        // ===== PHOTO UPLOAD BARU — parallel client-side compression =====
         (function() {
-            const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            const MAX_MB = 5;
-            const COMPRESS_MAX_WIDTH = 1920;
-            const COMPRESS_MAX_HEIGHT = 1920;
-            const COMPRESS_QUALITY = 0.8;
-            let photoFiles = [];
+            const ALLOWED_TYPES  = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const MAX_MB         = 5;
+            const COMPRESS_MAX   = 1280;       // max px for width OR height
+            const COMPRESS_SKIP  = 300 * 1024; // skip if already < 300 KB
+            const COMPRESS_Q     = 0.72;       // JPEG/WebP quality
+            let photoFiles  = [];
             let photoThumbs = [];
             let isProcessing = false;
 
@@ -269,15 +269,10 @@
                 return;
             }
 
-            /**
-             * Compress an image File using Canvas API.
-             */
+            /** Compress a single image File via Canvas. */
             function compressImage(file) {
                 return new Promise((resolve) => {
-                    if (file.size < 500 * 1024) {
-                        resolve(file);
-                        return;
-                    }
+                    if (file.size <= COMPRESS_SKIP) { resolve(file); return; }
 
                     const img = new Image();
                     const url = URL.createObjectURL(file);
@@ -286,110 +281,90 @@
                         URL.revokeObjectURL(url);
                         let { width, height } = img;
 
-                        if (width > COMPRESS_MAX_WIDTH || height > COMPRESS_MAX_HEIGHT) {
-                            const ratio = Math.min(COMPRESS_MAX_WIDTH / width, COMPRESS_MAX_HEIGHT / height);
-                            width = Math.round(width * ratio);
+                        if (width > COMPRESS_MAX || height > COMPRESS_MAX) {
+                            const ratio = Math.min(COMPRESS_MAX / width, COMPRESS_MAX / height);
+                            width  = Math.round(width  * ratio);
                             height = Math.round(height * ratio);
                         }
 
                         const canvas = document.createElement('canvas');
-                        canvas.width = width;
+                        canvas.width  = width;
                         canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-                        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        const quality = outputType === 'image/png' ? undefined : COMPRESS_QUALITY;
+                        const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                        const quality = outType === 'image/png' ? undefined : COMPRESS_Q;
 
                         canvas.toBlob((blob) => {
                             if (!blob) { resolve(file); return; }
-                            const ext = outputType === 'image/png' ? '.png' : '.jpg';
-                            const baseName = file.name.replace(/\.[^.]+$/, '');
-                            const compressedFile = new File([blob], baseName + ext, {
-                                type: outputType,
-                                lastModified: Date.now()
-                            });
-                            resolve(compressedFile);
-                        }, outputType, quality);
+                            const ext  = outType === 'image/png' ? '.png' : '.jpg';
+                            const base = file.name.replace(/\.[^.]+$/, '');
+                            resolve(new File([blob], base + ext, { type: outType, lastModified: Date.now() }));
+                        }, outType, quality);
                     };
 
-                    img.onerror = () => {
-                        URL.revokeObjectURL(url);
-                        resolve(file);
-                    };
-
+                    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
                     img.src = url;
                 });
             }
 
             pickBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (isProcessing) return;
-                photoInput.click();
+                if (!isProcessing) photoInput.click();
             });
 
             clearAllBtn && clearAllBtn.addEventListener('click', () => {
-                photoThumbs.forEach(url => URL.revokeObjectURL(url));
-                photoFiles = [];
-                photoThumbs = [];
-                syncInput();
-                render();
+                photoThumbs.forEach(u => URL.revokeObjectURL(u));
+                photoFiles = []; photoThumbs = [];
+                syncInput(); render();
             });
 
-            dropzone.addEventListener('dragover', e => {
-                e.preventDefault();
-                dropzone.classList.add('border-orange-400', 'bg-orange-50');
-            });
-            dropzone.addEventListener('dragleave', () => {
-                dropzone.classList.remove('border-orange-400', 'bg-orange-50');
-            });
+            dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('border-orange-400','bg-orange-50'); });
+            dropzone.addEventListener('dragleave', ()  => dropzone.classList.remove('border-orange-400','bg-orange-50'));
             dropzone.addEventListener('drop', e => {
                 e.preventDefault();
-                dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+                dropzone.classList.remove('border-orange-400','bg-orange-50');
                 addFiles(e.dataTransfer.files);
             });
-
-            photoInput.addEventListener('change', () => {
-                addFiles(photoInput.files);
-            });
+            photoInput.addEventListener('change', () => addFiles(photoInput.files));
 
             async function addFiles(fileList) {
                 if (isProcessing) return;
                 isProcessing = true;
 
-                const errors = [];
-                const validFiles = [];
-
+                const errors = [], validFiles = [];
                 Array.from(fileList).forEach(file => {
                     if (!ALLOWED_TYPES.includes(file.type)) {
                         errors.push(`"${file.name}" – format tidak didukung (JPG/PNG/WEBP)`);
-                        return;
-                    }
-                    if (file.size > MAX_MB * 1024 * 1024) {
+                    } else if (file.size > MAX_MB * 1024 * 1024) {
                         errors.push(`"${file.name}" – ukuran melebihi ${MAX_MB}MB`);
-                        return;
+                    } else if (!photoFiles.some(f => f.name === file.name && f.size === file.size)) {
+                        validFiles.push(file);
                     }
-                    const isDup = photoFiles.some(f => f.name === file.name && f.size === file.size);
-                    if (!isDup) validFiles.push(file);
                 });
-
                 showErrors(errors);
 
                 if (validFiles.length > 0) {
                     pickBtn.disabled = true;
-                    pickBtn.textContent = 'Mengompresi...';
+                    pickBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg> Mengompresi (0/${validFiles.length})…`;
 
-                    for (const file of validFiles) {
+                    // --- PARALLEL compression ---
+                    let done = 0;
+                    const results = await Promise.all(validFiles.map(async (file) => {
                         const compressed = await compressImage(file);
+                        done++;
+                        pickBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg> Mengompresi (${done}/${validFiles.length})…`;
+                        return { compressed, thumb: URL.createObjectURL(compressed) };
+                    }));
+
+                    results.forEach(({ compressed, thumb }) => {
                         photoFiles.push(compressed);
-                        photoThumbs.push(URL.createObjectURL(compressed));
-                    }
+                        photoThumbs.push(thumb);
+                    });
 
                     pickBtn.disabled = false;
                     pickBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Pilih Foto Baru';
-
-                    syncInput();
-                    render();
+                    syncInput(); render();
                 }
 
                 isProcessing = false;
@@ -399,8 +374,7 @@
                 URL.revokeObjectURL(photoThumbs[idx]);
                 photoFiles.splice(idx, 1);
                 photoThumbs.splice(idx, 1);
-                syncInput();
-                render();
+                syncInput(); render();
             }
 
             function syncInput() {
@@ -434,13 +408,11 @@
                             <p class="text-white/60 text-[9px]">${(file.size/1024).toFixed(0)} KB</p>
                         </div>
                         <span class="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">Foto ${idx+1}</span>
-                        <button type="button"
-                            onclick="window.__editRemovePhoto(${idx})"
+                        <button type="button" onclick="window.__editRemovePhoto(${idx})"
                             class="absolute top-1.5 right-1.5 flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow transition hover:scale-105">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
                             Hapus
-                        </button>
-                    `;
+                        </button>`;
                     photoPreview.appendChild(card);
                 });
             }
@@ -492,11 +464,8 @@
 
         // ===== QUILL EDITOR =====
         let quillInstance = null;
-        const DEBUG = true;
 
-        function log(...args) {
-            if (DEBUG) console.log('[Quill Debug]', ...args);
-        }
+        function log() {} // no-op in production
 
         function initializeQuill() {
             const editorContainer = document.getElementById('editor-container');

@@ -19,22 +19,24 @@ class ImageHelper
     /**
      * JPEG quality for thumbnails (1-100).
      */
-    const THUMB_QUALITY = 75;
+    const THUMB_QUALITY = 80;
 
     /**
-     * Compressed image width in pixels (480p).
+     * Compressed image max dimension in pixels (1280px = HD).
+     * Both width and height are capped at this value (aspect-ratio preserved).
      */
-    const COMPRESS_WIDTH = 854;
+    const COMPRESS_MAX_DIM = 1280;
 
     /**
-     * Compressed image height in pixels (480p).
+     * File size threshold below which compression is skipped (bytes).
+     * Images already smaller than this are stored as-is.
      */
-    const COMPRESS_HEIGHT = 480;
+    const COMPRESS_SKIP_BYTES = 307200; // 300 KB
 
     /**
      * JPEG quality for compressed images (1-100).
      */
-    const COMPRESS_QUALITY = 85;
+    const COMPRESS_QUALITY = 82;
 
     /**
      * Get the thumbnail path for a given original image path.
@@ -202,6 +204,11 @@ class ImageHelper
                 return false;
             }
 
+            // Skip compression for already-small files
+            if (filesize($fullPath) <= self::COMPRESS_SKIP_BYTES) {
+                return true;
+            }
+
             // Detect image type
             $info = @getimagesize($fullPath);
             if (!$info) {
@@ -212,51 +219,63 @@ class ImageHelper
             $origWidth = $info[0];
             $origHeight = $info[1];
 
+            // If image is already within max dimension, skip resize
+            if ($origWidth <= self::COMPRESS_MAX_DIM && $origHeight <= self::COMPRESS_MAX_DIM) {
+                // Re-encode at quality to reduce file size without resizing
+                // Only worthwhile for JPEG/WebP
+                if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
+                    $source = @imagecreatefromjpeg($fullPath);
+                    if ($source) {
+                        imagejpeg($source, $fullPath, self::COMPRESS_QUALITY);
+                        imagedestroy($source);
+                    }
+                } elseif ($mime === 'image/webp') {
+                    $source = @imagecreatefromwebp($fullPath);
+                    if ($source) {
+                        imagewebp($source, $fullPath, self::COMPRESS_QUALITY);
+                        imagedestroy($source);
+                    }
+                }
+                return true;
+            }
+
             // Create source image resource based on MIME type
             $source = match ($mime) {
                 'image/jpeg', 'image/jpg' => @imagecreatefromjpeg($fullPath),
-                'image/png' => @imagecreatefrompng($fullPath),
-                'image/webp' => @imagecreatefromwebp($fullPath),
-                'image/gif' => @imagecreatefromgif($fullPath),
-                default => false,
+                'image/png'              => @imagecreatefrompng($fullPath),
+                'image/webp'             => @imagecreatefromwebp($fullPath),
+                'image/gif'              => @imagecreatefromgif($fullPath),
+                default                  => false,
             };
 
             if (!$source) {
                 return false;
             }
 
-            // Calculate dimensions to maintain aspect ratio
+            // Calculate proportional dimensions (no letterbox / padding)
             $ratio = min(
-                self::COMPRESS_WIDTH / $origWidth,
-                self::COMPRESS_HEIGHT / $origHeight
+                self::COMPRESS_MAX_DIM / $origWidth,
+                self::COMPRESS_MAX_DIM / $origHeight
             );
 
-            $newWidth = (int) round($origWidth * $ratio);
+            $newWidth  = (int) round($origWidth  * $ratio);
             $newHeight = (int) round($origHeight * $ratio);
 
-            // Create canvas with exact dimensions (854x480), centered content
-            $compressed = imagecreatetruecolor(self::COMPRESS_WIDTH, self::COMPRESS_HEIGHT);
+            // Create canvas sized exactly to the new proportional dimensions
+            $compressed = imagecreatetruecolor($newWidth, $newHeight);
 
-            // Handle transparency for PNG/WebP
+            // Preserve transparency for PNG/WebP
             if ($mime === 'image/png' || $mime === 'image/webp') {
                 imagealphablending($compressed, false);
                 imagesavealpha($compressed, true);
                 $transparent = imagecolorallocatealpha($compressed, 0, 0, 0, 127);
-                imagefilledrectangle($compressed, 0, 0, self::COMPRESS_WIDTH, self::COMPRESS_HEIGHT, $transparent);
-            } else {
-                // Fill with white background for JPEG/GIF
-                $white = imagecolorallocate($compressed, 255, 255, 255);
-                imagefilledrectangle($compressed, 0, 0, self::COMPRESS_WIDTH, self::COMPRESS_HEIGHT, $white);
+                imagefilledrectangle($compressed, 0, 0, $newWidth, $newHeight, $transparent);
             }
 
-            // Center the resized image in the canvas
-            $x = (int) ((self::COMPRESS_WIDTH - $newWidth) / 2);
-            $y = (int) ((self::COMPRESS_HEIGHT - $newHeight) / 2);
-
-            // Resize with high-quality resampling
+            // High-quality resize
             imagecopyresampled(
                 $compressed, $source,
-                $x, $y, 0, 0,
+                0, 0, 0, 0,
                 $newWidth, $newHeight,
                 $origWidth, $origHeight
             );
@@ -264,23 +283,15 @@ class ImageHelper
             // Save compressed image, replacing the original
             $success = match ($mime) {
                 'image/jpeg', 'image/jpg' => imagejpeg($compressed, $fullPath, self::COMPRESS_QUALITY),
-                'image/png' => imagepng($compressed, $fullPath, 8),
-                'image/webp' => imagewebp($compressed, $fullPath, self::COMPRESS_QUALITY),
-                'image/gif' => imagegif($compressed, $fullPath),
-                default => false,
+                'image/png'              => imagepng($compressed, $fullPath, 7),
+                'image/webp'             => imagewebp($compressed, $fullPath, self::COMPRESS_QUALITY),
+                'image/gif'              => imagegif($compressed, $fullPath),
+                default                  => false,
             };
 
             // Free memory
             imagedestroy($source);
             imagedestroy($compressed);
-
-            if ($success) {
-                \Illuminate\Support\Facades\Log::info('Image compressed successfully', [
-                    'path' => $originalPath,
-                    'original_size' => "{$origWidth}x{$origHeight}",
-                    'compressed_size' => self::COMPRESS_WIDTH . 'x' . self::COMPRESS_HEIGHT,
-                ]);
-            }
 
             return $success;
 
