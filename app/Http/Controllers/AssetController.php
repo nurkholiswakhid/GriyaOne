@@ -49,52 +49,46 @@ class AssetController extends Controller
 
     /**
      * Store a newly created asset in storage.
-     *
-     * Supports two photo input methods:
-     *  1. temp_photos[] — string paths from background async upload (preferred)
-     *  2. photos[]      — direct file upload (fallback / legacy)
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'required|string|min:5',
-            'category'       => 'required|in:Bank Cessie,AYDA,Lelang',
-            'status'         => 'required|in:Available,Sold Out',
-            'location'       => 'nullable|string|max:255',
-            'gmap_link'      => 'nullable|url|max:1000',
-            'temp_photos'    => 'nullable|array',
-            'temp_photos.*'  => 'nullable|string',
-            'photos'         => 'nullable|array',
-            'photos.*'       => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|min:5',
+            'category' => 'required|in:Bank Cessie,AYDA,Lelang',
+            'status' => 'required|in:Available,Sold Out',
+            'location' => 'nullable|string|max:255',
+            'gmap_link' => 'nullable|url|max:1000',
+            'photos' => 'nullable|array',
+            'photos.*' =>'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
+        Log::info('Validated data:', $validated);
+
         $photos = [];
-
-        // --- Method 1: move temp files uploaded in background ---
-        if (!empty($validated['temp_photos'])) {
-            $photos = array_merge($photos, $this->moveTempPhotos($validated['temp_photos']));
-        }
-
-        // --- Method 2: direct file upload fallback ---
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path     = $photo->store('assets', 'public');
+                $path = $photo->store('assets', 'public');
                 $photos[] = $path;
+
+                // Compress image to 854x480 (480p)
                 ImageHelper::compressImage($path);
+
+                // Generate thumbnail for faster page loads (LCP optimization)
                 ImageHelper::generateThumbnail($path);
             }
         }
 
         $validated['photos'] = $photos;
-        unset($validated['temp_photos']);
 
         // Sanitize description HTML from Quill
         if (!empty($validated['description'])) {
             $validated['description'] = $this->sanitizeQuillHtml($validated['description']);
+            Log::info('Description after sanitization:', ['description' => $validated['description']]);
         }
 
-        Asset::create($validated);
+        $created = Asset::create($validated);
+        Log::info('Asset created with ID:', ['id' => $created->id, 'description' => $created->description]);
 
         // Regenerate session to prevent session issues
         session()->regenerate();
@@ -120,62 +114,53 @@ class AssetController extends Controller
 
     /**
      * Update the specified asset in storage.
-     *
-     * Supports two photo input methods:
-     *  1. temp_photos[] — string paths from background async upload (preferred)
-     *  2. photos[]      — direct file upload (fallback / legacy)
      */
     public function update(Request $request, Asset $asset)
     {
         $validated = $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'required|string|min:5',
-            'category'       => 'required|in:Bank Cessie,AYDA,Lelang',
-            'status'         => 'required|in:Available,Sold Out',
-            'location'       => 'nullable|string|max:255',
-            'gmap_link'      => 'nullable|url|max:1000',
-            'temp_photos'    => 'nullable|array',
-            'temp_photos.*'  => 'nullable|string',
-            'photos'         => 'nullable|array',
-            'photos.*'       => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|min:5',
+            'category' => 'required|in:Bank Cessie,AYDA,Lelang',
+            'status' => 'required|in:Available,Sold Out',
+            'location' => 'nullable|string|max:255',
+            'gmap_link' => 'nullable|url|max:1000',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'deleted_photos' => 'nullable|array',
         ]);
 
         $photos = $asset->photos ?? [];
 
-        // Remove deleted photos and their physical files
+        // Remove deleted photos (and delete physical files from storage)
         $deletedPhotos = $request->input('deleted_photos', []);
         if (!empty($deletedPhotos)) {
             foreach ($deletedPhotos as $deletedPhoto) {
+                // Delete the physical file from storage
                 if (Storage::disk('public')->exists($deletedPhoto)) {
                     Storage::disk('public')->delete($deletedPhoto);
                 }
-                // Also try to delete its thumbnail
-                $thumbPath = ImageHelper::thumbPath($deletedPhoto);
-                if (Storage::disk('public')->exists($thumbPath)) {
-                    Storage::disk('public')->delete($thumbPath);
-                }
             }
-            $photos = array_values(array_filter($photos, fn($p) => !in_array($p, $deletedPhotos)));
+            $photos = array_filter($photos, function($photo) use ($deletedPhotos) {
+                return !in_array($photo, $deletedPhotos);
+            });
+            $photos = array_values($photos); // Re-index array
         }
 
-        // --- Method 1: move temp files uploaded in background ---
-        if (!empty($validated['temp_photos'])) {
-            $photos = array_merge($photos, $this->moveTempPhotos($validated['temp_photos']));
-        }
-
-        // --- Method 2: direct file upload fallback ---
+        // Add new photos
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path     = $photo->store('assets', 'public');
+                $path = $photo->store('assets', 'public');
                 $photos[] = $path;
+
+                // Compress image to 854x480 (480p)
                 ImageHelper::compressImage($path);
+
+                // Generate thumbnail for faster page loads (LCP optimization)
                 ImageHelper::generateThumbnail($path);
             }
         }
 
         $validated['photos'] = $photos;
-        unset($validated['temp_photos'], $validated['deleted_photos']);
 
         // Sanitize description HTML from Quill
         if (!empty($validated['description'])) {
@@ -213,66 +198,23 @@ class AssetController extends Controller
     }
 
     /**
-     * Move temp-uploaded photos to the permanent assets/ directory.
-     * Thumbnails are also moved (or regenerated if missing).
-     *
-     * @param  array  $tempPaths  e.g. ["temp/uuid.jpg", ...]
-     * @return array              permanent paths e.g. ["assets/uuid.jpg", ...]
-     */
-    private function moveTempPhotos(array $tempPaths): array
-    {
-        $permanent = [];
-
-        foreach ($tempPaths as $tempPath) {
-            $tempPath = trim((string) $tempPath);
-
-            // Safety: only allow paths inside temp/
-            if (!str_starts_with($tempPath, 'temp/')) {
-                continue;
-            }
-
-            $disk = Storage::disk('public');
-
-            if (!$disk->exists($tempPath)) {
-                continue; // File missing — skip silently
-            }
-
-            $filename    = basename($tempPath);
-            $assetPath   = 'assets/' . $filename;
-            $thumbTemp   = ImageHelper::thumbPath($tempPath);
-            $thumbAsset  = ImageHelper::thumbPath($assetPath);
-
-            // Move main file
-            $disk->move($tempPath, $assetPath);
-
-            // Move or regenerate thumbnail
-            if ($disk->exists($thumbTemp)) {
-                // Ensure thumbs directory exists
-                $thumbDir = dirname($disk->path($thumbAsset));
-                if (!is_dir($thumbDir)) {
-                    mkdir($thumbDir, 0755, true);
-                }
-                $disk->move($thumbTemp, $thumbAsset);
-            } else {
-                ImageHelper::generateThumbnail($assetPath);
-            }
-
-            $permanent[] = $assetPath;
-        }
-
-        return $permanent;
-    }
-
-    /**
      * Sanitize HTML content from Quill editor
      */
     private function sanitizeQuillHtml($html)
     {
+        // Allow specific HTML tags from Quill
+        $allowed_tags = ['<p>', '</p>', '<h1>', '</h1>', '<h2>', '</h2>', '<h3>', '</h3>',
+                         '<strong>', '</strong>', '<em>', '</em>', '<u>', '</u>', '<s>', '</s>',
+                         '<ol>', '</ol>', '<ul>', '</ul>', '<li>', '</li>',
+                         '<blockquote>', '</blockquote>', '<pre>', '</pre>', '<code>', '</code>',
+                         '<br>', '<br/>', '<br />'];
+
         // Remove script tags and javascript
         $html = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $html);
         $html = preg_replace('/on\w+\s*=\s*["\'][^"\']*["\']/i', '', $html);
         $html = preg_replace('/on\w+\s*=\s*[^\s>]*/i', '', $html);
 
+        // Trim whitespace
         return trim($html);
     }
 }

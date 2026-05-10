@@ -25,9 +25,4 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })
-    ->withSchedule(function (\Illuminate\Console\Scheduling\Schedule $schedule): void {
-        // Clean up stale temp upload files (older than 2 hours) every hour
-        $schedule->command('temp:clean')->hourly();
-    })
-    ->create();
+    })->create();

@@ -14,7 +14,7 @@
     </div>
 
     <!-- Form -->
-    <form id="asset-form" action="{{ route('assets.update', $asset) }}" method="POST" enctype="multipart/form-data" class="fade-in" onsubmit="return handleFormSubmit(event)">
+    <form action="{{ route('assets.update', $asset) }}" method="POST" enctype="multipart/form-data" class="fade-in" onsubmit="return handleFormSubmit(event)">
         @csrf
         @method('PUT')
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -159,88 +159,51 @@
                 {{-- Hidden inputs untuk deleted_photos dikelola secara dinamis oleh syncDeletedInputs() di JS --}}
 
                 <!-- Upload Foto Tambahan -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-                    <!-- Header -->
-                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center shadow-sm">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            </div>
-                            <h3 class="text-base font-bold text-gray-900">Tambah Foto Baru</h3>
-                        </div>
-                        <div id="photo-counter" class="hidden items-center gap-2">
-                            <span id="photo-count-text" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">0/0</span>
-                        </div>
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Tambah Foto Baru</h3>
+                        <span id="photo-counter" class="hidden items-center gap-1.5 bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-full">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+                            <span id="photo-count-text">0 foto</span>
+                        </span>
                     </div>
 
-                    <div class="p-6 space-y-4">
-                        <!-- Overall progress bar -->
-                        <div id="overall-progress-wrap" class="hidden">
-                            <div class="flex justify-between text-[11px] font-semibold text-gray-500 mb-1.5">
-                                <span>Mengupload foto baru…</span>
-                                <span id="overall-progress-pct">0%</span>
-                            </div>
-                            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-300" style="width:0%"></div>
-                            </div>
+                    <!-- Dropzone -->
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-orange-400 hover:bg-orange-50/40 transition-all duration-200 group" id="photo-dropzone">
+                        <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-100 transition pointer-events-none">
+                            <svg class="w-7 h-7 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
                         </div>
+                        <p class="text-gray-700 font-semibold mb-1 pointer-events-none">Seret &amp; lepas foto baru di sini</p>
+                        <p class="text-gray-500 text-sm pointer-events-none">atau klik tombol di bawah</p>
+                        <p class="text-xs text-gray-400 mt-2 pointer-events-none">JPG, PNG, WEBP &bull; Maks. 5MB per foto</p>
+                        <input type="file" name="photos[]" id="photo-input" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                        <button type="button" id="pick-btn"
+                            class="mt-4 inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg font-semibold text-sm transition shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Pilih Foto Baru
+                        </button>
+                    </div>
 
-                        <!-- Dropzone -->
-                        <div id="photo-dropzone"
-                            class="relative rounded-2xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-orange-50/30 p-8 text-center cursor-pointer transition-all duration-300 group hover:border-orange-400 hover:bg-orange-50/60 hover:shadow-inner">
-                            <span class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-orange-400 rounded-tl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-orange-400 rounded-tr-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-orange-400 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-orange-400 rounded-br-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                    <!-- Error box -->
+                    <div id="upload-errors" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-xs font-semibold text-red-700 mb-1">File diabaikan:</p>
+                        <ul id="upload-error-list" class="text-xs text-red-600 space-y-0.5 list-disc list-inside"></ul>
+                    </div>
 
-                            <input type="file" id="photo-input" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
-
-                            <div class="w-16 h-16 mx-auto mb-4 bg-white shadow-sm rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300 pointer-events-none">
-                                <svg class="w-8 h-8 text-orange-400 group-hover:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                </svg>
-                            </div>
-
-                            <p class="font-bold text-gray-800 mb-1 pointer-events-none">Seret &amp; lepas foto baru di sini</p>
-                            <p class="text-sm text-gray-500 pointer-events-none">atau klik tombol untuk memilih file</p>
-                            <p class="text-[11px] text-gray-400 mt-1.5 pointer-events-none">JPG, PNG, WEBP &bull; Maks. 5 MB/foto &bull; Upload otomatis di background</p>
-
-                            <button type="button" id="pick-btn"
-                                class="mt-5 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                Pilih Foto Baru
-                            </button>
+                    <!-- File list (muncul setelah ada file) -->
+                    <div id="file-list-wrapper" class="hidden mt-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-sm font-semibold text-gray-700">Foto yang akan ditambahkan:</p>
+                            <button type="button" id="clear-all-btn"
+                                class="text-xs text-red-500 hover:text-red-700 font-semibold underline">Hapus Semua</button>
                         </div>
-
-                        <!-- Error box -->
-                        <div id="upload-errors" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl flex gap-2.5 items-start">
-                            <svg class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-                            <div>
-                                <p class="text-xs font-bold text-red-700 mb-1">File diabaikan:</p>
-                                <ul id="upload-error-list" class="text-xs text-red-600 space-y-0.5 list-disc list-inside"></ul>
-                            </div>
-                        </div>
-
-                        <!-- Photo grid -->
-                        <div id="file-list-wrapper" class="hidden">
-                            <div class="flex items-center justify-between mb-3">
-                                <p class="text-sm font-bold text-gray-700">Foto baru terpilih</p>
-                                <button type="button" id="clear-all-btn"
-                                    class="text-[11px] font-semibold text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    Hapus Semua
-                                </button>
-                            </div>
-                            <div id="photo-preview" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
-                        </div>
-
-                        <!-- Pending upload warning -->
-                        <div id="pending-warning" class="hidden p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-center gap-2.5">
-                            <svg class="w-4 h-4 text-amber-500 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
-                            <p id="pending-warning-text" class="text-xs font-semibold text-amber-700">Menunggu foto selesai diupload…</p>
-                        </div>
+                        <div id="photo-preview" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
                     </div>
                 </div>
+
+                <!-- Submit Buttons -->
                 <div class="flex gap-4">
                     <button type="submit" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
                         Perbarui Aset
@@ -279,21 +242,20 @@
     </form>
 
     <script>
-        // ===== BACKGROUND PHOTO UPLOAD =====
-        (function () {
-            const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            const MAX_MB        = 5;
-            const COMPRESS_MAX  = 1280;
-            const COMPRESS_SKIP = 300 * 1024;
-            const COMPRESS_Q    = 0.72;
-            const UPLOAD_URL    = '{{ route("assets.upload-photo") }}';
-            const CSRF          = '{{ csrf_token() }}';
-
-            let items = [];
+        // ===== PHOTO UPLOAD BARU — parallel client-side compression =====
+        (function() {
+            const ALLOWED_TYPES  = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const MAX_MB         = 5;
+            const COMPRESS_MAX   = 1280;       // max px for width OR height
+            const COMPRESS_SKIP  = 300 * 1024; // skip if already < 300 KB
+            const COMPRESS_Q     = 0.72;       // JPEG/WebP quality
+            let photoFiles  = [];
+            let photoThumbs = [];
+            let isProcessing = false;
 
             const dropzone    = document.getElementById('photo-dropzone');
             const photoInput  = document.getElementById('photo-input');
-            const preview     = document.getElementById('photo-preview');
+            const photoPreview = document.getElementById('photo-preview');
             const errorBox    = document.getElementById('upload-errors');
             const errorList   = document.getElementById('upload-error-list');
             const counter     = document.getElementById('photo-counter');
@@ -301,130 +263,168 @@
             const listWrapper = document.getElementById('file-list-wrapper');
             const clearAllBtn = document.getElementById('clear-all-btn');
             const pickBtn     = document.getElementById('pick-btn');
-            const pendingWarn = document.getElementById('pending-warning');
-            const pendingText = document.getElementById('pending-warning-text');
-            const progressWrap= document.getElementById('overall-progress-wrap');
-            const progressBar = document.getElementById('overall-progress-bar');
-            const progressPct = document.getElementById('overall-progress-pct');
 
-            if (!dropzone || !photoInput || !preview || !pickBtn) return;
+            if (!dropzone || !photoInput || !photoPreview || !pickBtn) {
+                console.error('[Upload] Elemen tidak ditemukan, cek ID HTML');
+                return;
+            }
 
-            function compress(file) {
-                return new Promise(resolve => {
+            /** Compress a single image File via Canvas. */
+            function compressImage(file) {
+                return new Promise((resolve) => {
                     if (file.size <= COMPRESS_SKIP) { resolve(file); return; }
-                    const img = new Image(), url = URL.createObjectURL(file);
+
+                    const img = new Image();
+                    const url = URL.createObjectURL(file);
+
                     img.onload = () => {
                         URL.revokeObjectURL(url);
                         let { width, height } = img;
+
                         if (width > COMPRESS_MAX || height > COMPRESS_MAX) {
-                            const r = Math.min(COMPRESS_MAX/width, COMPRESS_MAX/height);
-                            width = Math.round(width*r); height = Math.round(height*r);
+                            const ratio = Math.min(COMPRESS_MAX / width, COMPRESS_MAX / height);
+                            width  = Math.round(width  * ratio);
+                            height = Math.round(height * ratio);
                         }
-                        const c = document.createElement('canvas');
-                        c.width = width; c.height = height;
-                        c.getContext('2d').drawImage(img, 0, 0, width, height);
-                        const t = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        c.toBlob(b => {
-                            if (!b) { resolve(file); return; }
-                            resolve(new File([b], file.name.replace(/\.[^.]+$/, '') + (t==='image/png'?'.png':'.jpg'), { type:t, lastModified:Date.now() }));
-                        }, t, t==='image/png'?undefined:COMPRESS_Q);
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width  = width;
+                        canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+                        const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                        const quality = outType === 'image/png' ? undefined : COMPRESS_Q;
+
+                        canvas.toBlob((blob) => {
+                            if (!blob) { resolve(file); return; }
+                            const ext  = outType === 'image/png' ? '.png' : '.jpg';
+                            const base = file.name.replace(/\.[^.]+$/, '');
+                            resolve(new File([blob], base + ext, { type: outType, lastModified: Date.now() }));
+                        }, outType, quality);
                     };
+
                     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
                     img.src = url;
                 });
             }
 
-            async function uploadItem(item) {
-                item.status = 'uploading'; renderCard(item);
-                const fd = new FormData();
-                fd.append('photo', item.file); fd.append('_token', CSRF);
-                try {
-                    const res = await fetch(UPLOAD_URL, { method:'POST', body:fd });
-                    const json = await res.json();
-                    if (!res.ok || !json.success) throw new Error(json.message||'Server error');
-                    item.status = 'done'; item.tempPath = json.path;
-                    const inp = document.createElement('input');
-                    inp.type='hidden'; inp.name='temp_photos[]'; inp.value=json.path; inp.id='tp_'+item.id;
-                    document.getElementById('asset-form').appendChild(inp);
-                } catch(e) { item.status='error'; item.errorMsg=e.message; }
-                renderCard(item); updateCounter();
-            }
+            pickBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!isProcessing) photoInput.click();
+            });
+
+            clearAllBtn && clearAllBtn.addEventListener('click', () => {
+                photoThumbs.forEach(u => URL.revokeObjectURL(u));
+                photoFiles = []; photoThumbs = [];
+                syncInput(); render();
+            });
+
+            dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('border-orange-400','bg-orange-50'); });
+            dropzone.addEventListener('dragleave', ()  => dropzone.classList.remove('border-orange-400','bg-orange-50'));
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropzone.classList.remove('border-orange-400','bg-orange-50');
+                addFiles(e.dataTransfer.files);
+            });
+            photoInput.addEventListener('change', () => addFiles(photoInput.files));
 
             async function addFiles(fileList) {
-                const errs=[], valids=[];
-                Array.from(fileList).forEach(f => {
-                    if (!ALLOWED_TYPES.includes(f.type))          { errs.push(`"${f.name}" – format tidak didukung`); return; }
-                    if (f.size > MAX_MB*1024*1024)                { errs.push(`"${f.name}" – melebihi ${MAX_MB}MB`);  return; }
-                    if (!items.some(i=>i.file.name===f.name&&i.file.size===f.size)) valids.push(f);
+                if (isProcessing) return;
+                isProcessing = true;
+
+                const errors = [], validFiles = [];
+                Array.from(fileList).forEach(file => {
+                    if (!ALLOWED_TYPES.includes(file.type)) {
+                        errors.push(`"${file.name}" – format tidak didukung (JPG/PNG/WEBP)`);
+                    } else if (file.size > MAX_MB * 1024 * 1024) {
+                        errors.push(`"${file.name}" – ukuran melebihi ${MAX_MB}MB`);
+                    } else if (!photoFiles.some(f => f.name === file.name && f.size === file.size)) {
+                        validFiles.push(file);
+                    }
                 });
-                showErrors(errs);
-                if (!valids.length) return;
-                for (const f of valids) {
-                    const id=Date.now()+Math.random(), blob=URL.createObjectURL(f);
-                    const item={id,file:f,thumbUrl:blob,status:'compressing',tempPath:null};
-                    item.retryFn=()=>uploadItem(item); items.push(item); renderCard(item);
+                showErrors(errors);
+
+                if (validFiles.length > 0) {
+                    pickBtn.disabled = true;
+                    pickBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg> Mengompresi (0/${validFiles.length})…`;
+
+                    // --- PARALLEL compression ---
+                    let done = 0;
+                    const results = await Promise.all(validFiles.map(async (file) => {
+                        const compressed = await compressImage(file);
+                        done++;
+                        pickBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg> Mengompresi (${done}/${validFiles.length})…`;
+                        return { compressed, thumb: URL.createObjectURL(compressed) };
+                    }));
+
+                    results.forEach(({ compressed, thumb }) => {
+                        photoFiles.push(compressed);
+                        photoThumbs.push(thumb);
+                    });
+
+                    pickBtn.disabled = false;
+                    pickBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Pilih Foto Baru';
+                    syncInput(); render();
                 }
-                listWrapper.classList.remove('hidden'); updateCounter();
-                await Promise.all(valids.map(async(f,i)=>{
-                    const item=items[items.length-valids.length+i];
-                    const compressed=await compress(f);
-                    URL.revokeObjectURL(item.thumbUrl);
-                    item.file=compressed; item.thumbUrl=URL.createObjectURL(compressed);
-                    await uploadItem(item);
-                }));
+
+                isProcessing = false;
             }
 
-            function renderCard(item) {
-                let card=document.getElementById('card_'+item.id);
-                if (!card) { card=document.createElement('div'); card.id='card_'+item.id; card.className='relative rounded-xl overflow-hidden border shadow-sm bg-gray-100'; preview.appendChild(card); }
-                const s={
-                    compressing:`<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1"><svg class="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg><p class="text-white text-[10px] font-bold">Mengompresi…</p></div>`,
-                    uploading:`<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1"><svg class="w-5 h-5 text-orange-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg><p class="text-white text-[10px] font-bold">Mengupload…</p></div>`,
-                    done:`<div class="absolute top-1.5 right-1.5 bg-green-500 rounded-full p-0.5"><svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div><button type="button" onclick="window.__rmPhotoEdit('${item.id}')" class="absolute top-1.5 left-1.5 bg-red-600 hover:bg-red-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full transition">✕</button>`,
-                    error:`<div class="absolute inset-0 bg-red-800/70 flex flex-col items-center justify-center gap-1 p-1"><p class="text-white text-[9px] font-bold text-center">${item.errorMsg||'Gagal'}</p><button type="button" onclick="window.__retryPhotoEdit('${item.id}')" class="bg-white text-red-700 text-[9px] font-bold px-2 py-0.5 rounded-full mt-1">Coba lagi</button></div>`,
-                }[item.status]||'';
-                card.innerHTML=`<img src="${item.thumbUrl}" class="w-full h-28 object-cover" alt="" decoding="async"><div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div><div class="absolute bottom-0 left-0 right-0 p-1.5 pointer-events-none"><p class="text-white text-[9px] truncate">${item.file.name}</p><p class="text-white/60 text-[8px]">${(item.file.size/1024).toFixed(0)} KB</p></div>${s}`;
+            function removeFile(idx) {
+                URL.revokeObjectURL(photoThumbs[idx]);
+                photoFiles.splice(idx, 1);
+                photoThumbs.splice(idx, 1);
+                syncInput(); render();
             }
 
-            window.__rmPhotoEdit = id => {
-                const idx=items.findIndex(i=>String(i.id)===String(id)); if(idx===-1)return;
-                URL.revokeObjectURL(items[idx].thumbUrl);
-                document.getElementById('tp_'+id)?.remove();
-                document.getElementById('card_'+id)?.remove();
-                items.splice(idx,1); updateCounter();
-                if(!items.length) listWrapper.classList.add('hidden');
-            };
-            window.__retryPhotoEdit = id => { const item=items.find(i=>String(i.id)===String(id)); if(item)item.retryFn(); };
+            function syncInput() {
+                const dt = new DataTransfer();
+                photoFiles.forEach(f => dt.items.add(f));
+                photoInput.files = dt.files;
+            }
 
-            function updateCounter() {
-                const total   = items.length;
-                const pending = items.filter(i=>i.status==='compressing'||i.status==='uploading').length;
-                const doneOk  = items.filter(i=>i.status==='done').length;
-                if(total===0){counter.classList.add('hidden');counter.classList.remove('inline-flex');}else{counterText.textContent=`${doneOk}/${total} foto`;counter.classList.remove('hidden');counter.classList.add('inline-flex');}
-                if(progressWrap){
-                    if(pending>0||(total>0&&doneOk<total)){progressWrap.classList.remove('hidden');const pct=total>0?Math.round((doneOk/total)*100):0;if(progressBar)progressBar.style.width=pct+'%';if(progressPct)progressPct.textContent=pct+'%';}
-                    else{progressWrap.classList.add('hidden');}
+            function render() {
+                if (!photoPreview) return;
+                photoPreview.innerHTML = '';
+
+                if (photoFiles.length === 0) {
+                    listWrapper && listWrapper.classList.add('hidden');
+                    if (counter) { counter.classList.add('hidden'); counter.classList.remove('inline-flex'); }
+                    return;
                 }
-                if(pendingWarn){pendingWarn.classList.toggle('hidden',pending===0);if(pending>0)pendingText.textContent=`Menunggu ${pending} foto selesai diupload…`;}
+
+                listWrapper && listWrapper.classList.remove('hidden');
+                if (counterText) counterText.textContent = photoFiles.length + ' foto';
+                if (counter) { counter.classList.remove('hidden'); counter.classList.add('inline-flex'); }
+
+                photoFiles.forEach((file, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100';
+                    card.innerHTML = `
+                        <img src="${photoThumbs[idx]}" class="w-full h-32 object-cover" alt="Foto ${idx+1}" width="200" height="128" decoding="async">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-2 pointer-events-none">
+                            <p class="text-white text-[10px] font-semibold truncate">${file.name}</p>
+                            <p class="text-white/60 text-[9px]">${(file.size/1024).toFixed(0)} KB</p>
+                        </div>
+                        <span class="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">Foto ${idx+1}</span>
+                        <button type="button" onclick="window.__editRemovePhoto(${idx})"
+                            class="absolute top-1.5 right-1.5 flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow transition hover:scale-105">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Hapus
+                        </button>`;
+                    photoPreview.appendChild(card);
+                });
             }
-            function showErrors(errs){if(!errs.length){errorBox&&errorBox.classList.add('hidden');return;}errorList.innerHTML=errs.map(e=>`<li>${e}</li>`).join('');errorBox.classList.remove('hidden');}
 
-            pickBtn.addEventListener('click',e=>{e.stopPropagation();photoInput.click();});
-            photoInput.addEventListener('change',()=>addFiles(photoInput.files));
-            clearAllBtn&&clearAllBtn.addEventListener('click',()=>{
-                items.forEach(i=>URL.revokeObjectURL(i.thumbUrl));
-                document.querySelectorAll('input[name="temp_photos[]"]').forEach(el=>el.remove());
-                items=[];preview.innerHTML='';listWrapper.classList.add('hidden');updateCounter();
-            });
-            dropzone.addEventListener('dragover', e=>{e.preventDefault();dropzone.classList.add('border-orange-400','bg-orange-50');});
-            dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('border-orange-400','bg-orange-50'));
-            dropzone.addEventListener('drop',e=>{e.preventDefault();dropzone.classList.remove('border-orange-400','bg-orange-50');addFiles(e.dataTransfer.files);});
+            function showErrors(errs) {
+                if (!errorBox || !errorList) return;
+                if (!errs.length) { errorBox.classList.add('hidden'); return; }
+                errorList.innerHTML = errs.map(e => `<li>${e}</li>`).join('');
+                errorBox.classList.remove('hidden');
+            }
 
-            window.__bgUploadReady = function(){
-                const pending=items.filter(i=>i.status==='compressing'||i.status==='uploading').length;
-                if(pending>0){pendingWarn&&pendingWarn.classList.remove('hidden');if(pendingText)pendingText.textContent=`Menunggu ${pending} foto selesai diupload…`;pendingWarn&&pendingWarn.scrollIntoView({behavior:'smooth',block:'center'});return false;}
-                return true;
-            };
+            window.__editRemovePhoto = idx => removeFile(idx);
         })();
 
         // ===== HAPUS FOTO EXISTING =====
@@ -566,22 +566,29 @@
         }
 
         window.handleFormSubmit = function(event) {
-            // 1. Block if background uploads still pending
-            if (window.__bgUploadReady && !window.__bgUploadReady()) {
-                event.preventDefault();
-                return false;
-            }
+            log('========================================');
+            log('📤 FORM SUBMISSION STARTED');
+            log('========================================');
 
-            // 2. Sync Quill
+            // Sync first, then decide
             if (!syncQuillToField()) {
                 event.preventDefault();
+                log('SYNC FAILED - Preventing form submission');
                 const descErr = document.getElementById('desc_error');
-                if (descErr) { descErr.classList.remove('hidden'); descErr.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                if (descErr) {
+                    descErr.classList.remove('hidden');
+                    descErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return false;
             }
             const descErr = document.getElementById('desc_error');
             if (descErr) descErr.classList.add('hidden');
 
+            log('SYNC SUCCESSFUL - Allowing form submission');
+            log('========================================');
+
+            // Return true to allow default form submission
+            // Do NOT prevent default or manually submit - let browser handle it naturally
             return true;
         };
 

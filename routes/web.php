@@ -15,7 +15,6 @@ use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\InformasiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LoginSettingController;
-use App\Http\Controllers\TempUploadController;
 
 // Guest-only routes — authenticated users are redirected to /dashboard (via redirectUsersTo in bootstrap/app.php)
 Route::middleware('guest')->group(function () {
@@ -84,7 +83,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('assets', AssetController::class);
         Route::patch('assets/{asset}/status', [AssetController::class, 'updateStatus'])->name('assets.updateStatus');
-        Route::post('assets/upload-photo', [TempUploadController::class, 'upload'])->name('assets.upload-photo');
 
         // Informasi Management Routes
         Route::resource('informasi', InformasiController::class);
