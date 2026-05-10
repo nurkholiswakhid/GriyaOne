@@ -159,85 +159,77 @@
                 {{-- Hidden inputs untuk deleted_photos dikelola secara dinamis oleh syncDeletedInputs() di JS --}}
 
                 <!-- Upload Foto Tambahan -->
-                <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <div class="bg-white rounded-xl p-6 shadow-md border border-gray-100">
                     <!-- Header -->
-                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center shadow-sm">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             </div>
-                            <h3 class="text-base font-bold text-gray-900">Tambah Foto Baru</h3>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Tambah Foto Baru</h3>
+                                <p class="text-xs text-gray-500 mt-0.5">JPG, PNG, WEBP • Maks 5MB per foto</p>
+                            </div>
                         </div>
-                        <div id="photo-counter" class="hidden items-center gap-2">
-                            <span id="photo-count-text" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">0/0</span>
+                        <div id="photo-counter" class="hidden items-center gap-2 bg-green-50 text-green-700 text-sm font-bold px-3 py-1.5 rounded-full border border-green-200">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span id="photo-count-text">0/0 foto</span>
                         </div>
                     </div>
 
-                    <div class="p-6 space-y-4">
+                    <div class="space-y-4">
                         <!-- Overall progress bar -->
-                        <div id="overall-progress-wrap" class="hidden">
-                            <div class="flex justify-between text-[11px] font-semibold text-gray-500 mb-1.5">
-                                <span>Mengupload foto baru…</span>
-                                <span id="overall-progress-pct">0%</span>
+                        <div id="overall-progress-wrap" class="hidden space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-600">Sedang mengupload...</span>
+                                <span id="overall-progress-pct" class="text-xs font-bold text-orange-600">0%</span>
                             </div>
-                            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-300" style="width:0%"></div>
+                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-300" style="width:0%"></div>
                             </div>
                         </div>
 
                         <!-- Dropzone -->
-                        <div id="photo-dropzone"
-                            class="relative rounded-2xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-orange-50/30 p-8 text-center cursor-pointer transition-all duration-300 group hover:border-orange-400 hover:bg-orange-50/60 hover:shadow-inner">
-                            <span class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-orange-400 rounded-tl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-orange-400 rounded-tr-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-orange-400 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                            <span class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-orange-400 rounded-br-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-
+                        <div id="photo-dropzone" class="relative border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all duration-200 group hover:border-orange-400 hover:bg-orange-50/50">
                             <input type="file" id="photo-input" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
-
-                            <div class="w-16 h-16 mx-auto mb-4 bg-white shadow-sm rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300 pointer-events-none">
-                                <svg class="w-8 h-8 text-orange-400 group-hover:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                </svg>
+                            <div class="flex flex-col items-center justify-center gap-3">
+                                <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center group-hover:bg-orange-100 transition">
+                                    <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                </div>
+                                <div>
+                                    <p class="text-gray-800 font-semibold mb-1">Seret &amp; lepas foto baru di sini</p>
+                                    <p class="text-sm text-gray-500 mb-3">atau klik tombol untuk memilih file</p>
+                                    <p class="text-xs text-gray-400">Foto akan diupload otomatis di background</p>
+                                </div>
+                                <button type="button" id="pick-btn" class="mt-3 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-sm px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    Pilih Foto Baru
+                                </button>
                             </div>
-
-                            <p class="font-bold text-gray-800 mb-1 pointer-events-none">Seret &amp; lepas foto baru di sini</p>
-                            <p class="text-sm text-gray-500 pointer-events-none">atau klik tombol untuk memilih file</p>
-                            <p class="text-[11px] text-gray-400 mt-1.5 pointer-events-none">JPG, PNG, WEBP &bull; Maks. 5 MB/foto &bull; Upload otomatis di background</p>
-
-                            <button type="button" id="pick-btn"
-                                class="mt-5 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                Pilih Foto Baru
-                            </button>
                         </div>
 
                         <!-- Error box -->
-                        <div id="upload-errors" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl flex gap-2.5 items-start">
-                            <svg class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                        <div id="upload-errors" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3 items-start">
+                            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
                             <div>
-                                <p class="text-xs font-bold text-red-700 mb-1">File diabaikan:</p>
+                                <p class="text-sm font-bold text-red-700 mb-1">File tidak valid:</p>
                                 <ul id="upload-error-list" class="text-xs text-red-600 space-y-0.5 list-disc list-inside"></ul>
                             </div>
                         </div>
 
                         <!-- Photo grid -->
                         <div id="file-list-wrapper" class="hidden">
-                            <div class="flex items-center justify-between mb-3">
-                                <p class="text-sm font-bold text-gray-700">Foto baru terpilih</p>
-                                <button type="button" id="clear-all-btn"
-                                    class="text-[11px] font-semibold text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    Hapus Semua
-                                </button>
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-sm font-semibold text-gray-700">Foto baru yang dipilih</h4>
+                                <button type="button" id="clear-all-btn" class="text-xs text-red-600 hover:text-red-700 font-semibold hover:underline">Hapus Semua</button>
                             </div>
-                            <div id="photo-preview" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                            <div id="photo-preview" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
                         </div>
 
                         <!-- Pending upload warning -->
-                        <div id="pending-warning" class="hidden p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-center gap-2.5">
-                            <svg class="w-4 h-4 text-amber-500 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
-                            <p id="pending-warning-text" class="text-xs font-semibold text-amber-700">Menunggu foto selesai diupload…</p>
+                        <div id="pending-warning" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-3">
+                            <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+                            <p id="pending-warning-text" class="text-sm font-semibold text-yellow-700">Sedang mengunggah foto...</p>
                         </div>
                     </div>
                 </div>
