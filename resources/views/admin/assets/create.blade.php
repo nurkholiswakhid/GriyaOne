@@ -119,56 +119,96 @@
                 </div>
 
                 <!-- Upload Foto -->
-                <div class="bg-white rounded-xl p-6 shadow-md">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-gray-900">Upload Foto</h3>
-                        <span id="photo-counter" class="hidden items-center gap-1.5 bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-full">
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
-                            <span id="photo-count-text">0 foto</span>
-                        </span>
-                    </div>
-
-                    <!-- Dropzone -->
-                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-orange-400 hover:bg-orange-50/40 transition-all duration-200 group" id="photo-dropzone">
-                        <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-100 transition pointer-events-none">
-                            <svg class="w-7 h-7 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                            </svg>
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                    <!-- Header -->
+                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center shadow-sm">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            </div>
+                            <h3 class="text-base font-bold text-gray-900">Upload Foto</h3>
                         </div>
-                        <p class="text-gray-700 font-semibold mb-1 pointer-events-none">Seret &amp; lepas foto di sini</p>
-                        <p class="text-gray-500 text-sm pointer-events-none">Foto langsung diupload di background — isi form sambil menunggu</p>
-                        <p class="text-xs text-gray-400 mt-2 pointer-events-none">JPG, PNG, WEBP &bull; Maks. 5MB per foto</p>
-                        <input type="file" id="photo-input" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
-                        <button type="button" id="pick-btn"
-                            class="mt-4 inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg font-semibold text-sm transition shadow-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            Pilih Foto
-                        </button>
-                    </div>
-
-                    <!-- Error box -->
-                    <div id="upload-errors" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p class="text-xs font-semibold text-red-700 mb-1">File diabaikan:</p>
-                        <ul id="upload-error-list" class="text-xs text-red-600 space-y-0.5 list-disc list-inside"></ul>
-                    </div>
-
-                    <!-- Upload cards (per file progress) -->
-                    <div id="file-list-wrapper" class="hidden mt-5">
-                        <div class="flex items-center justify-between mb-3">
-                            <p class="text-sm font-semibold text-gray-700">Foto yang akan diupload:</p>
-                            <button type="button" id="clear-all-btn" class="text-xs text-red-500 hover:text-red-700 font-semibold underline">Hapus Semua</button>
+                        <div id="photo-counter" class="hidden items-center gap-2">
+                            <span id="photo-count-text" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">0/0</span>
                         </div>
-                        <div id="photo-preview" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
                     </div>
 
-                    <!-- Pending upload warning -->
-                    <div id="pending-warning" class="hidden mt-3 p-3 bg-yellow-50 border border-yellow-300 rounded-lg flex items-center gap-2">
-                        <svg class="w-4 h-4 text-yellow-600 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
-                        <p id="pending-warning-text" class="text-xs font-semibold text-yellow-700">Menunggu foto selesai diupload…</p>
+                    <div class="p-6 space-y-4">
+                        <!-- Overall progress bar (hidden until uploading) -->
+                        <div id="overall-progress-wrap" class="hidden">
+                            <div class="flex justify-between text-[11px] font-semibold text-gray-500 mb-1.5">
+                                <span>Mengupload foto…</span>
+                                <span id="overall-progress-pct">0%</span>
+                            </div>
+                            <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-orange-400 to-red-500 rounded-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Dropzone -->
+                        <div id="photo-dropzone"
+                            class="relative rounded-2xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-orange-50/30 p-8 text-center cursor-pointer transition-all duration-300 group hover:border-orange-400 hover:bg-orange-50/60 hover:shadow-inner">
+                            <!-- Animated corner accents -->
+                            <span class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-orange-400 rounded-tl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            <span class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-orange-400 rounded-tr-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            <span class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-orange-400 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            <span class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-orange-400 rounded-br-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+
+                            <input type="file" id="photo-input" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+
+                            <!-- Upload icon -->
+                            <div class="w-16 h-16 mx-auto mb-4 bg-white shadow-sm rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300 pointer-events-none">
+                                <svg class="w-8 h-8 text-orange-400 group-hover:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+
+                            <p class="font-bold text-gray-800 mb-1 pointer-events-none">Seret &amp; lepas foto di sini</p>
+                            <p class="text-sm text-gray-500 pointer-events-none">atau klik tombol untuk memilih file</p>
+                            <p class="text-[11px] text-gray-400 mt-1.5 pointer-events-none">JPG, PNG, WEBP &bull; Maks. 5 MB/foto &bull; Upload otomatis di background</p>
+
+                            <button type="button" id="pick-btn"
+                                class="mt-5 inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                Pilih Foto
+                            </button>
+                        </div>
+
+                        <!-- Error box -->
+                        <div id="upload-errors" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl flex gap-2.5 items-start">
+                            <svg class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                            <div>
+                                <p class="text-xs font-bold text-red-700 mb-1">File diabaikan:</p>
+                                <ul id="upload-error-list" class="text-xs text-red-600 space-y-0.5 list-disc list-inside"></ul>
+                            </div>
+                        </div>
+
+                        <!-- Photo grid -->
+                        <div id="file-list-wrapper" class="hidden">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-sm font-bold text-gray-700">Foto terpilih</p>
+                                <button type="button" id="clear-all-btn"
+                                    class="text-[11px] font-semibold text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    Hapus Semua
+                                </button>
+                            </div>
+                            <div id="photo-preview" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                        </div>
+
+                        <!-- Pending upload warning -->
+                        <div id="pending-warning" class="hidden p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-center gap-2.5">
+                            <svg class="w-4 h-4 text-amber-500 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+                            <p id="pending-warning-text" class="text-xs font-semibold text-amber-700">Menunggu foto selesai diupload…</p>
+                        </div>
+
+                        @error('photos')
+                            <p class="text-red-500 text-xs flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
-                    @error('photos')
-                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
-                    @enderror
                 </div>
 
                 <!-- Submit Buttons -->
@@ -209,6 +249,7 @@
         </div>
     </form>
 
+    <script>
         // ===== BACKGROUND PHOTO UPLOAD =====
         (function () {
             const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -235,6 +276,9 @@
             const pickBtn       = document.getElementById('pick-btn');
             const pendingWarn   = document.getElementById('pending-warning');
             const pendingText   = document.getElementById('pending-warning-text');
+            const progressWrap  = document.getElementById('overall-progress-wrap');
+            const progressBar   = document.getElementById('overall-progress-bar');
+            const progressPct   = document.getElementById('overall-progress-pct');
 
             // ── compress ──────────────────────────────────────────────
             function compress(file) {
@@ -357,11 +401,11 @@
                 }[item.status] || '';
 
                 card.innerHTML = `
-                    <img src="${item.thumbUrl}" class="w-full h-28 object-cover" alt="" decoding="async">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
-                    <div class="absolute bottom-0 left-0 right-0 p-1.5 pointer-events-none">
-                        <p class="text-white text-[9px] truncate">${item.file.name}</p>
-                        <p class="text-white/60 text-[8px]">${(item.file.size/1024).toFixed(0)} KB</p>
+                    <img src="${item.thumbUrl}" class="w-full h-32 object-cover" alt="" decoding="async" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-0 left-0 right-0 px-2 py-1.5 pointer-events-none">
+                        <p class="text-white text-[9px] font-semibold truncate leading-tight">${item.file.name}</p>
+                        <p class="text-white/50 text-[8px]">${(item.file.size/1024).toFixed(0)} KB</p>
                     </div>
                     ${statusHtml}`;
             }
@@ -383,12 +427,13 @@
                 if (item) item.retryFn();
             };
 
-            // ── counter & warning ────────────────────────────────────
+            // ── counter, progress bar & warning ─────────────────────
             function updateCounter() {
-                const total    = items.length;
-                const pending  = items.filter(i => i.status === 'compressing' || i.status === 'uploading').length;
-                const doneOk   = items.filter(i => i.status === 'done').length;
+                const total   = items.length;
+                const pending = items.filter(i => i.status === 'compressing' || i.status === 'uploading').length;
+                const doneOk  = items.filter(i => i.status === 'done').length;
 
+                // Badge
                 if (total === 0) {
                     counter.classList.add('hidden'); counter.classList.remove('inline-flex');
                 } else {
@@ -396,6 +441,19 @@
                     counter.classList.remove('hidden'); counter.classList.add('inline-flex');
                 }
 
+                // Overall progress bar
+                if (progressWrap) {
+                    if (pending > 0 || (total > 0 && doneOk < total)) {
+                        progressWrap.classList.remove('hidden');
+                        const pct = total > 0 ? Math.round((doneOk / total) * 100) : 0;
+                        if (progressBar) progressBar.style.width = pct + '%';
+                        if (progressPct) progressPct.textContent = pct + '%';
+                    } else {
+                        progressWrap.classList.add('hidden');
+                    }
+                }
+
+                // Pending warning
                 pendingWarn.classList.toggle('hidden', pending === 0);
                 if (pending > 0) pendingText.textContent = `Menunggu ${pending} foto selesai diupload…`;
             }
