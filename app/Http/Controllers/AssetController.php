@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ProcessAssetImages;
+use App\Helpers\ImageHelper;
 use App\Models\Asset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class AssetController extends Controller
@@ -16,6 +17,7 @@ class AssetController extends Controller
     {
         $query = Asset::query();
 
+        // Search by title or location
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
@@ -23,10 +25,12 @@ class AssetController extends Controller
             });
         }
 
+        // Filter by category
         if ($category = $request->input('category')) {
             $query->where('category', $category);
         }
 
+        // Filter by status
         if ($status = $request->input('status')) {
             $query->where('status', $status);
         }
@@ -45,52 +49,49 @@ class AssetController extends Controller
 
     /**
      * Store a newly created asset in storage.
-     * Supports both normal form submit and AJAX (X-Requested-With: XMLHttpRequest).
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'required|string|min:5',
-            'category'    => 'required|in:Bank Cessie,AYDA,Lelang',
-            'status'      => 'required|in:Available,Sold Out',
-            'location'    => 'nullable|string|max:255',
-            'gmap_link'   => 'nullable|url|max:1000',
-            'photos'      => 'nullable|array',
-            'photos.*'    => 'image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'category' => 'required|in:Bank Cessie,AYDA,Lelang',
+            'status' => 'required|in:Available,Sold Out',
+            'location' => 'nullable|string|max:255',
+            'gmap_link' => 'nullable|url|max:1000',
+            'photos' => 'nullable|array',
+            'photos.*' =>'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
-        // Store uploaded files — fast, no GD processing here
-        $newPaths = [];
+        Log::info('Validated data:', $validated);
+
+        $photos = [];
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $newPaths[] = $photo->store('assets', 'public');
+                $path = $photo->store('assets', 'public');
+                $photos[] = $path;
+
+                // Compress image to 854x480 (480p)
+                ImageHelper::compressImage($path);
+
+                // Generate thumbnail for faster page loads (LCP optimization)
+                ImageHelper::generateThumbnail($path);
             }
         }
 
-        $validated['photos'] = $newPaths;
+        $validated['photos'] = $photos;
 
         // Sanitize description HTML from Quill
         if (!empty($validated['description'])) {
             $validated['description'] = $this->sanitizeQuillHtml($validated['description']);
+            Log::info('Description after sanitization:', ['description' => $validated['description']]);
         }
 
-        $asset = Asset::create($validated);
+        $created = Asset::create($validated);
+        Log::info('Asset created with ID:', ['id' => $created->id, 'description' => $created->description]);
 
-        // Dispatch background job to compress & generate thumbnails (non-blocking)
-        if (!empty($newPaths)) {
-            ProcessAssetImages::dispatch($newPaths);
-        }
-
+        // Regenerate session to prevent session issues
         session()->regenerate();
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success'  => true,
-                'redirect' => route('assets.index'),
-                'message'  => 'Aset berhasil ditambahkan!',
-            ]);
-        }
 
         return redirect()->route('assets.index')->with('success', 'Aset berhasil ditambahkan!');
     }
@@ -113,72 +114,63 @@ class AssetController extends Controller
 
     /**
      * Update the specified asset in storage.
-     * Supports both normal form submit and AJAX.
      */
     public function update(Request $request, Asset $asset)
     {
         $validated = $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'required|string|min:5',
-            'category'       => 'required|in:Bank Cessie,AYDA,Lelang',
-            'status'         => 'required|in:Available,Sold Out',
-            'location'       => 'nullable|string|max:255',
-            'gmap_link'      => 'nullable|url|max:1000',
-            'photos'         => 'nullable|array',
-            'photos.*'       => 'image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|min:5',
+            'category' => 'required|in:Bank Cessie,AYDA,Lelang',
+            'status' => 'required|in:Available,Sold Out',
+            'location' => 'nullable|string|max:255',
+            'gmap_link' => 'nullable|url|max:1000',
+            'photos' => 'nullable|array',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'deleted_photos' => 'nullable|array',
         ]);
 
         $photos = $asset->photos ?? [];
 
-        // Remove deleted photos
+        // Remove deleted photos (and delete physical files from storage)
         $deletedPhotos = $request->input('deleted_photos', []);
         if (!empty($deletedPhotos)) {
             foreach ($deletedPhotos as $deletedPhoto) {
+                // Delete the physical file from storage
                 if (Storage::disk('public')->exists($deletedPhoto)) {
                     Storage::disk('public')->delete($deletedPhoto);
                 }
-                // Also delete thumbnail
-                $thumbPath = \App\Helpers\ImageHelper::thumbPath($deletedPhoto);
-                if (Storage::disk('public')->exists($thumbPath)) {
-                    Storage::disk('public')->delete($thumbPath);
-                }
             }
-            $photos = array_values(array_filter($photos, fn($p) => !in_array($p, $deletedPhotos)));
+            $photos = array_filter($photos, function($photo) use ($deletedPhotos) {
+                return !in_array($photo, $deletedPhotos);
+            });
+            $photos = array_values($photos); // Re-index array
         }
 
-        // Store new uploaded files — fast, no GD here
-        $newPaths = [];
+        // Add new photos
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
-                $path       = $photo->store('assets', 'public');
-                $photos[]   = $path;
-                $newPaths[] = $path;
+                $path = $photo->store('assets', 'public');
+                $photos[] = $path;
+
+                // Compress image to 854x480 (480p)
+                ImageHelper::compressImage($path);
+
+                // Generate thumbnail for faster page loads (LCP optimization)
+                ImageHelper::generateThumbnail($path);
             }
         }
 
         $validated['photos'] = $photos;
 
+        // Sanitize description HTML from Quill
         if (!empty($validated['description'])) {
             $validated['description'] = $this->sanitizeQuillHtml($validated['description']);
         }
 
         $asset->update($validated);
 
-        // Dispatch background job for new photos only
-        if (!empty($newPaths)) {
-            ProcessAssetImages::dispatch($newPaths);
-        }
-
+        // Regenerate session to prevent session issues
         session()->regenerate();
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success'  => true,
-                'redirect' => route('assets.show', $asset),
-                'message'  => 'Aset berhasil diperbarui!',
-            ]);
-        }
 
         return redirect()->route('assets.show', $asset)->with('success', 'Aset berhasil diperbarui!');
     }
@@ -206,13 +198,23 @@ class AssetController extends Controller
     }
 
     /**
-     * Sanitize HTML content from Quill editor.
+     * Sanitize HTML content from Quill editor
      */
-    private function sanitizeQuillHtml(string $html): string
+    private function sanitizeQuillHtml($html)
     {
+        // Allow specific HTML tags from Quill
+        $allowed_tags = ['<p>', '</p>', '<h1>', '</h1>', '<h2>', '</h2>', '<h3>', '</h3>',
+                         '<strong>', '</strong>', '<em>', '</em>', '<u>', '</u>', '<s>', '</s>',
+                         '<ol>', '</ol>', '<ul>', '</ul>', '<li>', '</li>',
+                         '<blockquote>', '</blockquote>', '<pre>', '</pre>', '<code>', '</code>',
+                         '<br>', '<br/>', '<br />'];
+
+        // Remove script tags and javascript
         $html = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $html);
         $html = preg_replace('/on\w+\s*=\s*["\'][^"\']*["\']/i', '', $html);
         $html = preg_replace('/on\w+\s*=\s*[^\s>]*/i', '', $html);
+
+        // Trim whitespace
         return trim($html);
     }
 }

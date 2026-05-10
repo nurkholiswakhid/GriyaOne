@@ -170,25 +170,12 @@
 
                 <!-- Submit Buttons -->
                 <div class="flex gap-4">
-                    <button type="submit" id="submit-btn" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg">
                         Simpan Aset
                     </button>
-                    <a href="{{ route('assets.index') }}" id="cancel-btn" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 py-3 rounded-lg font-semibold transition text-center">
+                    <a href="{{ route('assets.index') }}" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 py-3 rounded-lg font-semibold transition text-center">
                         Batalkan
                     </a>
-                </div>
-
-                <!-- Upload Progress Bar (hidden until upload starts) -->
-                <div id="upload-progress-wrap" class="hidden mt-4 bg-white rounded-xl p-5 shadow-md border border-gray-100">
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-sm font-semibold text-gray-700" id="progress-label">Mengupload foto…</p>
-                        <span class="text-sm font-bold text-red-600" id="progress-pct">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                        <div id="progress-bar" class="h-3 rounded-full bg-gradient-to-r from-red-500 to-red-700 transition-all duration-300 ease-out" style="width:0%"></div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-2" id="progress-sub">Harap tunggu, jangan tutup halaman ini…</p>
                 </div>
             </div>
 
@@ -501,10 +488,14 @@
         }
 
         window.handleFormSubmit = function(event) {
-            event.preventDefault();
+            log('========================================');
+            log('📤 FORM SUBMISSION STARTED');
+            log('========================================');
 
-            // 1. Validate Quill description
+            // Sync first, then decide
             if (!syncQuillToField()) {
+                event.preventDefault();
+                log('SYNC FAILED - Preventing form submission');
                 const descErr = document.getElementById('desc_error');
                 if (descErr) {
                     descErr.classList.remove('hidden');
@@ -515,116 +506,33 @@
             const descErr = document.getElementById('desc_error');
             if (descErr) descErr.classList.add('hidden');
 
-            // 2. Build FormData
-            const form       = event.target;
-            const formData   = new FormData(form);
-            const submitBtn  = document.getElementById('submit-btn');
-            const cancelBtn  = document.getElementById('cancel-btn');
-            const progressWrap = document.getElementById('upload-progress-wrap');
-            const progressBar  = document.getElementById('progress-bar');
-            const progressPct  = document.getElementById('progress-pct');
-            const progressLbl  = document.getElementById('progress-label');
-            const progressSub  = document.getElementById('progress-sub');
+            log('SYNC SUCCESSFUL - Allowing form submission');
+            log('========================================');
 
-            const hasFiles = (document.getElementById('photo-input')?.files?.length ?? 0) > 0;
-
-            // 3. Show progress UI
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg> Menyimpan…`;
-            }
-            if (cancelBtn) cancelBtn.style.pointerEvents = 'none';
-            if (progressWrap && hasFiles) progressWrap.classList.remove('hidden');
-
-            // 4. Send via XHR (supports upload progress)
-            const xhr = new XMLHttpRequest();
-
-            xhr.upload.addEventListener('progress', (e) => {
-                if (!e.lengthComputable) return;
-                const pct = Math.round((e.loaded / e.total) * 100);
-                if (progressBar)  progressBar.style.width = pct + '%';
-                if (progressPct)  progressPct.textContent = pct + '%';
-                if (progressLbl) {
-                    progressLbl.textContent = pct < 100
-                        ? `Mengupload foto… (${pct}%)`
-                        : 'Menyimpan data aset…';
-                }
-                if (progressSub && pct === 100) {
-                    progressSub.textContent = 'Upload selesai, memproses…';
-                }
-            });
-
-            xhr.addEventListener('load', () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        if (data.success && data.redirect) {
-                            if (progressLbl) progressLbl.textContent = 'Berhasil! Mengalihkan…';
-                            if (progressPct) progressPct.textContent = '✓';
-                            if (progressBar) progressBar.style.width = '100%';
-                            setTimeout(() => { window.location.href = data.redirect; }, 400);
-                            return;
-                        }
-                    } catch (_) {}
-                    // Non-JSON success (fallback: reload)
-                    window.location.href = '{{ route("assets.index") }}';
-                } else if (xhr.status === 422) {
-                    // Validation errors — reload to show them
-                    try {
-                        const errors = JSON.parse(xhr.responseText);
-                        let msg = 'Terjadi kesalahan validasi:';
-                        if (errors.errors) {
-                            msg += '\n' + Object.values(errors.errors).flat().join('\n');
-                        }
-                        alert(msg);
-                    } catch (_) {
-                        alert('Terjadi kesalahan validasi. Periksa formulir Anda.');
-                    }
-                    resetSubmitButton();
-                } else {
-                    alert('Terjadi kesalahan server (' + xhr.status + '). Silakan coba lagi.');
-                    resetSubmitButton();
-                }
-            });
-
-            xhr.addEventListener('error', () => {
-                alert('Koneksi gagal. Periksa koneksi internet Anda dan coba lagi.');
-                resetSubmitButton();
-            });
-
-            xhr.addEventListener('timeout', () => {
-                alert('Upload timeout. Coba kurangi jumlah atau ukuran foto.');
-                resetSubmitButton();
-            });
-
-            xhr.timeout = 300000; // 5 minutes
-            xhr.open('POST', form.action);
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-            xhr.send(formData);
-
-            function resetSubmitButton() {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg> Simpan Aset`;
-                }
-                if (cancelBtn) cancelBtn.style.pointerEvents = '';
-                if (progressWrap) progressWrap.classList.add('hidden');
-            }
-
-            return false;
+            // Return true to allow default form submission
+            // Do NOT prevent default or manually submit - let browser handle it naturally
+            return true;
         };
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeQuill);
+            document.addEventListener('DOMContentLoaded', () => {
+                log('DOM loaded - initializing Quill');
+                initializeQuill();
+            });
         } else {
+            log('DOM already loaded - initializing Quill immediately');
             initializeQuill();
         }
 
         window.addEventListener('load', () => {
-            if (!quillInstance) initializeQuill();
+            if (!quillInstance) {
+                log('Quill not initialized on DOMContentLoaded, trying again on page load');
+                initializeQuill();
+            } else {
+                log('Quill already initialized');
+            }
         });
     </script>
-
 
     {{-- ===== WILAYAH INDONESIA CASCADE ===== --}}
     <script>
