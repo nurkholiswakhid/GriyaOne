@@ -14,7 +14,7 @@
     </div>
 
     <!-- Form -->
-    <form action="{{ route('assets.store') }}" method="POST" enctype="multipart/form-data" class="fade-in" onsubmit="return handleFormSubmit(event)">
+    <form id="asset-form" action="{{ route('assets.store') }}" method="POST" enctype="multipart/form-data" class="fade-in" onsubmit="return handleFormSubmit(event)">
         @csrf
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Form -->
@@ -136,9 +136,9 @@
                             </svg>
                         </div>
                         <p class="text-gray-700 font-semibold mb-1 pointer-events-none">Seret &amp; lepas foto di sini</p>
-                        <p class="text-gray-500 text-sm pointer-events-none">atau klik tombol di bawah</p>
+                        <p class="text-gray-500 text-sm pointer-events-none">Foto langsung diupload di background — isi form sambil menunggu</p>
                         <p class="text-xs text-gray-400 mt-2 pointer-events-none">JPG, PNG, WEBP &bull; Maks. 5MB per foto</p>
-                        <input type="file" name="photos[]" id="photo-input" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                        <input type="file" id="photo-input" multiple accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
                         <button type="button" id="pick-btn"
                             class="mt-4 inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg font-semibold text-sm transition shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -152,17 +152,20 @@
                         <ul id="upload-error-list" class="text-xs text-red-600 space-y-0.5 list-disc list-inside"></ul>
                     </div>
 
-                    <!-- File List (tampil setelah dipilih) -->
+                    <!-- Upload cards (per file progress) -->
                     <div id="file-list-wrapper" class="hidden mt-5">
                         <div class="flex items-center justify-between mb-3">
                             <p class="text-sm font-semibold text-gray-700">Foto yang akan diupload:</p>
-                            <button type="button" id="clear-all-btn"
-                                class="text-xs text-red-500 hover:text-red-700 font-semibold underline">Hapus Semua</button>
+                            <button type="button" id="clear-all-btn" class="text-xs text-red-500 hover:text-red-700 font-semibold underline">Hapus Semua</button>
                         </div>
-                        <!-- Grid preview -->
                         <div id="photo-preview" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
                     </div>
 
+                    <!-- Pending upload warning -->
+                    <div id="pending-warning" class="hidden mt-3 p-3 bg-yellow-50 border border-yellow-300 rounded-lg flex items-center gap-2">
+                        <svg class="w-4 h-4 text-yellow-600 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+                        <p id="pending-warning-text" class="text-xs font-semibold text-yellow-700">Menunggu foto selesai diupload…</p>
+                    </div>
                     @error('photos')
                         <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                     @enderror
@@ -206,172 +209,195 @@
         </div>
     </form>
 
-    <script>
-        // ===== PHOTO UPLOAD — parallel client-side compression =====
-        (function() {
-            const ALLOWED_TYPES  = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            const MAX_MB         = 5;
-            const COMPRESS_MAX   = 1280;   // max px for width OR height
-            const COMPRESS_SKIP  = 300 * 1024; // skip if already < 300 KB
-            const COMPRESS_Q     = 0.72;   // JPEG/WebP quality (0–1)
-            let photoFiles  = [];
-            let photoThumbs = [];
-            let isProcessing = false;
+        // ===== BACKGROUND PHOTO UPLOAD =====
+        (function () {
+            const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const MAX_MB        = 5;
+            const COMPRESS_MAX  = 1280;
+            const COMPRESS_SKIP = 300 * 1024;
+            const COMPRESS_Q    = 0.72;
+            const UPLOAD_URL    = '{{ route("assets.upload-photo") }}';
+            const CSRF          = '{{ csrf_token() }}';
 
-            const dropzone    = document.getElementById('photo-dropzone');
-            const photoInput  = document.getElementById('photo-input');
-            const photoPreview= document.getElementById('photo-preview');
-            const errorBox    = document.getElementById('upload-errors');
-            const errorList   = document.getElementById('upload-error-list');
-            const counter     = document.getElementById('photo-counter');
-            const counterText = document.getElementById('photo-count-text');
-            const listWrapper = document.getElementById('file-list-wrapper');
-            const clearAllBtn = document.getElementById('clear-all-btn');
-            const pickBtn     = document.getElementById('pick-btn');
+            // STATE: one entry per selected file
+            // { id, file, thumbUrl, status: 'compressing'|'uploading'|'done'|'error', tempPath, retryFn }
+            let items = [];
 
-            /** Compress a single image File via Canvas. */
-            function compressImage(file) {
-                return new Promise((resolve) => {
+            const dropzone      = document.getElementById('photo-dropzone');
+            const photoInput    = document.getElementById('photo-input');
+            const preview       = document.getElementById('photo-preview');
+            const errorBox      = document.getElementById('upload-errors');
+            const errorList     = document.getElementById('upload-error-list');
+            const counter       = document.getElementById('photo-counter');
+            const counterText   = document.getElementById('photo-count-text');
+            const listWrapper   = document.getElementById('file-list-wrapper');
+            const clearAllBtn   = document.getElementById('clear-all-btn');
+            const pickBtn       = document.getElementById('pick-btn');
+            const pendingWarn   = document.getElementById('pending-warning');
+            const pendingText   = document.getElementById('pending-warning-text');
+
+            // ── compress ──────────────────────────────────────────────
+            function compress(file) {
+                return new Promise(resolve => {
                     if (file.size <= COMPRESS_SKIP) { resolve(file); return; }
-
                     const img = new Image();
                     const url = URL.createObjectURL(file);
-
                     img.onload = () => {
                         URL.revokeObjectURL(url);
                         let { width, height } = img;
-
                         if (width > COMPRESS_MAX || height > COMPRESS_MAX) {
-                            const ratio = Math.min(COMPRESS_MAX / width, COMPRESS_MAX / height);
-                            width  = Math.round(width  * ratio);
-                            height = Math.round(height * ratio);
+                            const r = Math.min(COMPRESS_MAX / width, COMPRESS_MAX / height);
+                            width = Math.round(width * r); height = Math.round(height * r);
                         }
-
-                        const canvas = document.createElement('canvas');
-                        canvas.width  = width;
-                        canvas.height = height;
-                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-
-                        const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-                        const quality = outType === 'image/png' ? undefined : COMPRESS_Q;
-
-                        canvas.toBlob((blob) => {
-                            if (!blob) { resolve(file); return; }
-                            const ext  = outType === 'image/png' ? '.png' : '.jpg';
-                            const base = file.name.replace(/\.[^.]+$/, '');
-                            resolve(new File([blob], base + ext, { type: outType, lastModified: Date.now() }));
-                        }, outType, quality);
+                        const c = document.createElement('canvas');
+                        c.width = width; c.height = height;
+                        c.getContext('2d').drawImage(img, 0, 0, width, height);
+                        const t = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                        c.toBlob(b => {
+                            if (!b) { resolve(file); return; }
+                            const ext = t === 'image/png' ? '.png' : '.jpg';
+                            resolve(new File([b], file.name.replace(/\.[^.]+$/, '') + ext, { type: t, lastModified: Date.now() }));
+                        }, t, t === 'image/png' ? undefined : COMPRESS_Q);
                     };
-
                     img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
                     img.src = url;
                 });
             }
 
-            pickBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (!isProcessing) photoInput.click();
-            });
+            // ── upload one file ──────────────────────────────────────
+            async function uploadItem(item) {
+                item.status = 'uploading';
+                renderCard(item);
 
-            clearAllBtn.addEventListener('click', () => {
-                photoThumbs.forEach(u => URL.revokeObjectURL(u));
-                photoFiles = []; photoThumbs = [];
-                syncInput(); render();
-            });
+                const fd = new FormData();
+                fd.append('photo', item.file);
+                fd.append('_token', CSRF);
 
-            dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('border-orange-400','bg-orange-50'); });
-            dropzone.addEventListener('dragleave', ()  => dropzone.classList.remove('border-orange-400','bg-orange-50'));
-            dropzone.addEventListener('drop', e => {
-                e.preventDefault();
-                dropzone.classList.remove('border-orange-400','bg-orange-50');
-                addFiles(e.dataTransfer.files);
-            });
-            photoInput.addEventListener('change', () => addFiles(photoInput.files));
+                try {
+                    const res  = await fetch(UPLOAD_URL, { method: 'POST', body: fd });
+                    const json = await res.json();
 
-            async function addFiles(fileList) {
-                if (isProcessing) return;
-                isProcessing = true;
+                    if (!res.ok || !json.success) throw new Error(json.message || 'Server error');
 
-                const errors = [], validFiles = [];
-                Array.from(fileList).forEach(file => {
-                    if (!ALLOWED_TYPES.includes(file.type)) {
-                        errors.push(`"${file.name}" – format tidak didukung`);
-                    } else if (file.size > MAX_MB * 1024 * 1024) {
-                        errors.push(`"${file.name}" – melebihi ${MAX_MB}MB (${(file.size/1024/1024).toFixed(1)}MB)`);
-                    } else if (!photoFiles.some(f => f.name === file.name && f.size === file.size)) {
-                        validFiles.push(file);
-                    }
-                });
-                showErrors(errors);
+                    item.status   = 'done';
+                    item.tempPath = json.path;
+                    // inject hidden input so form submission knows the temp path
+                    const inp = document.createElement('input');
+                    inp.type = 'hidden'; inp.name = 'temp_photos[]'; inp.value = json.path;
+                    inp.id = 'tp_' + item.id;
+                    document.getElementById('asset-form').appendChild(inp);
 
-                if (validFiles.length > 0) {
-                    pickBtn.disabled = true;
-                    pickBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg> Mengompresi (0/${validFiles.length})…`;
-
-                    // --- PARALLEL compression ---
-                    let done = 0;
-                    const results = await Promise.all(validFiles.map(async (file) => {
-                        const compressed = await compressImage(file);
-                        done++;
-                        pickBtn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg> Mengompresi (${done}/${validFiles.length})…`;
-                        return { compressed, thumb: URL.createObjectURL(compressed) };
-                    }));
-
-                    results.forEach(({ compressed, thumb }) => {
-                        photoFiles.push(compressed);
-                        photoThumbs.push(thumb);
-                    });
-
-                    pickBtn.disabled = false;
-                    pickBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg> Pilih Foto';
-                    syncInput(); render();
+                } catch (e) {
+                    item.status = 'error';
+                    item.errorMsg = e.message;
                 }
 
-                isProcessing = false;
+                renderCard(item);
+                updateCounter();
             }
 
-            function removeFile(idx) {
-                URL.revokeObjectURL(photoThumbs[idx]);
-                photoFiles.splice(idx, 1);
-                photoThumbs.splice(idx, 1);
-                syncInput(); render();
-            }
+            // ── process new files ────────────────────────────────────
+            async function addFiles(fileList) {
+                const errs = [], valids = [];
+                Array.from(fileList).forEach(f => {
+                    if (!ALLOWED_TYPES.includes(f.type))            { errs.push(`"${f.name}" – format tidak didukung`); return; }
+                    if (f.size > MAX_MB * 1024 * 1024)              { errs.push(`"${f.name}" – melebihi ${MAX_MB}MB`);  return; }
+                    if (items.some(i => i.file.name === f.name && i.file.size === f.size)) return;
+                    valids.push(f);
+                });
+                showErrors(errs);
+                if (!valids.length) return;
 
-            function syncInput() {
-                const dt = new DataTransfer();
-                photoFiles.forEach(f => dt.items.add(f));
-                photoInput.files = dt.files;
-            }
-
-            function render() {
-                photoPreview.innerHTML = '';
-                if (photoFiles.length === 0) {
-                    listWrapper.classList.add('hidden');
-                    counter.classList.add('hidden'); counter.classList.remove('inline-flex');
-                    return;
+                // Create placeholder cards first
+                for (const f of valids) {
+                    const id   = Date.now() + Math.random();
+                    const blob = URL.createObjectURL(f);
+                    const item = { id, file: f, thumbUrl: blob, status: 'compressing', tempPath: null };
+                    item.retryFn = () => uploadItem(item);
+                    items.push(item);
+                    renderCard(item);
                 }
                 listWrapper.classList.remove('hidden');
-                counterText.textContent = photoFiles.length + ' foto';
-                counter.classList.remove('hidden'); counter.classList.add('inline-flex');
+                updateCounter();
 
-                photoFiles.forEach((file, idx) => {
-                    const card = document.createElement('div');
-                    card.className = 'relative rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100';
-                    card.innerHTML = `
-                        <img src="${photoThumbs[idx]}" class="w-full h-32 object-cover" alt="Foto ${idx+1}" width="200" height="128" decoding="async">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent pointer-events-none"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-2 pointer-events-none">
-                            <p class="text-white text-[10px] font-semibold truncate">${file.name}</p>
-                            <p class="text-white/60 text-[9px]">${(file.size/1024).toFixed(0)} KB</p>
-                        </div>
-                        <span class="absolute top-1.5 left-1.5 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">Foto ${idx+1}</span>
-                        <button type="button" onclick="window.__removePhoto(${idx})"
-                            class="absolute top-1.5 right-1.5 flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow transition hover:scale-105">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>
-                            Hapus
-                        </button>`;
-                    photoPreview.appendChild(card);
-                });
+                // Compress + upload in parallel
+                await Promise.all(valids.map(async (f, i) => {
+                    const item = items[items.length - valids.length + i];
+                    const compressed = await compress(f);
+                    URL.revokeObjectURL(item.thumbUrl);
+                    item.file     = compressed;
+                    item.thumbUrl = URL.createObjectURL(compressed);
+                    await uploadItem(item);
+                }));
+            }
+
+            // ── render single card ───────────────────────────────────
+            function renderCard(item) {
+                let card = document.getElementById('card_' + item.id);
+                if (!card) {
+                    card = document.createElement('div');
+                    card.id        = 'card_' + item.id;
+                    card.className = 'relative rounded-xl overflow-hidden border shadow-sm bg-gray-100';
+                    preview.appendChild(card);
+                }
+
+                const statusHtml = {
+                    compressing: `<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+                        <svg class="w-5 h-5 text-white animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+                        <p class="text-white text-[10px] font-bold">Mengompresi…</p></div>`,
+                    uploading: `<div class="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+                        <svg class="w-5 h-5 text-orange-400 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+                        <p class="text-white text-[10px] font-bold">Mengupload…</p></div>`,
+                    done: `<div class="absolute top-1.5 right-1.5 bg-green-500 rounded-full p-0.5">
+                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                        <button type="button" onclick="window.__rmPhoto('${item.id}')" class="absolute top-1.5 left-1.5 bg-red-600 hover:bg-red-700 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full transition">✕</button>`,
+                    error: `<div class="absolute inset-0 bg-red-800/70 flex flex-col items-center justify-center gap-1 p-1">
+                        <p class="text-white text-[9px] font-bold text-center">${item.errorMsg || 'Gagal'}</p>
+                        <button type="button" onclick="window.__retryPhoto('${item.id}')" class="bg-white text-red-700 text-[9px] font-bold px-2 py-0.5 rounded-full mt-1">Coba lagi</button></div>`,
+                }[item.status] || '';
+
+                card.innerHTML = `
+                    <img src="${item.thumbUrl}" class="w-full h-28 object-cover" alt="" decoding="async">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+                    <div class="absolute bottom-0 left-0 right-0 p-1.5 pointer-events-none">
+                        <p class="text-white text-[9px] truncate">${item.file.name}</p>
+                        <p class="text-white/60 text-[8px]">${(item.file.size/1024).toFixed(0)} KB</p>
+                    </div>
+                    ${statusHtml}`;
+            }
+
+            // ── remove / retry ───────────────────────────────────────
+            window.__rmPhoto = id => {
+                const idx = items.findIndex(i => String(i.id) === String(id));
+                if (idx === -1) return;
+                URL.revokeObjectURL(items[idx].thumbUrl);
+                const inp = document.getElementById('tp_' + id);
+                if (inp) inp.remove();
+                document.getElementById('card_' + id)?.remove();
+                items.splice(idx, 1);
+                updateCounter();
+                if (!items.length) listWrapper.classList.add('hidden');
+            };
+            window.__retryPhoto = id => {
+                const item = items.find(i => String(i.id) === String(id));
+                if (item) item.retryFn();
+            };
+
+            // ── counter & warning ────────────────────────────────────
+            function updateCounter() {
+                const total    = items.length;
+                const pending  = items.filter(i => i.status === 'compressing' || i.status === 'uploading').length;
+                const doneOk   = items.filter(i => i.status === 'done').length;
+
+                if (total === 0) {
+                    counter.classList.add('hidden'); counter.classList.remove('inline-flex');
+                } else {
+                    counterText.textContent = `${doneOk}/${total} foto`;
+                    counter.classList.remove('hidden'); counter.classList.add('inline-flex');
+                }
+
+                pendingWarn.classList.toggle('hidden', pending === 0);
+                if (pending > 0) pendingText.textContent = `Menunggu ${pending} foto selesai diupload…`;
             }
 
             function showErrors(errs) {
@@ -380,7 +406,34 @@
                 errorBox.classList.remove('hidden');
             }
 
-            window.__removePhoto = idx => removeFile(idx);
+            // ── event listeners ──────────────────────────────────────
+            pickBtn.addEventListener('click', e => { e.stopPropagation(); photoInput.click(); });
+            photoInput.addEventListener('change', () => addFiles(photoInput.files));
+            clearAllBtn.addEventListener('click', () => {
+                items.forEach(i => URL.revokeObjectURL(i.thumbUrl));
+                document.querySelectorAll('input[name="temp_photos[]"]').forEach(el => el.remove());
+                items = []; preview.innerHTML = '';
+                listWrapper.classList.add('hidden');
+                updateCounter();
+            });
+            dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('border-orange-400','bg-orange-50'); });
+            dropzone.addEventListener('dragleave', ()  => dropzone.classList.remove('border-orange-400','bg-orange-50'));
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault(); dropzone.classList.remove('border-orange-400','bg-orange-50');
+                addFiles(e.dataTransfer.files);
+            });
+
+            // ── block submit if uploads still in progress ─────────────
+            window.__bgUploadReady = function () {
+                const pending = items.filter(i => i.status === 'compressing' || i.status === 'uploading').length;
+                if (pending > 0) {
+                    pendingWarn.classList.remove('hidden');
+                    pendingText.textContent = `Menunggu ${pending} foto selesai diupload…`;
+                    pendingWarn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return false;
+                }
+                return true;
+            };
         })();
 
         // ===== QUILL EDITOR =====
@@ -488,14 +541,15 @@
         }
 
         window.handleFormSubmit = function(event) {
-            log('========================================');
-            log('📤 FORM SUBMISSION STARTED');
-            log('========================================');
+            // 1. Block if background uploads still in progress
+            if (window.__bgUploadReady && !window.__bgUploadReady()) {
+                event.preventDefault();
+                return false;
+            }
 
-            // Sync first, then decide
+            // 2. Sync Quill description
             if (!syncQuillToField()) {
                 event.preventDefault();
-                log('SYNC FAILED - Preventing form submission');
                 const descErr = document.getElementById('desc_error');
                 if (descErr) {
                     descErr.classList.remove('hidden');
